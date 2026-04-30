@@ -1,0 +1,153 @@
+2026-04-30 20:27:56 [Information] User profile is available. Using '"C:\Users\TALHA\AppData\Local\ASP.NET\DataProtection-Keys"' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-04-30 20:27:58 [Information] Executed DbCommand ("35"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT COUNT(*) FROM \"sqlite_master\" WHERE \"type\" = 'table' AND \"rootpage\" IS NOT NULL;"
+2026-04-30 20:27:58 [Information] Executed DbCommand ("7"ms) [Parameters=["@__normalizedName_0='?' (Size = 5)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"ConcurrencyStamp\", \"a\".\"Name\", \"a\".\"NormalizedName\"
+FROM \"AspNetRoles\" AS \"a\"
+WHERE \"a\".\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2026-04-30 20:27:58 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedName_0='?' (Size = 7)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"ConcurrencyStamp\", \"a\".\"Name\", \"a\".\"NormalizedName\"
+FROM \"AspNetRoles\" AS \"a\"
+WHERE \"a\".\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2026-04-30 20:27:58 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedName_0='?' (Size = 7)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"ConcurrencyStamp\", \"a\".\"Name\", \"a\".\"NormalizedName\"
+FROM \"AspNetRoles\" AS \"a\"
+WHERE \"a\".\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2026-04-30 20:27:58 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedName_0='?' (Size = 9)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"ConcurrencyStamp\", \"a\".\"Name\", \"a\".\"NormalizedName\"
+FROM \"AspNetRoles\" AS \"a\"
+WHERE \"a\".\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2026-04-30 20:27:58 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 20)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-04-30 20:27:58 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 22)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-04-30 20:27:58 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 19)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-04-30 20:27:58 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 24)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-04-30 20:27:58 [Information] Database seeded successfully!
+2026-04-30 20:27:59 [Information] Now listening on: "https://localhost:5001"
+2026-04-30 20:27:59 [Information] Now listening on: "http://localhost:5000"
+2026-04-30 20:27:59 [Information] Application started. Press Ctrl+C to shut down.
+2026-04-30 20:27:59 [Information] Hosting environment: "Development"
+2026-04-30 20:27:59 [Information] Content root path: "C:\Users\TALHA\Desktop\FXTransfer\FXTransfer"
+2026-04-30 20:28:00 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/""" - null null
+2026-04-30 20:28:00 [Information] Executing endpoint '"/_Host"'
+2026-04-30 20:28:00 [Information] Route matched with "{page = \"/_Host\"}". Executing page "/_Host"
+2026-04-30 20:28:00 [Information] Executing an implicit handler method - ModelState is Valid
+2026-04-30 20:28:00 [Information] Executed an implicit handler method, returned result "Microsoft.AspNetCore.Mvc.RazorPages.PageResult".
+2026-04-30 20:28:00 [Information] Executed page "/_Host" in 187.4423ms
+2026-04-30 20:28:00 [Information] Executed endpoint '"/_Host"'
+2026-04-30 20:28:00 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/""" - 200 null "text/html; charset=utf-8" 540.3138ms
+2026-04-30 20:28:00 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/blazor.server.js""" - null null
+2026-04-30 20:28:00 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/aspnetcore-browser-refresh.js""" - null null
+2026-04-30 20:28:00 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/aspnetcore-browser-refresh.js""" - 200 14925 "application/javascript; charset=utf-8" 9.1333ms
+2026-04-30 20:28:00 [Information] Executing endpoint '"Blazor static files"'
+2026-04-30 20:28:00 [Information] The file "/_framework/blazor.server.js" was not modified
+2026-04-30 20:28:00 [Information] Executed endpoint '"Blazor static files"'
+2026-04-30 20:28:00 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/blazor.server.js""" - 304 null "text/javascript" 22.4081ms
+2026-04-30 20:28:00 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_vs/browserLink""" - null null
+2026-04-30 20:28:00 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_blazor/initializers""" - null null
+2026-04-30 20:28:00 [Information] Executing endpoint '"Blazor initializers"'
+2026-04-30 20:28:00 [Information] Executed endpoint '"Blazor initializers"'
+2026-04-30 20:28:00 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_blazor/initializers""" - 200 null "application/json; charset=utf-8" 29.3177ms
+2026-04-30 20:28:00 [Information] Request starting "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/negotiate""?negotiateVersion=1" - null 0
+2026-04-30 20:28:00 [Information] Executing endpoint '"/_blazor/negotiate"'
+2026-04-30 20:28:01 [Information] Executed endpoint '"/_blazor/negotiate"'
+2026-04-30 20:28:01 [Information] Request finished "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/negotiate""?negotiateVersion=1" - 200 316 "application/json" 44.2893ms
+2026-04-30 20:28:01 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_vs/browserLink""" - 200 null "text/javascript; charset=UTF-8" 155.4889ms
+2026-04-30 20:28:01 [Information] Request starting "HTTP/2" "CONNECT" "https"://"localhost:5001""""/_blazor""?id=DDk957lWaY1qKBJoTSI9TQ" - null null
+2026-04-30 20:28:01 [Information] Executing endpoint '"/_blazor"'
+2026-04-30 20:28:01 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/favicon.ico""" - null null
+2026-04-30 20:28:01 [Information] The file "/favicon.ico" was not modified
+2026-04-30 20:28:01 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/favicon.ico""" - 304 null "image/x-icon" 7.0551ms
+2026-04-30 20:28:38 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 15)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-04-30 20:28:39 [Information] Executed DbCommand ("0"ms) [Parameters=["@__userId_0='?' (Size = 36)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a0\".\"Name\"
+FROM \"AspNetUserRoles\" AS \"a\"
+INNER JOIN \"AspNetRoles\" AS \"a0\" ON \"a\".\"RoleId\" = \"a0\".\"Id\"
+WHERE \"a\".\"UserId\" = @__userId_0"
+2026-04-30 20:28:39 [Information] User logged in: talha@gmail.com
+2026-04-30 20:28:39 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/dashboard""" - null null
+2026-04-30 20:28:39 [Information] Executing endpoint '"/_Host"'
+2026-04-30 20:28:39 [Information] Route matched with "{page = \"/_Host\"}". Executing page "/_Host"
+2026-04-30 20:28:39 [Information] Executing an implicit handler method - ModelState is Valid
+2026-04-30 20:28:39 [Information] Executed an implicit handler method, returned result "Microsoft.AspNetCore.Mvc.RazorPages.PageResult".
+2026-04-30 20:28:39 [Information] Executed page "/_Host" in 26.6262ms
+2026-04-30 20:28:39 [Information] Executed endpoint '"/_Host"'
+2026-04-30 20:28:39 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/dashboard""" - 200 null "text/html; charset=utf-8" 49.9128ms
+2026-04-30 20:28:39 [Information] Request starting "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/disconnect""" - "multipart/form-data; boundary=----WebKitFormBoundarylVQbAjKcCeET4VUW" 359
+2026-04-30 20:28:39 [Information] Executing endpoint '"Blazor disconnect"'
+2026-04-30 20:28:39 [Information] Executed endpoint '"/_blazor"'
+2026-04-30 20:28:39 [Information] Request finished "HTTP/2" "CONNECT" "https"://"localhost:5001""""/_blazor""?id=DDk957lWaY1qKBJoTSI9TQ" - 200 null null 38391.0845ms
+2026-04-30 20:28:39 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/blazor.server.js""" - null null
+2026-04-30 20:28:39 [Information] Executing endpoint '"Blazor static files"'
+2026-04-30 20:28:39 [Information] The file "/_framework/blazor.server.js" was not modified
+2026-04-30 20:28:39 [Information] Executed endpoint '"Blazor static files"'
+2026-04-30 20:28:39 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/blazor.server.js""" - 304 null "text/javascript" 3.2892ms
+2026-04-30 20:28:39 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_vs/browserLink""" - null null
+2026-04-30 20:28:39 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/aspnetcore-browser-refresh.js""" - null null
+2026-04-30 20:28:39 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/aspnetcore-browser-refresh.js""" - 200 14925 "application/javascript; charset=utf-8" 3.0948ms
+2026-04-30 20:28:39 [Information] Executed endpoint '"Blazor disconnect"'
+2026-04-30 20:28:39 [Information] Request finished "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/disconnect""" - 200 0 null 60.8826ms
+2026-04-30 20:28:39 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_vs/browserLink""" - 200 null "text/javascript; charset=UTF-8" 61.0569ms
+2026-04-30 20:28:39 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_blazor/initializers""" - null null
+2026-04-30 20:28:39 [Information] Executing endpoint '"Blazor initializers"'
+2026-04-30 20:28:39 [Information] Executed endpoint '"Blazor initializers"'
+2026-04-30 20:28:39 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_blazor/initializers""" - 200 null "application/json; charset=utf-8" 1.3055ms
+2026-04-30 20:28:39 [Information] Request starting "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/negotiate""?negotiateVersion=1" - null 0
+2026-04-30 20:28:39 [Information] Executing endpoint '"/_blazor/negotiate"'
+2026-04-30 20:28:39 [Information] Executed endpoint '"/_blazor/negotiate"'
+2026-04-30 20:28:39 [Information] Request finished "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/negotiate""?negotiateVersion=1" - 200 316 "application/json" 7.3131ms
+2026-04-30 20:28:39 [Information] Request starting "HTTP/2" "CONNECT" "https"://"localhost:5001""""/_blazor""?id=_9LxJB3oV1FHX2NIhO5m2w" - null null
+2026-04-30 20:28:39 [Information] Executing endpoint '"/_blazor"'
+2026-04-30 20:28:39 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 15)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-04-30 20:28:39 [Information] Executed DbCommand ("5"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 15)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-04-30 20:28:39 [Information] Executed DbCommand ("1"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 15)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-04-30 20:28:39 [Information] Executed DbCommand ("0"ms) [Parameters=["@__userId_0='?' (Size = 36)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a0\".\"Name\"
+FROM \"AspNetUserRoles\" AS \"a\"
+INNER JOIN \"AspNetRoles\" AS \"a0\" ON \"a\".\"RoleId\" = \"a0\".\"Id\"
+WHERE \"a\".\"UserId\" = @__userId_0"
+2026-04-30 20:28:39 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 15)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-04-30 20:28:39 [Information] Executed DbCommand ("0"ms) [Parameters=["@__userId_0='?' (Size = 36)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a0\".\"Name\"
+FROM \"AspNetUserRoles\" AS \"a\"
+INNER JOIN \"AspNetRoles\" AS \"a0\" ON \"a\".\"RoleId\" = \"a0\".\"Id\"
+WHERE \"a\".\"UserId\" = @__userId_0"

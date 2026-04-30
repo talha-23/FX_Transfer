@@ -1,0 +1,58 @@
+﻿    @inject IJSRuntime JS
+
+    @if (_visible)
+    {
+        <div class="toast-notification" style="position: fixed; top: 20px; right: 20px; z-index: 10000; animation: slideInRight 0.3s ease;">
+            <div style="background: @_backgroundColor; border-radius: 12px; padding: 12px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                <div style="display: flex; align-items: center; gap: 10px; color: white;">
+                    <i class="bi bi-@_icon"></i>
+                    <span>@_message</span>
+                    <button class="btn-close btn-close-white ms-2" @onclick="Hide" style="font-size: 12px;"></button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @code {
+        private bool _visible = false;
+        private string _message = "";
+        private string _backgroundColor = "linear-gradient(135deg, #00d2ff, #3a7bd5)";
+        private string _icon = "info-circle-fill";
+        private Timer? _timer;
+    
+        public void Show(string message, string type = "info")
+        {
+            _message = message;
+            _visible = true;
+        
+            switch (type)
+            {
+                case "success":
+                    _backgroundColor = "linear-gradient(135deg, #00d2ff, #3a7bd5)";
+                    _icon = "check-circle-fill";
+                    break;
+                case "error":
+                    _backgroundColor = "linear-gradient(135deg, #f093fb, #f5576c)";
+                    _icon = "x-circle-fill";
+                    break;
+                case "info":
+                default:
+                    _backgroundColor = "linear-gradient(135deg, #4facfe, #00f2fe)";
+                    _icon = "info-circle-fill";
+                    break;
+            }
+        
+            StateHasChanged();
+        
+            // Auto hide after 3 seconds
+            _timer?.Dispose();
+            _timer = new Timer(_ => { Hide(); }, null, 3000, Timeout.Infinite);
+        }
+    
+        private void Hide()
+        {
+            _visible = false;
+            _timer?.Dispose();
+            StateHasChanged();
+        }
+    }

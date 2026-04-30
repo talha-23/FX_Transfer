@@ -1,0 +1,98 @@
+﻿@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+            💱 FXTransfer
+        </a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
+                🏠 Home
+            </NavLink>
+        </div>
+        
+        @if (_isLoggedIn && !_isSuspended)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/dashboard">
+                    📊 Dashboard
+                </NavLink>
+            </div>
+            
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/exchange">
+                    💱 Exchange
+                </NavLink>
+            </div>
+            
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/transfers">
+                    📜 Transfers
+                </NavLink>
+            </div>
+            
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/wallet">
+                    👛 Wallet
+                </NavLink>
+            </div>
+        }
+        
+        @if (_isAdmin)
+        {
+            <div class="nav-item px-3 mt-3">
+                <div class="text-white-50 small px-3 mb-2">ADMIN</div>
+                <NavLink class="nav-link" href="/admin/dashboard">
+                    ⚙️ Admin Dashboard
+                </NavLink>
+            </div>
+        }
+        
+        @if (!_isLoggedIn)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/login">
+                    🔐 Login
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/register">
+                    📝 Register
+                </NavLink>
+            </div>
+        }
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    private bool _isLoggedIn;
+    private bool _isAdmin;
+    private bool _isSuspended;
+    
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _isLoggedIn = await AuthService.IsAuthenticatedAsync();
+        if (_isLoggedIn)
+        {
+            var roles = await AuthService.GetCurrentUserRolesAsync();
+            _isAdmin = roles.Contains("Admin");
+            _isSuspended = roles.Contains("Suspended");
+        }
+    }
+}

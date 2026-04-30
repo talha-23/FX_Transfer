@@ -1,0 +1,350 @@
+﻿@page "/"
+@namespace FXTransfer.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <base href="~/" />
+    <title>FXTransfer - Currency Exchange Platform</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    
+    <!-- Pure CSS Animations (No JavaScript) -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Animated Gradient Orbs - Pure CSS */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.5;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #00d2ff 0%, #3a7bd5 100%);
+            top: -250px;
+            right: -100px;
+            animation: floatOrb 20s ease-in-out infinite;
+        }
+        
+        .orb-2 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #f093fb 0%, #f5576c 100%);
+            bottom: -300px;
+            left: -150px;
+            animation: floatOrbReverse 25s ease-in-out infinite;
+        }
+        
+        .orb-3 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #4facfe 0%, #00f2fe 100%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulseOrb 15s ease-in-out infinite;
+        }
+        
+        @@keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(50px, -50px) rotate(120deg); }
+            66% { transform: translate(-30px, 30px) rotate(240deg); }
+        }
+        
+        @@keyframes floatOrbReverse {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(-50px, 50px) rotate(-120deg); }
+            66% { transform: translate(30px, -30px) rotate(-240deg); }
+        }
+        
+        @@keyframes pulseOrb {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+            50% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.5; }
+        }
+        
+        /* Glass Card Effect - Pure CSS */
+        .glass-card {
+            background: rgba(15, 25, 35, 0.7);
+            backdrop-filter: blur(16px);
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(0, 210, 255, 0.5);
+            box-shadow: 0 20px 50px rgba(0, 210, 255, 0.2);
+        }
+        
+        /* Neon Button - Pure CSS */
+        .btn-neon {
+            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 32px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+            color: white !important;
+            display: inline-block;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .btn-neon::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn-neon:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-neon:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 40px rgba(0, 210, 255, 0.5);
+            color: white !important;
+        }
+        
+        /* Futuristic Input - Pure CSS */
+        .input-futuristic {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 14px 18px;
+            color: white;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .input-futuristic:focus {
+            border-color: #00d2ff;
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+            outline: none;
+        }
+        
+        .input-futuristic::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        /* Neon Navbar - Pure CSS */
+        .navbar-futuristic {
+            background: rgba(15, 25, 35, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 210, 255, 0.2);
+            padding: 1rem 0;
+        }
+        
+        /* Animated Text Gradient - Pure CSS */
+        .gradient-text {
+            background: linear-gradient(135deg, #00d2ff 0%, #f093fb 50%, #4facfe 100%);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 3s ease infinite;
+        }
+        
+        @@keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Floating Animation - Pure CSS */
+        @@keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        /* Progress Bar Animation - Pure CSS */
+        .progress-bar-animated {
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5, #f093fb);
+            background-size: 200% 200%;
+            animation: gradientShift 2s ease infinite;
+        }
+        
+        /* Custom Scrollbar - Pure CSS */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #00d2ff, #f093fb);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #f093fb, #00d2ff);
+        }
+        
+        /* Page Transition - Pure CSS */
+        .page-transition {
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Stat Card Hover */
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: #00d2ff;
+        }
+        
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .glass-card {
+                margin: 10px;
+            }
+            
+            .gradient-text {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Navbar link hover */
+        .navbar-nav .nav-link {
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            color: #00d2ff !important;
+            transform: translateY(-2px);
+        }
+        
+        /* Dropdown menu items */
+        .dropdown-item {
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(0, 210, 255, 0.2);
+            transform: translateX(5px);
+        }
+        
+        /* Loading Spinner - Pure CSS */
+        .spinner-css {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            display: inline-block;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Alert styling */
+        .alert-futuristic {
+            background: rgba(0, 210, 255, 0.1);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-radius: 12px;
+            color: #00d2ff;
+        }
+        
+        .btn-outline-info, .btn-outline-success, .btn-outline-warning, .btn-outline-danger {
+            border-radius: 50px;
+            padding: 8px 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-info:hover, .btn-outline-success:hover, .btn-outline-warning:hover, .btn-outline-danger:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Badge styling */
+        .badge-premium {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            border-radius: 20px;
+            padding: 5px 12px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    
+    <component type="typeof(App)" render-mode="Server" />
+
+    <div id="blazor-error-ui" style="display:none; position:fixed; bottom:20px; right:20px; left:auto; background:rgba(220,53,69,0.9); backdrop-filter:blur(10px); color:white; padding:12px 20px; border-radius:12px; text-align:center; z-index:9999;">
+        An error has occurred.
+        <a href="" style="color:white; margin-left:10px;">Reload</a>
+        <a href="#" onclick="document.getElementById('blazor-error-ui').style.display='none'" style="color:white; margin-left:10px;">✕</a>
+    </div>
+
+    <!-- ONLY ESSENTIAL SCRIPTS (Bootstrap and Blazor) -->
+    <script src="_framework/blazor.server.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

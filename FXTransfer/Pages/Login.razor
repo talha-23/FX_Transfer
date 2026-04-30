@@ -1,0 +1,159 @@
+﻿@page "/login"
+@using FXTransfer.Models.DTOs
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="container page-transition">
+    <div class="row justify-content-center min-vh-100 align-items-center">
+        <div class="col-md-6 col-lg-5" data-aos="fade-up" data-aos-duration="1000">
+            <div class="glass-card p-5">
+                <div class="text-center mb-4">
+                    <div class="float-animation" style="width: 80px; height: 80px; margin: 0 auto 20px;">
+                        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #00d2ff, #f093fb); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-person-check" style="font-size: 40px; color: white;"></i>
+                        </div>
+                    </div>
+                    <h2 class="gradient-text" style="font-size: 2.5rem; font-weight: 800;">Welcome Back</h2>
+                    <p class="text-white-50">Sign in to your futuristic dashboard</p>
+                </div>
+                
+                @if (!string.IsNullOrEmpty(_errorMessage))
+                {
+                    <div class="alert alert-danger" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.5); border-radius: 12px;">
+                        @_errorMessage
+                    </div>
+                }
+                
+                <div class="mb-3">
+                    <label class="form-label text-white">Email Address</label>
+                    <div class="position-relative">
+                        <i class="bi bi-envelope" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #667eea; z-index: 1;"></i>
+                        <input type="email" class="form-control" @bind="_email" @bind:event="oninput"
+                               placeholder="Enter your email"
+                               style="padding-left: 45px; background: white; border: 1px solid #e0e0e0; border-radius: 12px; color: #333; width: 100%; height: 50px;" />
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label text-white">Password</label>
+                    <div class="position-relative">
+                        <i class="bi bi-lock" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #667eea; z-index: 1;"></i>
+                        <input type="password" class="form-control" @bind="_password" @bind:event="oninput"
+                               placeholder="Enter your password"
+                               style="padding-left: 45px; background: white; border: 1px solid #e0e0e0; border-radius: 12px; color: #333; width: 100%; height: 50px;" />
+                    </div>
+                </div>
+                
+                <!-- Remember Me Checkbox -->
+                <div class="mb-4 form-check">
+                    <input type="checkbox" class="form-check-input" id="rememberMe" @bind="_rememberMe"
+                           style="background: white; border: 1px solid #ccc;" />
+                    <label class="form-check-label text-white" for="rememberMe">
+                        Remember me on this device
+                    </label>
+                </div>
+                
+                <button class="btn-neon w-100 mb-4" @onclick="LoginAsync" disabled="@_isLoading" style="color: white;">
+                    @if (_isLoading)
+                    {
+                        <span class="spinner-css me-2"></span>
+                        <span>Authenticating...</span>
+                    }
+                    else
+                    {
+                        <span><i class="bi bi-box-arrow-in-right me-2"></i>Access Dashboard</span>
+                    }
+                </button>
+                
+                <hr style="border-color: rgba(255,255,255,0.1);" />
+                
+                <div class="text-center">
+                    <p class="text-white-50 small mb-3">✨ Quick Access Demos ✨</p>
+                    <div class="d-flex gap-2 justify-content-center flex-wrap">
+                        <button class="btn btn-outline-info btn-sm" @onclick='() => SetCredentials("admin@fxtransfer.com", "Admin@123")' style="border-radius: 20px;">
+                            <i class="bi bi-shield-lock"></i> Admin
+                        </button>
+                        <button class="btn btn-outline-success btn-sm" @onclick='() => SetCredentials("premium@fxtransfer.com", "Premium@123")' style="border-radius: 20px;">
+                            <i class="bi bi-gem"></i> Premium
+                        </button>
+                        <button class="btn btn-outline-warning btn-sm" @onclick='() => SetCredentials("user@fxtransfer.com", "User@123")' style="border-radius: 20px;">
+                            <i class="bi bi-person"></i> Regular
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <small class="text-white-50">
+                        New here? <a href="/register" class="gradient-text" style="text-decoration: none;">Create Account</a>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _email = "";
+    private string _password = "";
+    private string _errorMessage = "";
+    private bool _isLoading = false;
+    private bool _rememberMe = false;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        // Load saved credentials if any
+        _email = await GetSavedEmail();
+        _rememberMe = !string.IsNullOrEmpty(_email);
+    }
+    
+    private async Task<string> GetSavedEmail()
+    {
+        // You can implement this with ProtectedLocalStorage
+        // For now, return empty
+        return "";
+    }
+    
+    private void SetCredentials(string email, string password)
+    {
+        _email = email;
+        _password = password;
+        _errorMessage = "";
+        StateHasChanged();
+    }
+    
+    private async Task LoginAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_email) || string.IsNullOrWhiteSpace(_password))
+        {
+            _errorMessage = "Please enter email and password";
+            return;
+        }
+        
+        _isLoading = true;
+        _errorMessage = "";
+        StateHasChanged();
+        
+        try
+        {
+            var loginDto = new LoginDto { Email = _email, Password = _password, RememberMe = _rememberMe };
+            var success = await AuthService.LoginAsync(loginDto);
+            
+            if (success)
+            {
+                Navigation.NavigateTo("/dashboard", forceLoad: true);
+            }
+            else
+            {
+                _errorMessage = "Invalid email or password";
+                _isLoading = false;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Login error: {ex.Message}";
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+}

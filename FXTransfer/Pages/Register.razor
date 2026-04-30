@@ -1,0 +1,281 @@
+﻿@page "/register"
+@using FXTransfer.Models.DTOs
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="container page-transition">
+    <div class="row justify-content-center min-vh-100 align-items-center">
+        <div class="col-md-6 col-lg-5" data-aos="fade-up" data-aos-duration="1000">
+            <div class="glass-card p-5">
+                <div class="text-center mb-4">
+                    <div class="float-animation" style="width: 80px; height: 80px; margin: 0 auto 20px;">
+                        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #00d2ff, #f093fb); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-person-plus-fill" style="font-size: 40px; color: white;"></i>
+                        </div>
+                    </div>
+                    <h2 class="gradient-text" style="font-size: 2.5rem; font-weight: 800;">Create Account</h2>
+                    <p class="text-white-50">Join the future of currency exchange</p>
+                </div>
+                
+                @if (!string.IsNullOrEmpty(_errorMessage))
+                {
+                    <div class="alert alert-danger" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.5); border-radius: 12px;">
+                        @_errorMessage
+                    </div>
+                }
+                
+                <!-- Full Name Field -->
+                <div class="mb-3">
+                    <label class="form-label text-white">Full Name</label>
+                    <div class="position-relative">
+                        <i class="bi bi-person" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #667eea; z-index: 1;"></i>
+                        <input type="text" class="form-control" @bind="_fullName" @bind:event="oninput"
+                               placeholder="Enter your full name"
+                               style="padding-left: 45px; background: white; border: 1px solid #e0e0e0; border-radius: 12px; color: #333; width: 100%; height: 50px;" />
+                    </div>
+                </div>
+                
+                <!-- Email Field -->
+                <div class="mb-3">
+                    <label class="form-label text-white">Email Address</label>
+                    <div class="position-relative">
+                        <i class="bi bi-envelope" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #667eea; z-index: 1;"></i>
+                        <input type="email" class="form-control" @bind="_email" @bind:event="oninput"
+                               placeholder="Enter your email"
+                               style="padding-left: 45px; background: white; border: 1px solid #e0e0e0; border-radius: 12px; color: #333; width: 100%; height: 50px;" />
+                    </div>
+                </div>
+                
+                <!-- Password Field with Strength Meter -->
+                <div class="mb-3">
+                    <label class="form-label text-white">Password</label>
+                    <div class="position-relative">
+                        <i class="bi bi-lock" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #667eea; z-index: 1;"></i>
+                        <input type="password" class="form-control" @bind="_password" @bind:event="oninput" @onkeyup="OnPasswordChange"
+                               placeholder="Create a password"
+                               style="padding-left: 45px; background: white; border: 1px solid #e0e0e0; border-radius: 12px; color: #333; width: 100%; height: 50px;" />
+                    </div>
+                    
+                    <!-- Password Strength Meter -->
+                    @if (!string.IsNullOrEmpty(_password))
+                    {
+                        <div class="mt-3">
+                            <div class="progress" style="height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden;">
+                                <div class="progress-bar @_strengthClass" role="progressbar"
+                                     style="width: @_strengthPercent%; transition: width 0.3s ease;"
+                                     aria-valuenow="@_strengthPercent" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            
+                            <div class="mt-2 d-flex align-items-center gap-2">
+                                <i class="bi @_strengthIcon" style="font-size: 18px; @_strengthIconStyle"></i>
+                                <span style="@_strengthTextStyle">
+                                    <strong>Password Strength:</strong> @_strengthText
+                                </span>
+                            </div>
+                            
+                            @if (_strengthText == "Weak")
+                            {
+                                <div class="mt-2 small text-danger">
+                                    <i class="bi bi-info-circle"></i> Use at least 8 characters with numbers, uppercase & special characters
+                                </div>
+                            }
+                            else if (_strengthText == "Medium")
+                            {
+                                <div class="mt-2 small text-warning">
+                                    <i class="bi bi-check-circle"></i> Good! Add special characters for strong password
+                                </div>
+                            }
+                            else if (_strengthText == "Strong")
+                            {
+                                <div class="mt-2 small text-success">
+                                    <i class="bi bi-check-circle-fill"></i> Excellent! Your password is secure
+                                </div>
+                            }
+                        </div>
+                    }
+                    
+                    <div class="mt-1">
+                        <small class="text-white-50">Minimum 6 characters</small>
+                    </div>
+                </div>
+                
+                <!-- Confirm Password Field -->
+                <div class="mb-4">
+                    <label class="form-label text-white">Confirm Password</label>
+                    <div class="position-relative">
+                        <i class="bi bi-shield-lock" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #667eea; z-index: 1;"></i>
+                        <input type="password" class="form-control" @bind="_confirmPassword" @bind:event="oninput"
+                               placeholder="Confirm your password"
+                               style="padding-left: 45px; background: white; border: 1px solid #e0e0e0; border-radius: 12px; color: #333; width: 100%; height: 50px;" />
+                    </div>
+                    @if (_password != _confirmPassword && !string.IsNullOrEmpty(_confirmPassword))
+                    {
+                        <small class="text-danger mt-1 d-block">✗ Passwords do not match</small>
+                    }
+                    else if (_password == _confirmPassword && !string.IsNullOrEmpty(_confirmPassword) && !string.IsNullOrEmpty(_password))
+                    {
+                        <small class="text-success mt-1 d-block">✓ Passwords match</small>
+                    }
+                </div>
+                
+                <button class="btn-neon w-100 mb-4" @onclick="RegisterAsync" disabled="@_isLoading" style="color: white;">
+                    @if (_isLoading)
+                    {
+                        <span class="spinner-css me-2"></span>
+                        <span>Creating Account...</span>
+                    }
+                    else
+                    {
+                        <span><i class="bi bi-person-plus me-2"></i>Create Account</span>
+                    }
+                </button>
+                
+                <hr style="border-color: rgba(255,255,255,0.1);" />
+                
+                <div class="text-center">
+                    <p class="text-white-50 mb-0">
+                        Already have an account?
+                        <a href="/login" class="gradient-text" style="text-decoration: none; font-weight: 600;">Sign In</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _fullName = "";
+    private string _email = "";
+    private string _password = "";
+    private string _confirmPassword = "";
+    private string _errorMessage = "";
+    private bool _isLoading = false;
+    
+    // Password Strength Properties
+    private string _strengthText = "";
+    private string _strengthClass = "";
+    private string _strengthIcon = "";
+    private string _strengthIconStyle = "";
+    private string _strengthTextStyle = "";
+    private int _strengthPercent = 0;
+    
+    private void OnPasswordChange()
+    {
+        CalculatePasswordStrength();
+        StateHasChanged();
+    }
+    
+    private void CalculatePasswordStrength()
+    {
+        if (string.IsNullOrEmpty(_password))
+        {
+            _strengthText = "";
+            return;
+        }
+        
+        int score = 0;
+        
+        if (_password.Length >= 6) score++;
+        if (_password.Length >= 8) score++;
+        if (_password.Length >= 12) score++;
+        if (System.Text.RegularExpressions.Regex.IsMatch(_password, @"\d")) score++;
+        if (System.Text.RegularExpressions.Regex.IsMatch(_password, @"[A-Z]")) score++;
+        if (System.Text.RegularExpressions.Regex.IsMatch(_password, @"[a-z]")) score++;
+        if (System.Text.RegularExpressions.Regex.IsMatch(_password, @"[!@#$%^&*(),.?"":{}|<>]")) score++;
+        
+        if (score <= 2)
+        {
+            _strengthText = "Weak";
+            _strengthClass = "bg-danger";
+            _strengthIcon = "bi-exclamation-triangle-fill";
+            _strengthIconStyle = "color: #dc3545;";
+            _strengthTextStyle = "color: #dc3545;";
+            _strengthPercent = 25;
+        }
+        else if (score <= 4)
+        {
+            _strengthText = "Medium";
+            _strengthClass = "bg-warning";
+            _strengthIcon = "bi-shield-shaded";
+            _strengthIconStyle = "color: #ffc107;";
+            _strengthTextStyle = "color: #ffc107;";
+            _strengthPercent = 60;
+        }
+        else
+        {
+            _strengthText = "Strong";
+            _strengthClass = "bg-success";
+            _strengthIcon = "bi-shield-check";
+            _strengthIconStyle = "color: #28a745;";
+            _strengthTextStyle = "color: #28a745;";
+            _strengthPercent = 100;
+        }
+    }
+    
+    private async Task RegisterAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_fullName))
+        {
+            _errorMessage = "Please enter your full name";
+            return;
+        }
+        
+        if (string.IsNullOrWhiteSpace(_email))
+        {
+            _errorMessage = "Please enter your email";
+            return;
+        }
+        
+        if (string.IsNullOrWhiteSpace(_password))
+        {
+            _errorMessage = "Please enter a password";
+            return;
+        }
+        
+        if (_password.Length < 6)
+        {
+            _errorMessage = "Password must be at least 6 characters";
+            return;
+        }
+        
+        if (_password != _confirmPassword)
+        {
+            _errorMessage = "Passwords do not match";
+            return;
+        }
+        
+        _isLoading = true;
+        _errorMessage = "";
+        StateHasChanged();
+        
+        try
+        {
+            var registerDto = new RegisterDto
+            {
+                FullName = _fullName,
+                Email = _email,
+                Password = _password,
+                ConfirmPassword = _confirmPassword
+            };
+            
+            var (success, error) = await AuthService.RegisterAsync(registerDto);
+            
+            if (success)
+            {
+                Navigation.NavigateTo("/dashboard", forceLoad: true);
+            }
+            else
+            {
+                _errorMessage = error;
+                _isLoading = false;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Registration error: {ex.Message}";
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+}
