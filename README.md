@@ -154,7 +154,7 @@ text
 ### Installation Steps
 
 1. **Clone the repository**
-```bash
+
 git clone https://github.com/talha-23/FXTransfer.git
 cd FXTransfer
 Restore NuGet packages
@@ -343,11 +343,6 @@ This project is created for educational purposes as part of the Visual Programmi
 Talha
 
 GitHub: @talha-23
-
-Course: Visual Programming
-
-Semester: Spring 2026
-
 🙏 Acknowledgments
 ExchangeRate-API for free currency rates
 
@@ -394,34 +389,3 @@ https://img.shields.io/github/stars/talha-23/FXTransfer?style=social
 
 © 2026 FXTransfer - The Future of Currency Exchange
 
-text
-
----
-
-## 📋 Git Commands to Push
-
-```bash
-# Initialize repository
-git init
-
-# Add all files
-git add .
-
-# Commit changes
-git commit -m "FXTransfer - Complete Currency Exchange Platform with all 5 modules
-
-- Module 1: Core Infrastructure & Authentication
-- Module 2: Core Services & API Integration  
-- Module 3: User Portal Pages (35+ features)
-- Module 4: Admin Panel (6 management pages)
-- Module 5: Advanced Features (QR, PDF, Charts)
-- Glass morphism UI with neon theme
-- SQLite database with EF Core
-- Complete documentation"
-
-# Add remote repository
-git remote add origin https://github.com/talha-23/FXTransfer.git
-
-# Push to GitHub
-git branch -M main
-git push -u origin main
