@@ -137,10 +137,16 @@
         {
             var loginDto = new LoginDto { Email = _email, Password = _password, RememberMe = _rememberMe };
             var success = await AuthService.LoginAsync(loginDto);
-            
             if (success)
             {
-                Navigation.NavigateTo("/dashboard", forceLoad: true);
+                if (_email.Contains("admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    Navigation.NavigateTo("/admin/dashboard", forceLoad: true);
+                }
+                else
+                {
+                    Navigation.NavigateTo("/dashboard", forceLoad: true);
+                }
             }
             else
             {

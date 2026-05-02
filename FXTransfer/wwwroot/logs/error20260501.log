@@ -1,0 +1,704 @@
+2026-05-01 13:18:41 [Information] User profile is available. Using '"C:\Users\TALHA\AppData\Local\ASP.NET\DataProtection-Keys"' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-05-01 13:18:46 [Information] Executed DbCommand ("50"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT COUNT(*) FROM \"sqlite_master\" WHERE \"type\" = 'table' AND \"rootpage\" IS NOT NULL;"
+2026-05-01 13:18:47 [Information] Executed DbCommand ("12"ms) [Parameters=["@__normalizedName_0='?' (Size = 5)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"ConcurrencyStamp\", \"a\".\"Name\", \"a\".\"NormalizedName\"
+FROM \"AspNetRoles\" AS \"a\"
+WHERE \"a\".\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2026-05-01 13:18:47 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedName_0='?' (Size = 7)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"ConcurrencyStamp\", \"a\".\"Name\", \"a\".\"NormalizedName\"
+FROM \"AspNetRoles\" AS \"a\"
+WHERE \"a\".\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2026-05-01 13:18:47 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedName_0='?' (Size = 7)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"ConcurrencyStamp\", \"a\".\"Name\", \"a\".\"NormalizedName\"
+FROM \"AspNetRoles\" AS \"a\"
+WHERE \"a\".\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2026-05-01 13:18:47 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedName_0='?' (Size = 9)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"ConcurrencyStamp\", \"a\".\"Name\", \"a\".\"NormalizedName\"
+FROM \"AspNetRoles\" AS \"a\"
+WHERE \"a\".\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2026-05-01 13:18:47 [Information] Executed DbCommand ("1"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 20)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:18:48 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 22)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:18:48 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 19)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:18:48 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 24)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:18:48 [Information] Database seeded successfully!
+2026-05-01 13:18:48 [Information] Executed DbCommand ("1"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT COUNT(*)
+FROM \"AspNetUsers\" AS \"a\""
+2026-05-01 13:18:48 [Information] FXTransfer Application Started
+2026-05-01 13:18:49 [Information] Now listening on: "https://localhost:5001"
+2026-05-01 13:18:49 [Information] Now listening on: "http://localhost:5000"
+2026-05-01 13:18:49 [Information] Application started. Press Ctrl+C to shut down.
+2026-05-01 13:18:49 [Information] Hosting environment: "Development"
+2026-05-01 13:18:49 [Information] Content root path: "C:\Users\TALHA\Desktop\FXTransfer\FXTransfer"
+2026-05-01 13:18:49 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/""" - null null
+2026-05-01 13:18:50 [Information] Executing endpoint '"/_Host"'
+2026-05-01 13:18:50 [Information] Route matched with "{page = \"/_Host\"}". Executing page "/_Host"
+2026-05-01 13:18:50 [Information] Executing an implicit handler method - ModelState is Valid
+2026-05-01 13:18:50 [Information] Executed an implicit handler method, returned result "Microsoft.AspNetCore.Mvc.RazorPages.PageResult".
+2026-05-01 13:18:50 [Information] Executed page "/_Host" in 442.3903ms
+2026-05-01 13:18:50 [Information] Executed endpoint '"/_Host"'
+2026-05-01 13:18:50 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/""" - 200 null "text/html; charset=utf-8" 990.2137ms
+2026-05-01 13:18:51 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/blazor.server.js""" - null null
+2026-05-01 13:18:51 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/aspnetcore-browser-refresh.js""" - null null
+2026-05-01 13:18:51 [Information] Executing endpoint '"Blazor static files"'
+2026-05-01 13:18:51 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_vs/browserLink""" - null null
+2026-05-01 13:18:51 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/aspnetcore-browser-refresh.js""" - 200 14925 "application/javascript; charset=utf-8" 43.7245ms
+2026-05-01 13:18:51 [Information] The file "/_framework/blazor.server.js" was not modified
+2026-05-01 13:18:51 [Information] Executed endpoint '"Blazor static files"'
+2026-05-01 13:18:51 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/blazor.server.js""" - 304 null "text/javascript" 62.9202ms
+2026-05-01 13:18:51 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_blazor/initializers""" - null null
+2026-05-01 13:18:51 [Information] Executing endpoint '"Blazor initializers"'
+2026-05-01 13:18:51 [Information] Executed endpoint '"Blazor initializers"'
+2026-05-01 13:18:51 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_blazor/initializers""" - 200 null "application/json; charset=utf-8" 15.1567ms
+2026-05-01 13:18:51 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_vs/browserLink""" - 200 null "text/javascript; charset=UTF-8" 148.7443ms
+2026-05-01 13:18:51 [Information] Request starting "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/negotiate""?negotiateVersion=1" - null 0
+2026-05-01 13:18:51 [Information] Executing endpoint '"/_blazor/negotiate"'
+2026-05-01 13:18:51 [Information] Executed endpoint '"/_blazor/negotiate"'
+2026-05-01 13:18:51 [Information] Request finished "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/negotiate""?negotiateVersion=1" - 200 316 "application/json" 22.2797ms
+2026-05-01 13:18:51 [Information] Request starting "HTTP/2" "CONNECT" "https"://"localhost:5001""""/_blazor""?id=s2O6PqTx2Ac3sKT_RJxK7w" - null null
+2026-05-01 13:18:51 [Information] Executing endpoint '"/_blazor"'
+2026-05-01 13:18:51 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/favicon.ico""" - null null
+2026-05-01 13:18:51 [Information] The file "/favicon.ico" was not modified
+2026-05-01 13:18:51 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/favicon.ico""" - 304 null "image/x-icon" 6.1301ms
+2026-05-01 13:18:52 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 15)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:18:52 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 15)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:18:52 [Information] Executed DbCommand ("0"ms) [Parameters=["@__userId_0='?' (Size = 36)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a0\".\"Name\"
+FROM \"AspNetUserRoles\" AS \"a\"
+INNER JOIN \"AspNetRoles\" AS \"a0\" ON \"a\".\"RoleId\" = \"a0\".\"Id\"
+WHERE \"a\".\"UserId\" = @__userId_0"
+2026-05-01 13:19:05 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 15)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:19:05 [Information] Executed DbCommand ("0"ms) [Parameters=["@__userId_0='?' (Size = 36)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a0\".\"Name\"
+FROM \"AspNetUserRoles\" AS \"a\"
+INNER JOIN \"AspNetRoles\" AS \"a0\" ON \"a\".\"RoleId\" = \"a0\".\"Id\"
+WHERE \"a\".\"UserId\" = @__userId_0"
+2026-05-01 13:19:05 [Information] Attempt 1 to fetch rates for USD
+2026-05-01 13:19:05 [Information] Start processing HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:05 [Information] Sending HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:05 [Information] Attempt 1 to fetch rates for USD
+2026-05-01 13:19:05 [Information] Start processing HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:05 [Information] Sending HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:06 [Information] Received HTTP response headers after 1014.8245ms - 200
+2026-05-01 13:19:06 [Information] Received HTTP response headers after 973.6131ms - 200
+2026-05-01 13:19:06 [Information] End processing HTTP request after 986.8152ms - 200
+2026-05-01 13:19:06 [Information] End processing HTTP request after 1041.5857ms - 200
+2026-05-01 13:19:06 [Warning] Attempt 1 failed. Retrying in 2 seconds...
+2026-05-01 13:19:06 [Warning] Attempt 1 failed. Retrying in 2 seconds...
+2026-05-01 13:19:08 [Information] Attempt 2 to fetch rates for USD
+2026-05-01 13:19:08 [Information] Start processing HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:08 [Information] Sending HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:08 [Information] Attempt 2 to fetch rates for USD
+2026-05-01 13:19:08 [Information] Start processing HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:08 [Information] Sending HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:08 [Information] Received HTTP response headers after 309.872ms - 200
+2026-05-01 13:19:08 [Information] Received HTTP response headers after 284.7661ms - 200
+2026-05-01 13:19:08 [Information] End processing HTTP request after 312.0415ms - 200
+2026-05-01 13:19:08 [Information] End processing HTTP request after 288.5402ms - 200
+2026-05-01 13:19:08 [Warning] Attempt 2 failed. Retrying in 4 seconds...
+2026-05-01 13:19:08 [Warning] Attempt 2 failed. Retrying in 4 seconds...
+2026-05-01 13:19:12 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/""" - null null
+2026-05-01 13:19:12 [Information] Executing endpoint '"/_Host"'
+2026-05-01 13:19:12 [Information] Route matched with "{page = \"/_Host\"}". Executing page "/_Host"
+2026-05-01 13:19:12 [Information] Executing an implicit handler method - ModelState is Valid
+2026-05-01 13:19:12 [Information] Executed an implicit handler method, returned result "Microsoft.AspNetCore.Mvc.RazorPages.PageResult".
+2026-05-01 13:19:12 [Information] Executed page "/_Host" in 54.2035ms
+2026-05-01 13:19:12 [Information] Executed endpoint '"/_Host"'
+2026-05-01 13:19:12 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/""" - 200 null "text/html; charset=utf-8" 75.7304ms
+2026-05-01 13:19:12 [Information] Request starting "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/disconnect""" - "multipart/form-data; boundary=----WebKitFormBoundaryKva9DKt3mLftGeyB" 359
+2026-05-01 13:19:12 [Information] Executing endpoint '"Blazor disconnect"'
+2026-05-01 13:19:12 [Information] Executed endpoint '"/_blazor"'
+2026-05-01 13:19:12 [Information] Request finished "HTTP/2" "CONNECT" "https"://"localhost:5001""""/_blazor""?id=s2O6PqTx2Ac3sKT_RJxK7w" - 200 null null 21133.6488ms
+2026-05-01 13:19:12 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/blazor.server.js""" - null null
+2026-05-01 13:19:12 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_vs/browserLink""" - null null
+2026-05-01 13:19:12 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/aspnetcore-browser-refresh.js""" - null null
+2026-05-01 13:19:12 [Information] Executed endpoint '"Blazor disconnect"'
+2026-05-01 13:19:12 [Information] Request finished "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/disconnect""" - 200 0 null 82.8309ms
+2026-05-01 13:19:12 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/aspnetcore-browser-refresh.js""" - 200 14925 "application/javascript; charset=utf-8" 10.426ms
+2026-05-01 13:19:12 [Information] Executing endpoint '"Blazor static files"'
+2026-05-01 13:19:12 [Information] The file "/_framework/blazor.server.js" was not modified
+2026-05-01 13:19:12 [Information] Executed endpoint '"Blazor static files"'
+2026-05-01 13:19:12 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/blazor.server.js""" - 304 null "text/javascript" 29.4671ms
+2026-05-01 13:19:12 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_blazor/initializers""" - null null
+2026-05-01 13:19:12 [Information] Executing endpoint '"Blazor initializers"'
+2026-05-01 13:19:12 [Information] Executed endpoint '"Blazor initializers"'
+2026-05-01 13:19:12 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_blazor/initializers""" - 200 null "application/json; charset=utf-8" 1.625ms
+2026-05-01 13:19:12 [Information] Request starting "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/negotiate""?negotiateVersion=1" - null 0
+2026-05-01 13:19:12 [Information] Executing endpoint '"/_blazor/negotiate"'
+2026-05-01 13:19:12 [Information] Executed endpoint '"/_blazor/negotiate"'
+2026-05-01 13:19:12 [Information] Request finished "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/negotiate""?negotiateVersion=1" - 200 316 "application/json" 4.5132ms
+2026-05-01 13:19:12 [Information] Request starting "HTTP/2" "CONNECT" "https"://"localhost:5001""""/_blazor""?id=R4-pyOOdsnS8nq_tDZHVhA" - null null
+2026-05-01 13:19:12 [Information] Executing endpoint '"/_blazor"'
+2026-05-01 13:19:12 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_vs/browserLink""" - 200 null "text/javascript; charset=UTF-8" 135.3014ms
+2026-05-01 13:19:12 [Information] Attempt 3 to fetch rates for USD
+2026-05-01 13:19:12 [Information] Start processing HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:12 [Information] Sending HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:12 [Information] Attempt 3 to fetch rates for USD
+2026-05-01 13:19:12 [Information] Start processing HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:12 [Information] Sending HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:13 [Information] Received HTTP response headers after 358.9548ms - 200
+2026-05-01 13:19:13 [Information] Received HTTP response headers after 349.8827ms - 200
+2026-05-01 13:19:13 [Information] End processing HTTP request after 360.1216ms - 200
+2026-05-01 13:19:13 [Information] End processing HTTP request after 351.3282ms - 200
+2026-05-01 13:19:13 [Warning] API failed for USD, attempting fallback
+2026-05-01 13:19:13 [Warning] API failed for USD, attempting fallback
+2026-05-01 13:19:13 [Error] Failed to load fallback rates
+FXTransfer.Services.ApiFailureException: Invalid fallback rates data
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 157
+2026-05-01 13:19:14 [Warning] Unhandled exception rendering component: "Unable to load exchange rates from fallback"
+FXTransfer.Services.ApiFailureException: Unable to load exchange rates from fallback
+ ---> FXTransfer.Services.ApiFailureException: Invalid fallback rates data
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 157
+   --- End of inner exception stack trace ---
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 162
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.GetRatesAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 68
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.GetExchangeRateAsync(String fromCurrency, String toCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 190
+   at FXTransfer.Pages.Exchange.CalculateRate() in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Pages\Exchange.razor:line 144
+   at FXTransfer.Pages.Exchange.OnInitializedAsync() in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Pages\Exchange.razor:line 118
+   at Microsoft.AspNetCore.Components.ComponentBase.RunInitAndSetParametersAsync()
+   at Microsoft.AspNetCore.Components.RenderTree.Renderer.GetErrorHandledTask(Task taskToHandle, ComponentState owningComponentState)
+2026-05-01 13:19:14 [Error] Unhandled exception in circuit '"qE_sJkgG_cjvFq2Gt7mdDVc3axvvpRLMNdHwlSMQmwo"'.
+FXTransfer.Services.ApiFailureException: Unable to load exchange rates from fallback
+ ---> FXTransfer.Services.ApiFailureException: Invalid fallback rates data
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 157
+   --- End of inner exception stack trace ---
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 162
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.GetRatesAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 68
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.GetExchangeRateAsync(String fromCurrency, String toCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 190
+   at FXTransfer.Pages.Exchange.CalculateRate() in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Pages\Exchange.razor:line 144
+   at FXTransfer.Pages.Exchange.OnInitializedAsync() in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Pages\Exchange.razor:line 118
+   at Microsoft.AspNetCore.Components.ComponentBase.RunInitAndSetParametersAsync()
+   at Microsoft.AspNetCore.Components.RenderTree.Renderer.GetErrorHandledTask(Task taskToHandle, ComponentState owningComponentState)
+2026-05-01 13:19:14 [Error] Failed to load fallback rates
+FXTransfer.Services.ApiFailureException: Invalid fallback rates data
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 157
+2026-05-01 13:19:15 [Warning] Unhandled exception rendering component: "Unable to load exchange rates from fallback"
+FXTransfer.Services.ApiFailureException: Unable to load exchange rates from fallback
+ ---> FXTransfer.Services.ApiFailureException: Invalid fallback rates data
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 157
+   --- End of inner exception stack trace ---
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 162
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.GetRatesAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 68
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.GetExchangeRateAsync(String fromCurrency, String toCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 190
+   at FXTransfer.Pages.Exchange.CalculateRate() in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Pages\Exchange.razor:line 144
+   at FXTransfer.Pages.Exchange.OnAfterRenderAsync(Boolean firstRender) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Pages\Exchange.razor:line 125
+   at Microsoft.AspNetCore.Components.RenderTree.Renderer.GetErrorHandledTask(Task taskToHandle, ComponentState owningComponentState)
+2026-05-01 13:19:15 [Error] Unhandled exception in circuit '"qE_sJkgG_cjvFq2Gt7mdDVc3axvvpRLMNdHwlSMQmwo"'.
+FXTransfer.Services.ApiFailureException: Unable to load exchange rates from fallback
+ ---> FXTransfer.Services.ApiFailureException: Invalid fallback rates data
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 157
+   --- End of inner exception stack trace ---
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 162
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.GetRatesAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 68
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.GetExchangeRateAsync(String fromCurrency, String toCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 190
+   at FXTransfer.Pages.Exchange.CalculateRate() in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Pages\Exchange.razor:line 144
+   at FXTransfer.Pages.Exchange.OnAfterRenderAsync(Boolean firstRender) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Pages\Exchange.razor:line 125
+   at Microsoft.AspNetCore.Components.RenderTree.Renderer.GetErrorHandledTask(Task taskToHandle, ComponentState owningComponentState)
+2026-05-01 13:19:18 [Information] Executed DbCommand ("1"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 20)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:19:18 [Information] Executed DbCommand ("0"ms) [Parameters=["@__userId_0='?' (Size = 36)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a0\".\"Name\"
+FROM \"AspNetUserRoles\" AS \"a\"
+INNER JOIN \"AspNetRoles\" AS \"a0\" ON \"a\".\"RoleId\" = \"a0\".\"Id\"
+WHERE \"a\".\"UserId\" = @__userId_0"
+2026-05-01 13:19:18 [Information] User logged in: admin@fxtransfer.com
+2026-05-01 13:19:18 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/dashboard""" - null null
+2026-05-01 13:19:18 [Information] Executing endpoint '"/_Host"'
+2026-05-01 13:19:18 [Information] Route matched with "{page = \"/_Host\"}". Executing page "/_Host"
+2026-05-01 13:19:18 [Information] Executing an implicit handler method - ModelState is Valid
+2026-05-01 13:19:18 [Information] Executed an implicit handler method, returned result "Microsoft.AspNetCore.Mvc.RazorPages.PageResult".
+2026-05-01 13:19:18 [Information] Executed page "/_Host" in 28.9401ms
+2026-05-01 13:19:18 [Information] Executed endpoint '"/_Host"'
+2026-05-01 13:19:18 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/dashboard""" - 200 null "text/html; charset=utf-8" 55.3227ms
+2026-05-01 13:19:18 [Information] Request starting "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/disconnect""" - "multipart/form-data; boundary=----WebKitFormBoundary8tvF2guniycx2QKU" 359
+2026-05-01 13:19:18 [Information] Executing endpoint '"Blazor disconnect"'
+2026-05-01 13:19:18 [Information] Executed endpoint '"Blazor disconnect"'
+2026-05-01 13:19:18 [Information] Request finished "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/disconnect""" - 200 0 null 6.2478ms
+2026-05-01 13:19:18 [Information] Executed endpoint '"/_blazor"'
+2026-05-01 13:19:18 [Information] Request finished "HTTP/2" "CONNECT" "https"://"localhost:5001""""/_blazor""?id=R4-pyOOdsnS8nq_tDZHVhA" - 200 null null 6406.7848ms
+2026-05-01 13:19:18 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/blazor.server.js""" - null null
+2026-05-01 13:19:18 [Information] Executing endpoint '"Blazor static files"'
+2026-05-01 13:19:18 [Information] The file "/_framework/blazor.server.js" was not modified
+2026-05-01 13:19:18 [Information] Executed endpoint '"Blazor static files"'
+2026-05-01 13:19:18 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/blazor.server.js""" - 304 null "text/javascript" 2.0088ms
+2026-05-01 13:19:18 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_vs/browserLink""" - null null
+2026-05-01 13:19:18 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/aspnetcore-browser-refresh.js""" - null null
+2026-05-01 13:19:18 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/aspnetcore-browser-refresh.js""" - 200 14925 "application/javascript; charset=utf-8" 3.1424ms
+2026-05-01 13:19:18 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_blazor/initializers""" - null null
+2026-05-01 13:19:18 [Information] Executing endpoint '"Blazor initializers"'
+2026-05-01 13:19:18 [Information] Executed endpoint '"Blazor initializers"'
+2026-05-01 13:19:18 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_blazor/initializers""" - 200 null "application/json; charset=utf-8" 2.8137ms
+2026-05-01 13:19:18 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_vs/browserLink""" - 200 null "text/javascript; charset=UTF-8" 37.3823ms
+2026-05-01 13:19:19 [Information] Request starting "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/negotiate""?negotiateVersion=1" - null 0
+2026-05-01 13:19:19 [Information] Executing endpoint '"/_blazor/negotiate"'
+2026-05-01 13:19:19 [Information] Executed endpoint '"/_blazor/negotiate"'
+2026-05-01 13:19:19 [Information] Request finished "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/negotiate""?negotiateVersion=1" - 200 316 "application/json" 2.8786ms
+2026-05-01 13:19:19 [Information] Request starting "HTTP/2" "CONNECT" "https"://"localhost:5001""""/_blazor""?id=jgPTZOnMqCJGJRdLvnbSgA" - null null
+2026-05-01 13:19:19 [Information] Executing endpoint '"/_blazor"'
+2026-05-01 13:19:19 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 20)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:19:19 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 20)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:19:19 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 20)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:19:19 [Information] Executed DbCommand ("0"ms) [Parameters=["@__userId_0='?' (Size = 36)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a0\".\"Name\"
+FROM \"AspNetUserRoles\" AS \"a\"
+INNER JOIN \"AspNetRoles\" AS \"a0\" ON \"a\".\"RoleId\" = \"a0\".\"Id\"
+WHERE \"a\".\"UserId\" = @__userId_0"
+2026-05-01 13:19:19 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 20)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:19:19 [Information] Executed DbCommand ("0"ms) [Parameters=["@__userId_0='?' (Size = 36)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a0\".\"Name\"
+FROM \"AspNetUserRoles\" AS \"a\"
+INNER JOIN \"AspNetRoles\" AS \"a0\" ON \"a\".\"RoleId\" = \"a0\".\"Id\"
+WHERE \"a\".\"UserId\" = @__userId_0"
+2026-05-01 13:19:19 [Information] Executed DbCommand ("0"ms) [Parameters=["@__userId_0='?' (Size = 36)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"w\".\"Id\", \"w\".\"Balance\", \"w\".\"CreatedAt\", \"w\".\"CurrencyCode\", \"w\".\"LastUpdatedAt\", \"w\".\"UserId\"
+FROM \"Wallets\" AS \"w\"
+WHERE \"w\".\"UserId\" = @__userId_0"
+2026-05-01 13:19:19 [Information] Attempt 1 to fetch rates for USD
+2026-05-01 13:19:19 [Information] Start processing HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:19 [Information] Sending HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:19 [Information] Received HTTP response headers after 280.7947ms - 200
+2026-05-01 13:19:19 [Information] End processing HTTP request after 281.5519ms - 200
+2026-05-01 13:19:19 [Warning] Attempt 1 failed. Retrying in 2 seconds...
+2026-05-01 13:19:21 [Information] Attempt 2 to fetch rates for USD
+2026-05-01 13:19:21 [Information] Start processing HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:21 [Information] Sending HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:22 [Information] Received HTTP response headers after 388.6456ms - 200
+2026-05-01 13:19:22 [Information] End processing HTTP request after 389.2126ms - 200
+2026-05-01 13:19:22 [Warning] Attempt 2 failed. Retrying in 4 seconds...
+2026-05-01 13:19:26 [Information] Attempt 3 to fetch rates for USD
+2026-05-01 13:19:26 [Information] Start processing HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:26 [Information] Sending HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:26 [Information] Received HTTP response headers after 383.8363ms - 200
+2026-05-01 13:19:26 [Information] End processing HTTP request after 384.3103ms - 200
+2026-05-01 13:19:26 [Warning] API failed for USD, attempting fallback
+2026-05-01 13:19:26 [Error] Failed to load fallback rates
+FXTransfer.Services.ApiFailureException: Invalid fallback rates data
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 157
+2026-05-01 13:19:27 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 20)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:19:27 [Information] Executed DbCommand ("0"ms) [Parameters=["@__userId_0='?' (Size = 36)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a0\".\"Name\"
+FROM \"AspNetUserRoles\" AS \"a\"
+INNER JOIN \"AspNetRoles\" AS \"a0\" ON \"a\".\"RoleId\" = \"a0\".\"Id\"
+WHERE \"a\".\"UserId\" = @__userId_0"
+2026-05-01 13:19:27 [Information] Attempt 1 to fetch rates for USD
+2026-05-01 13:19:27 [Information] Start processing HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:27 [Information] Sending HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:27 [Information] Attempt 1 to fetch rates for USD
+2026-05-01 13:19:27 [Information] Start processing HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:27 [Information] Sending HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:28 [Information] Received HTTP response headers after 321.3523ms - 200
+2026-05-01 13:19:28 [Information] Received HTTP response headers after 330.3605ms - 200
+2026-05-01 13:19:28 [Information] End processing HTTP request after 322.0297ms - 200
+2026-05-01 13:19:28 [Information] End processing HTTP request after 332.3639ms - 200
+2026-05-01 13:19:28 [Warning] Attempt 1 failed. Retrying in 2 seconds...
+2026-05-01 13:19:28 [Warning] Attempt 1 failed. Retrying in 2 seconds...
+2026-05-01 13:19:30 [Information] Attempt 2 to fetch rates for USD
+2026-05-01 13:19:30 [Information] Start processing HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:30 [Information] Sending HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:30 [Information] Attempt 2 to fetch rates for USD
+2026-05-01 13:19:30 [Information] Start processing HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:30 [Information] Sending HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:30 [Information] Received HTTP response headers after 341.2429ms - 200
+2026-05-01 13:19:30 [Information] Received HTTP response headers after 349.5348ms - 200
+2026-05-01 13:19:30 [Information] End processing HTTP request after 342.3012ms - 200
+2026-05-01 13:19:30 [Information] End processing HTTP request after 350.094ms - 200
+2026-05-01 13:19:30 [Warning] Attempt 2 failed. Retrying in 4 seconds...
+2026-05-01 13:19:30 [Warning] Attempt 2 failed. Retrying in 4 seconds...
+2026-05-01 13:19:34 [Information] Attempt 3 to fetch rates for USD
+2026-05-01 13:19:34 [Information] Start processing HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:34 [Information] Sending HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:34 [Information] Attempt 3 to fetch rates for USD
+2026-05-01 13:19:34 [Information] Start processing HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:34 [Information] Sending HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:19:34 [Information] Received HTTP response headers after 300.0291ms - 200
+2026-05-01 13:19:34 [Information] End processing HTTP request after 300.5013ms - 200
+2026-05-01 13:19:34 [Information] Received HTTP response headers after 342.1909ms - 200
+2026-05-01 13:19:34 [Information] End processing HTTP request after 342.607ms - 200
+2026-05-01 13:19:34 [Warning] API failed for USD, attempting fallback
+2026-05-01 13:19:35 [Warning] API failed for USD, attempting fallback
+2026-05-01 13:19:35 [Error] Failed to load fallback rates
+FXTransfer.Services.ApiFailureException: Invalid fallback rates data
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 157
+2026-05-01 13:19:35 [Warning] Unhandled exception rendering component: "Unable to load exchange rates from fallback"
+FXTransfer.Services.ApiFailureException: Unable to load exchange rates from fallback
+ ---> FXTransfer.Services.ApiFailureException: Invalid fallback rates data
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 157
+   --- End of inner exception stack trace ---
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 162
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.GetRatesAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 68
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.GetExchangeRateAsync(String fromCurrency, String toCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 190
+   at FXTransfer.Pages.Exchange.CalculateRate() in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Pages\Exchange.razor:line 144
+   at FXTransfer.Pages.Exchange.OnAfterRenderAsync(Boolean firstRender) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Pages\Exchange.razor:line 125
+   at Microsoft.AspNetCore.Components.RenderTree.Renderer.GetErrorHandledTask(Task taskToHandle, ComponentState owningComponentState)
+2026-05-01 13:19:35 [Error] Unhandled exception in circuit '"f-sTqACnZCVRpz7fC4RX4BElIfPfqsT2X0O1qqZDtbQ"'.
+FXTransfer.Services.ApiFailureException: Unable to load exchange rates from fallback
+ ---> FXTransfer.Services.ApiFailureException: Invalid fallback rates data
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 157
+   --- End of inner exception stack trace ---
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 162
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.GetRatesAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 68
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.GetExchangeRateAsync(String fromCurrency, String toCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 190
+   at FXTransfer.Pages.Exchange.CalculateRate() in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Pages\Exchange.razor:line 144
+   at FXTransfer.Pages.Exchange.OnAfterRenderAsync(Boolean firstRender) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Pages\Exchange.razor:line 125
+   at Microsoft.AspNetCore.Components.RenderTree.Renderer.GetErrorHandledTask(Task taskToHandle, ComponentState owningComponentState)
+2026-05-01 13:19:36 [Error] Failed to load fallback rates
+FXTransfer.Services.ApiFailureException: Invalid fallback rates data
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 157
+2026-05-01 13:19:36 [Information] Executed endpoint '"/_blazor"'
+2026-05-01 13:19:36 [Information] Request finished "HTTP/2" "CONNECT" "https"://"localhost:5001""""/_blazor""?id=jgPTZOnMqCJGJRdLvnbSgA" - 200 null null 17108.5489ms
+2026-05-01 13:19:36 [Information] Connection id ""0HNL7B92S7GBC"", Request id ""0HNL7B92S7GBC:0000002F"": the application completed without reading the entire request body.
+2026-05-01 13:19:36 [Warning] Unhandled exception rendering component: "Unable to load exchange rates from fallback"
+FXTransfer.Services.ApiFailureException: Unable to load exchange rates from fallback
+ ---> FXTransfer.Services.ApiFailureException: Invalid fallback rates data
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 157
+   --- End of inner exception stack trace ---
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 162
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.GetRatesAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 68
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.GetExchangeRateAsync(String fromCurrency, String toCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 190
+   at FXTransfer.Pages.Exchange.CalculateRate() in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Pages\Exchange.razor:line 144
+   at FXTransfer.Pages.Exchange.OnInitializedAsync() in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Pages\Exchange.razor:line 118
+   at Microsoft.AspNetCore.Components.ComponentBase.RunInitAndSetParametersAsync()
+   at Microsoft.AspNetCore.Components.RenderTree.Renderer.GetErrorHandledTask(Task taskToHandle, ComponentState owningComponentState)
+2026-05-01 13:19:36 [Error] Unhandled exception in circuit '"f-sTqACnZCVRpz7fC4RX4BElIfPfqsT2X0O1qqZDtbQ"'.
+FXTransfer.Services.ApiFailureException: Unable to load exchange rates from fallback
+ ---> FXTransfer.Services.ApiFailureException: Invalid fallback rates data
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 157
+   --- End of inner exception stack trace ---
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 162
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.GetRatesAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 68
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.GetExchangeRateAsync(String fromCurrency, String toCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 190
+   at FXTransfer.Pages.Exchange.CalculateRate() in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Pages\Exchange.razor:line 144
+   at FXTransfer.Pages.Exchange.OnInitializedAsync() in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Pages\Exchange.razor:line 118
+   at Microsoft.AspNetCore.Components.ComponentBase.RunInitAndSetParametersAsync()
+   at Microsoft.AspNetCore.Components.RenderTree.Renderer.GetErrorHandledTask(Task taskToHandle, ComponentState owningComponentState)
+2026-05-01 13:20:05 [Information] User profile is available. Using '"C:\Users\TALHA\AppData\Local\ASP.NET\DataProtection-Keys"' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-05-01 13:20:08 [Information] Executed DbCommand ("41"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT COUNT(*) FROM \"sqlite_master\" WHERE \"type\" = 'table' AND \"rootpage\" IS NOT NULL;"
+2026-05-01 13:20:09 [Information] Executed DbCommand ("8"ms) [Parameters=["@__normalizedName_0='?' (Size = 5)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"ConcurrencyStamp\", \"a\".\"Name\", \"a\".\"NormalizedName\"
+FROM \"AspNetRoles\" AS \"a\"
+WHERE \"a\".\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2026-05-01 13:20:09 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedName_0='?' (Size = 7)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"ConcurrencyStamp\", \"a\".\"Name\", \"a\".\"NormalizedName\"
+FROM \"AspNetRoles\" AS \"a\"
+WHERE \"a\".\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2026-05-01 13:20:09 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedName_0='?' (Size = 7)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"ConcurrencyStamp\", \"a\".\"Name\", \"a\".\"NormalizedName\"
+FROM \"AspNetRoles\" AS \"a\"
+WHERE \"a\".\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2026-05-01 13:20:09 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedName_0='?' (Size = 9)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"ConcurrencyStamp\", \"a\".\"Name\", \"a\".\"NormalizedName\"
+FROM \"AspNetRoles\" AS \"a\"
+WHERE \"a\".\"NormalizedName\" = @__normalizedName_0
+LIMIT 1"
+2026-05-01 13:20:09 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 20)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:20:09 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 22)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:20:09 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 19)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:20:09 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 24)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:20:09 [Information] Database seeded successfully!
+2026-05-01 13:20:09 [Information] Executed DbCommand ("1"ms) [Parameters=[""], CommandType='Text', CommandTimeout='30']"
+""SELECT COUNT(*)
+FROM \"AspNetUsers\" AS \"a\""
+2026-05-01 13:20:09 [Information] FXTransfer Application Started
+2026-05-01 13:20:10 [Information] Now listening on: "https://localhost:5001"
+2026-05-01 13:20:10 [Information] Now listening on: "http://localhost:5000"
+2026-05-01 13:20:10 [Information] Application started. Press Ctrl+C to shut down.
+2026-05-01 13:20:10 [Information] Hosting environment: "Development"
+2026-05-01 13:20:10 [Information] Content root path: "C:\Users\TALHA\Desktop\FXTransfer\FXTransfer"
+2026-05-01 13:20:11 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/""" - null null
+2026-05-01 13:20:11 [Information] Executing endpoint '"/_Host"'
+2026-05-01 13:20:11 [Information] Route matched with "{page = \"/_Host\"}". Executing page "/_Host"
+2026-05-01 13:20:11 [Information] Executing an implicit handler method - ModelState is Valid
+2026-05-01 13:20:11 [Information] Executed an implicit handler method, returned result "Microsoft.AspNetCore.Mvc.RazorPages.PageResult".
+2026-05-01 13:20:12 [Information] Executed page "/_Host" in 564.3684ms
+2026-05-01 13:20:12 [Information] Executed endpoint '"/_Host"'
+2026-05-01 13:20:12 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/aspnetcore-browser-refresh.js""" - null null
+2026-05-01 13:20:12 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/blazor.server.js""" - null null
+2026-05-01 13:20:12 [Information] Executing endpoint '"Blazor static files"'
+2026-05-01 13:20:12 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/""" - 200 null "text/html; charset=utf-8" 1094.0717ms
+2026-05-01 13:20:12 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/aspnetcore-browser-refresh.js""" - 200 14925 "application/javascript; charset=utf-8" 27.8587ms
+2026-05-01 13:20:12 [Information] The file "/_framework/blazor.server.js" was not modified
+2026-05-01 13:20:12 [Information] Executed endpoint '"Blazor static files"'
+2026-05-01 13:20:12 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/blazor.server.js""" - 304 null "text/javascript" 55.5677ms
+2026-05-01 13:20:12 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_vs/browserLink""" - null null
+2026-05-01 13:20:12 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_blazor/initializers""" - null null
+2026-05-01 13:20:12 [Information] Executing endpoint '"Blazor initializers"'
+2026-05-01 13:20:12 [Information] Executed endpoint '"Blazor initializers"'
+2026-05-01 13:20:12 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_blazor/initializers""" - 200 null "application/json; charset=utf-8" 16.1665ms
+2026-05-01 13:20:12 [Information] Request starting "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/negotiate""?negotiateVersion=1" - null 0
+2026-05-01 13:20:12 [Information] Executing endpoint '"/_blazor/negotiate"'
+2026-05-01 13:20:12 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_vs/browserLink""" - 200 null "text/javascript; charset=UTF-8" 124.3214ms
+2026-05-01 13:20:12 [Information] Executed endpoint '"/_blazor/negotiate"'
+2026-05-01 13:20:12 [Information] Request finished "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/negotiate""?negotiateVersion=1" - 200 316 "application/json" 38.6936ms
+2026-05-01 13:20:12 [Information] Request starting "HTTP/2" "CONNECT" "https"://"localhost:5001""""/_blazor""?id=ZTMomcd5vD7m_KHmDhtK8A" - null null
+2026-05-01 13:20:12 [Information] Executing endpoint '"/_blazor"'
+2026-05-01 13:20:13 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 20)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:20:13 [Information] Executed DbCommand ("1"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 20)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:20:13 [Information] Executed DbCommand ("1"ms) [Parameters=["@__userId_0='?' (Size = 36)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a0\".\"Name\"
+FROM \"AspNetUserRoles\" AS \"a\"
+INNER JOIN \"AspNetRoles\" AS \"a0\" ON \"a\".\"RoleId\" = \"a0\".\"Id\"
+WHERE \"a\".\"UserId\" = @__userId_0"
+2026-05-01 13:20:16 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/admin/dashboard""" - null null
+2026-05-01 13:20:16 [Information] Executing endpoint '"/_Host"'
+2026-05-01 13:20:16 [Information] Route matched with "{page = \"/_Host\"}". Executing page "/_Host"
+2026-05-01 13:20:16 [Information] Executing an implicit handler method - ModelState is Valid
+2026-05-01 13:20:16 [Information] Executed an implicit handler method, returned result "Microsoft.AspNetCore.Mvc.RazorPages.PageResult".
+2026-05-01 13:20:16 [Information] Executed page "/_Host" in 51.7613ms
+2026-05-01 13:20:16 [Information] Executed endpoint '"/_Host"'
+2026-05-01 13:20:16 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/admin/dashboard""" - 200 null "text/html; charset=utf-8" 85.2253ms
+2026-05-01 13:20:16 [Information] Request starting "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/disconnect""" - "multipart/form-data; boundary=----WebKitFormBoundarykkHpV5AdURbW3gXG" 359
+2026-05-01 13:20:16 [Information] Executing endpoint '"Blazor disconnect"'
+2026-05-01 13:20:16 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/blazor.server.js""" - null null
+2026-05-01 13:20:16 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_vs/browserLink""" - null null
+2026-05-01 13:20:16 [Information] Executing endpoint '"Blazor static files"'
+2026-05-01 13:20:16 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/aspnetcore-browser-refresh.js""" - null null
+2026-05-01 13:20:16 [Information] The file "/_framework/blazor.server.js" was not modified
+2026-05-01 13:20:16 [Information] Executed endpoint '"Blazor static files"'
+2026-05-01 13:20:16 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/aspnetcore-browser-refresh.js""" - 200 14925 "application/javascript; charset=utf-8" 5.375ms
+2026-05-01 13:20:16 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/blazor.server.js""" - 304 null "text/javascript" 9.2024ms
+2026-05-01 13:20:16 [Information] Executed endpoint '"/_blazor"'
+2026-05-01 13:20:16 [Information] Request finished "HTTP/2" "CONNECT" "https"://"localhost:5001""""/_blazor""?id=ZTMomcd5vD7m_KHmDhtK8A" - 200 null null 4087.3284ms
+2026-05-01 13:20:16 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_blazor/initializers""" - null null
+2026-05-01 13:20:16 [Information] Executing endpoint '"Blazor initializers"'
+2026-05-01 13:20:16 [Information] Executed endpoint '"Blazor initializers"'
+2026-05-01 13:20:16 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_blazor/initializers""" - 200 null "application/json; charset=utf-8" 4.776ms
+2026-05-01 13:20:16 [Information] Executed endpoint '"Blazor disconnect"'
+2026-05-01 13:20:16 [Information] Request finished "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/disconnect""" - 200 0 null 98.5258ms
+2026-05-01 13:20:16 [Information] Request starting "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/negotiate""?negotiateVersion=1" - null 0
+2026-05-01 13:20:16 [Information] Executing endpoint '"/_blazor/negotiate"'
+2026-05-01 13:20:16 [Information] Executed endpoint '"/_blazor/negotiate"'
+2026-05-01 13:20:16 [Information] Request finished "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/negotiate""?negotiateVersion=1" - 200 316 "application/json" 5.717ms
+2026-05-01 13:20:16 [Information] Request starting "HTTP/2" "CONNECT" "https"://"localhost:5001""""/_blazor""?id=wy7X1gY9enhLAMwmLU5tZQ" - null null
+2026-05-01 13:20:16 [Information] Executing endpoint '"/_blazor"'
+2026-05-01 13:20:16 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_vs/browserLink""" - 200 null "text/javascript; charset=UTF-8" 79.9551ms
+2026-05-01 13:20:16 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 20)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:20:16 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 20)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:20:16 [Information] Executed DbCommand ("5"ms) [Parameters=["@__userId_0='?' (Size = 36)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a0\".\"Name\"
+FROM \"AspNetUserRoles\" AS \"a\"
+INNER JOIN \"AspNetRoles\" AS \"a0\" ON \"a\".\"RoleId\" = \"a0\".\"Id\"
+WHERE \"a\".\"UserId\" = @__userId_0"
+2026-05-01 13:20:20 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/""" - null null
+2026-05-01 13:20:20 [Information] Executing endpoint '"/_Host"'
+2026-05-01 13:20:20 [Information] Route matched with "{page = \"/_Host\"}". Executing page "/_Host"
+2026-05-01 13:20:21 [Information] Executing an implicit handler method - ModelState is Valid
+2026-05-01 13:20:21 [Information] Executed an implicit handler method, returned result "Microsoft.AspNetCore.Mvc.RazorPages.PageResult".
+2026-05-01 13:20:21 [Information] Executed page "/_Host" in 29.2197ms
+2026-05-01 13:20:21 [Information] Executed endpoint '"/_Host"'
+2026-05-01 13:20:21 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/""" - 200 null "text/html; charset=utf-8" 53.6543ms
+2026-05-01 13:20:21 [Information] Request starting "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/disconnect""" - "multipart/form-data; boundary=----WebKitFormBoundary4FQ0oSin3CX6Ijam" 359
+2026-05-01 13:20:21 [Information] Executing endpoint '"Blazor disconnect"'
+2026-05-01 13:20:21 [Information] Executed endpoint '"/_blazor"'
+2026-05-01 13:20:21 [Information] Executed endpoint '"Blazor disconnect"'
+2026-05-01 13:20:21 [Information] Request finished "HTTP/2" "CONNECT" "https"://"localhost:5001""""/_blazor""?id=wy7X1gY9enhLAMwmLU5tZQ" - 200 null null 4368.2265ms
+2026-05-01 13:20:21 [Information] Request finished "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/disconnect""" - 200 0 null 21.7727ms
+2026-05-01 13:20:21 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/blazor.server.js""" - null null
+2026-05-01 13:20:21 [Information] Executing endpoint '"Blazor static files"'
+2026-05-01 13:20:21 [Information] The file "/_framework/blazor.server.js" was not modified
+2026-05-01 13:20:21 [Information] Executed endpoint '"Blazor static files"'
+2026-05-01 13:20:21 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/blazor.server.js""" - 304 null "text/javascript" 3.0902ms
+2026-05-01 13:20:21 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_vs/browserLink""" - null null
+2026-05-01 13:20:21 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/aspnetcore-browser-refresh.js""" - null null
+2026-05-01 13:20:21 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/aspnetcore-browser-refresh.js""" - 200 14925 "application/javascript; charset=utf-8" 4.7127ms
+2026-05-01 13:20:21 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_blazor/initializers""" - null null
+2026-05-01 13:20:21 [Information] Executing endpoint '"Blazor initializers"'
+2026-05-01 13:20:21 [Information] Executed endpoint '"Blazor initializers"'
+2026-05-01 13:20:21 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_blazor/initializers""" - 200 null "application/json; charset=utf-8" 3.8436ms
+2026-05-01 13:20:21 [Information] Request starting "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/negotiate""?negotiateVersion=1" - null 0
+2026-05-01 13:20:21 [Information] Executing endpoint '"/_blazor/negotiate"'
+2026-05-01 13:20:21 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_vs/browserLink""" - 200 null "text/javascript; charset=UTF-8" 48.355ms
+2026-05-01 13:20:21 [Information] Executed endpoint '"/_blazor/negotiate"'
+2026-05-01 13:20:21 [Information] Request finished "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/negotiate""?negotiateVersion=1" - 200 316 "application/json" 3.7305ms
+2026-05-01 13:20:21 [Information] Request starting "HTTP/2" "CONNECT" "https"://"localhost:5001""""/_blazor""?id=wwP2kbg0hnyM0q-sh_tbTg" - null null
+2026-05-01 13:20:21 [Information] Executing endpoint '"/_blazor"'
+2026-05-01 13:20:25 [Information] Executed DbCommand ("1"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 15)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:20:26 [Information] Executed DbCommand ("0"ms) [Parameters=["@__userId_0='?' (Size = 36)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a0\".\"Name\"
+FROM \"AspNetUserRoles\" AS \"a\"
+INNER JOIN \"AspNetRoles\" AS \"a0\" ON \"a\".\"RoleId\" = \"a0\".\"Id\"
+WHERE \"a\".\"UserId\" = @__userId_0"
+2026-05-01 13:20:26 [Information] User logged in: talha@gmail.com
+2026-05-01 13:20:26 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/dashboard""" - null null
+2026-05-01 13:20:26 [Information] Executing endpoint '"/_Host"'
+2026-05-01 13:20:26 [Information] Route matched with "{page = \"/_Host\"}". Executing page "/_Host"
+2026-05-01 13:20:26 [Information] Executing an implicit handler method - ModelState is Valid
+2026-05-01 13:20:26 [Information] Executed an implicit handler method, returned result "Microsoft.AspNetCore.Mvc.RazorPages.PageResult".
+2026-05-01 13:20:26 [Information] Executed page "/_Host" in 9.8301ms
+2026-05-01 13:20:26 [Information] Executed endpoint '"/_Host"'
+2026-05-01 13:20:26 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/dashboard""" - 200 null "text/html; charset=utf-8" 28.023ms
+2026-05-01 13:20:26 [Information] Request starting "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/disconnect""" - "multipart/form-data; boundary=----WebKitFormBoundaryAkJNSb2fZt3On3xf" 359
+2026-05-01 13:20:26 [Information] Executing endpoint '"Blazor disconnect"'
+2026-05-01 13:20:26 [Information] Executed endpoint '"Blazor disconnect"'
+2026-05-01 13:20:26 [Information] Request finished "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/disconnect""" - 200 0 null 5.8339ms
+2026-05-01 13:20:26 [Information] Executed endpoint '"/_blazor"'
+2026-05-01 13:20:26 [Information] Request finished "HTTP/2" "CONNECT" "https"://"localhost:5001""""/_blazor""?id=wwP2kbg0hnyM0q-sh_tbTg" - 200 null null 4977.434ms
+2026-05-01 13:20:26 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/blazor.server.js""" - null null
+2026-05-01 13:20:26 [Information] Executing endpoint '"Blazor static files"'
+2026-05-01 13:20:26 [Information] The file "/_framework/blazor.server.js" was not modified
+2026-05-01 13:20:26 [Information] Executed endpoint '"Blazor static files"'
+2026-05-01 13:20:26 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/blazor.server.js""" - 304 null "text/javascript" 2.203ms
+2026-05-01 13:20:26 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_vs/browserLink""" - null null
+2026-05-01 13:20:26 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/aspnetcore-browser-refresh.js""" - null null
+2026-05-01 13:20:26 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_framework/aspnetcore-browser-refresh.js""" - 200 14925 "application/javascript; charset=utf-8" 7.8633ms
+2026-05-01 13:20:26 [Information] Request starting "HTTP/2" "GET" "https"://"localhost:5001""""/_blazor/initializers""" - null null
+2026-05-01 13:20:26 [Information] Executing endpoint '"Blazor initializers"'
+2026-05-01 13:20:26 [Information] Executed endpoint '"Blazor initializers"'
+2026-05-01 13:20:26 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_blazor/initializers""" - 200 null "application/json; charset=utf-8" 3.9474ms
+2026-05-01 13:20:26 [Information] Request finished "HTTP/2" "GET" "https"://"localhost:5001""""/_vs/browserLink""" - 200 null "text/javascript; charset=UTF-8" 39.0383ms
+2026-05-01 13:20:26 [Information] Request starting "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/negotiate""?negotiateVersion=1" - null 0
+2026-05-01 13:20:26 [Information] Executing endpoint '"/_blazor/negotiate"'
+2026-05-01 13:20:26 [Information] Executed endpoint '"/_blazor/negotiate"'
+2026-05-01 13:20:26 [Information] Request finished "HTTP/2" "POST" "https"://"localhost:5001""""/_blazor/negotiate""?negotiateVersion=1" - 200 316 "application/json" 2.0002ms
+2026-05-01 13:20:26 [Information] Request starting "HTTP/2" "CONNECT" "https"://"localhost:5001""""/_blazor""?id=aBml9PIGA1vdca1yTaeYlA" - null null
+2026-05-01 13:20:26 [Information] Executing endpoint '"/_blazor"'
+2026-05-01 13:20:26 [Information] Executed DbCommand ("1"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 15)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:20:26 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 15)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:20:26 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 15)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:20:26 [Information] Executed DbCommand ("0"ms) [Parameters=["@__userId_0='?' (Size = 36)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a0\".\"Name\"
+FROM \"AspNetUserRoles\" AS \"a\"
+INNER JOIN \"AspNetRoles\" AS \"a0\" ON \"a\".\"RoleId\" = \"a0\".\"Id\"
+WHERE \"a\".\"UserId\" = @__userId_0"
+2026-05-01 13:20:26 [Information] Executed DbCommand ("0"ms) [Parameters=["@__normalizedEmail_0='?' (Size = 15)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a\".\"Id\", \"a\".\"AccessFailedCount\", \"a\".\"ConcurrencyStamp\", \"a\".\"CountryCode\", \"a\".\"Email\", \"a\".\"EmailConfirmed\", \"a\".\"FullName\", \"a\".\"IsPremium\", \"a\".\"IsSuspended\", \"a\".\"LockoutEnabled\", \"a\".\"LockoutEnd\", \"a\".\"NormalizedEmail\", \"a\".\"NormalizedUserName\", \"a\".\"PasswordHash\", \"a\".\"PhoneNumber\", \"a\".\"PhoneNumberConfirmed\", \"a\".\"PremiumExpiry\", \"a\".\"ReferralCode\", \"a\".\"ReferredBy\", \"a\".\"RegisteredAt\", \"a\".\"SecurityStamp\", \"a\".\"TotalBonusEarned\", \"a\".\"TwoFactorEnabled\", \"a\".\"UserName\"
+FROM \"AspNetUsers\" AS \"a\"
+WHERE \"a\".\"NormalizedEmail\" = @__normalizedEmail_0
+LIMIT 2"
+2026-05-01 13:20:26 [Information] Executed DbCommand ("0"ms) [Parameters=["@__userId_0='?' (Size = 36)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"a0\".\"Name\"
+FROM \"AspNetUserRoles\" AS \"a\"
+INNER JOIN \"AspNetRoles\" AS \"a0\" ON \"a\".\"RoleId\" = \"a0\".\"Id\"
+WHERE \"a\".\"UserId\" = @__userId_0"
+2026-05-01 13:20:26 [Information] Executed DbCommand ("1"ms) [Parameters=["@__userId_0='?' (Size = 36)"], CommandType='Text', CommandTimeout='30']"
+""SELECT \"w\".\"Id\", \"w\".\"Balance\", \"w\".\"CreatedAt\", \"w\".\"CurrencyCode\", \"w\".\"LastUpdatedAt\", \"w\".\"UserId\"
+FROM \"Wallets\" AS \"w\"
+WHERE \"w\".\"UserId\" = @__userId_0"
+2026-05-01 13:20:26 [Information] Attempt 1 to fetch rates for USD
+2026-05-01 13:20:26 [Information] Start processing HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:20:26 [Information] Sending HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:20:27 [Information] Received HTTP response headers after 967.9833ms - 200
+2026-05-01 13:20:27 [Information] End processing HTTP request after 980.5508ms - 200
+2026-05-01 13:20:27 [Warning] Attempt 1 failed. Retrying in 2 seconds...
+2026-05-01 13:20:29 [Information] Attempt 2 to fetch rates for USD
+2026-05-01 13:20:29 [Information] Start processing HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:20:29 [Information] Sending HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:20:29 [Information] Received HTTP response headers after 317.6938ms - 200
+2026-05-01 13:20:30 [Information] End processing HTTP request after 318.6561ms - 200
+2026-05-01 13:20:30 [Warning] Attempt 2 failed. Retrying in 4 seconds...
+2026-05-01 13:20:34 [Information] Attempt 3 to fetch rates for USD
+2026-05-01 13:20:34 [Information] Start processing HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:20:34 [Information] Sending HTTP request "GET" "https://api.exchangerate-api.com/v4/latest/USD"
+2026-05-01 13:20:34 [Information] Received HTTP response headers after 295.2785ms - 200
+2026-05-01 13:20:34 [Information] End processing HTTP request after 295.9035ms - 200
+2026-05-01 13:20:34 [Warning] API failed for USD, attempting fallback
+2026-05-01 13:20:34 [Error] Failed to load fallback rates
+FXTransfer.Services.ApiFailureException: Invalid fallback rates data
+   at FXTransfer.Services.Implementations.ExchangeRateApiService.LoadRatesFromJsonFallbackAsync(String baseCurrency) in C:\Users\TALHA\Desktop\FXTransfer\FXTransfer\Services\Implementations\ExchangeRateApiService.cs:line 157

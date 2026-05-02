@@ -1,0 +1,358 @@
+﻿@page "/sendmoney"
+@attribute [Authorize]
+@using FXTransfer.Models.DTOs
+@using FXTransfer.Models.Entities
+@using FXTransfer.Models.Enums
+@using FXTransfer.Data
+@inject ICurrencyRateService RateService
+@inject IWalletService WalletService
+@inject ITransferService TransferService
+@inject IFeeCalculator FeeCalculator
+@inject IToastService ToastService
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject ApplicationDbContext DbContext
+
+<div class="container page-transition">
+    <div class="row justify-content-center">
+        <div class="col-lg-8" data-aos="fade-up">
+            <div class="glass-card p-4">
+                <div class="text-center mb-4">
+                    <div class="float-animation" style="display: inline-block;">
+                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #00d2ff, #f093fb); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+                            <i class="bi bi-send" style="font-size: 28px; color: white;"></i>
+                        </div>
+                    </div>
+                    <h1 class="gradient-text">Send Money</h1>
+                    <p class="text-white-50">Transfer funds internationally</p>
+                </div>
+
+                @if (!string.IsNullOrEmpty(_successMessage))
+                {
+                    <div class="alert alert-success mb-3" style="background: rgba(40,167,69,0.2); border: 1px solid #28a745;">
+                        <i class="bi bi-check-circle me-2"></i> @_successMessage
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(_errorMessage))
+                {
+                    <div class="alert alert-danger mb-3" style="background: rgba(220,53,69,0.2); border: 1px solid #dc3545;">
+                        <i class="bi bi-exclamation-triangle me-2"></i> @_errorMessage
+                    </div>
+                }
+
+                <div class="row g-3">
+                    <!-- From Currency -->
+                    <div class="col-md-6">
+                        <label class="form-label text-white">
+                            <i class="bi bi-wallet2 me-1"></i> From Currency
+                        </label>
+                        <select class="form-control input-futuristic" @bind="_fromCurrency" @bind:event="onchange">
+                            @foreach (var wallet in _wallets)
+                            {
+                                <option value="@wallet.CurrencyCode">
+                                    @GetCurrencyIcon(wallet.CurrencyCode) @wallet.CurrencyCode - Balance: @wallet.Balance.ToString("N2")
+                                </option>
+                            }
+                        </select>
+                        <small class="text-white-50">Available balance: @_selectedWalletBalance.ToString("N2") @_fromCurrency</small>
+                    </div>
+
+                    <!-- To Currency -->
+                    <div class="col-md-6">
+                        <label class="form-label text-white">
+                            <i class="bi bi-currency-exchange me-1"></i> To Currency
+                        </label>
+                        <select class="form-control input-futuristic" @bind="_toCurrency" @bind:event="onchange">
+                            <option value="EUR">🇪🇺 EUR - Euro</option>
+                            <option value="USD">🇺🇸 USD - US Dollar</option>
+                            <option value="GBP">🇬🇧 GBP - British Pound</option>
+                            <option value="PKR">🇵🇰 PKR - Pakistani Rupee</option>
+                            <option value="AED">🇦🇪 AED - Dirham</option>
+                            <option value="SAR">🇸🇦 SAR - Riyal</option>
+                            <option value="CAD">🇨🇦 CAD - Canadian Dollar</option>
+                            <option value="AUD">🇦🇺 AUD - Australian Dollar</option>
+                        </select>
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="col-md-6">
+                        <label class="form-label text-white">
+                            <i class="bi bi-calculator me-1"></i> Amount
+                        </label>
+                        <input type="number" class="form-control input-futuristic" @bind="_amount" @bind:event="oninput" placeholder="Enter amount" />
+                    </div>
+
+                    <!-- Converted Amount -->
+                    <div class="col-md-6">
+                        <label class="form-label text-white">
+                            <i class="bi bi-graph-up me-1"></i> Recipient Gets
+                        </label>
+                        <div class="input-futuristic" style="background: rgba(0,210,255,0.1); height: 50px; display: flex; align-items: center; padding: 0 15px;">
+                            <span class="fw-bold fs-5 text-white">@_convertedAmount.ToString("N2") @_toCurrency</span>
+                        </div>
+                    </div>
+
+                    <!-- Exchange Rate -->
+                    <div class="col-12">
+                        <div class="alert text-center" style="background: rgba(0,210,255,0.1); border: 1px solid rgba(0,210,255,0.3); border-radius: 16px;">
+                            <i class="bi bi-arrow-left-right text-info me-2"></i>
+                            <span class="text-white">Exchange Rate: 1 @_fromCurrency = </span>
+                            <span class="text-info fw-bold">@_currentRate.ToString("F4") @_toCurrency</span>
+                        </div>
+                    </div>
+
+                    <!-- Recipient Details -->
+                    <div class="col-md-6">
+                        <label class="form-label text-white">
+                            <i class="bi bi-person me-1"></i> Recipient Name
+                        </label>
+                        <input type="text" class="form-control input-futuristic" @bind="_recipientName" placeholder="Full name of recipient" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label text-white">
+                            <i class="bi bi-envelope me-1"></i> Recipient Email
+                        </label>
+                        <input type="email" class="form-control input-futuristic" @bind="_recipientEmail" placeholder="recipient@example.com" />
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label text-white">
+                            <i class="bi bi-chat-text me-1"></i> Reference / Note (Optional)
+                        </label>
+                        <input type="text" class="form-control input-futuristic" @bind="_reference" placeholder="Add a note for this transfer" />
+                    </div>
+
+                    <!-- Fee Summary -->
+                    <div class="col-12">
+                        <div class="p-3" style="background: rgba(255,255,255,0.05); border-radius: 16px;">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-white-50">Transfer Fee</span>
+                                <span class="text-warning fw-bold">@_feeAmount.ToString("N2") @_fromCurrency</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-white-50">Total to Deduct</span>
+                                <span class="text-white fw-bold fs-5">@_totalAmount.ToString("N2") @_fromCurrency</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="col-12 mt-3">
+                        <div class="d-flex gap-3">
+                            <button class="btn-neon flex-grow-1" @onclick="SendMoney" disabled="@_isLoading" style="color: white;">
+                                @if (_isLoading)
+                                {
+                                    <span class="spinner-css me-2"></span>
+                                    <span>Processing...</span>
+                                }
+                                else
+                                {
+                                    <span><i class="bi bi-send me-2"></i>Send Money</span>
+                                }
+                            </button>
+                            <button class="btn btn-outline-secondary" @onclick="ResetForm" style="border-radius: 50px;">
+                                <i class="bi bi-arrow-repeat me-1"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .input-futuristic:focus {
+        border-color: #00d2ff;
+        box-shadow: 0 0 20px rgba(0,210,255,0.2);
+        outline: none;
+    }
+</style>
+
+@code {
+    private string _userId = "";
+    private string _fromCurrency = "USD";
+    private string _toCurrency = "EUR";
+    private decimal _amount = 100;
+    private decimal _convertedAmount = 0;
+    private decimal _currentRate = 0;
+    private decimal _feeAmount = 0;
+    private decimal _totalAmount = 0;
+    private string _recipientName = "";
+    private string _recipientEmail = "";
+    private string _reference = "";
+    private string _successMessage = "";
+    private string _errorMessage = "";
+    private bool _isLoading = false;
+    private bool _isPremium = false;
+    private decimal _selectedWalletBalance = 0;
+    
+    private List<WalletInfo> _wallets = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _userId = await AuthService.GetCurrentUserIdAsync() ?? "";
+        var roles = await AuthService.GetCurrentUserRolesAsync();
+        _isPremium = roles.Contains("Premium");
+        await LoadWallets();
+        await CalculateRate();
+    }
+    
+    private async Task LoadWallets()
+    {
+        var wallets = await WalletService.GetUserWalletsAsync(_userId);
+        _wallets = wallets.Select(w => new WalletInfo
+        {
+            CurrencyCode = w.CurrencyCode,
+            Balance = w.Balance
+        }).ToList();
+        
+        if (_wallets.Any())
+        {
+            _fromCurrency = _wallets.First().CurrencyCode;
+            await UpdateWalletBalance();
+        }
+    }
+    
+    private async Task UpdateWalletBalance()
+    {
+        var wallet = _wallets.FirstOrDefault(w => w.CurrencyCode == _fromCurrency);
+        _selectedWalletBalance = wallet?.Balance ?? 0;
+        StateHasChanged();
+    }
+    
+    private async Task CalculateRate()
+    {
+        try
+        {
+            _currentRate = await RateService.GetExchangeRateAsync(_fromCurrency, _toCurrency);
+            _convertedAmount = _amount * _currentRate;
+            
+            var user = new ApplicationUser { Id = _userId, IsPremium = _isPremium };
+            _feeAmount = await FeeCalculator.CalculateFeeAsync(_amount, _fromCurrency, _toCurrency, user);
+            _totalAmount = _amount + _feeAmount;
+            
+            await UpdateWalletBalance();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error loading rates: {ex.Message}";
+        }
+    }
+    
+    private async Task SendMoney()
+    {
+        _errorMessage = "";
+        _successMessage = "";
+        
+        // Validation
+        if (_amount <= 0)
+        {
+            _errorMessage = "Please enter a valid amount";
+            return;
+        }
+        
+        if (_totalAmount > _selectedWalletBalance)
+        {
+            _errorMessage = $"Insufficient balance. Required: {_totalAmount} {_fromCurrency}, Available: {_selectedWalletBalance} {_fromCurrency}";
+            return;
+        }
+        
+        if (string.IsNullOrWhiteSpace(_recipientName))
+        {
+            _errorMessage = "Please enter recipient name";
+            return;
+        }
+        
+        if (string.IsNullOrWhiteSpace(_recipientEmail))
+        {
+            _errorMessage = "Please enter recipient email";
+            return;
+        }
+        
+        _isLoading = true;
+        StateHasChanged();
+        
+        try
+        {
+            // Deduct from wallet
+            await WalletService.DeductBalanceAsync(_userId, _fromCurrency, _totalAmount);
+            
+            // Create transfer record
+            var transfer = new Transfer
+            {
+                UserId = _userId,
+                FromCurrency = _fromCurrency,
+                ToCurrency = _toCurrency,
+                Amount = _amount,
+                ConvertedAmount = _convertedAmount,
+                ExchangeRate = _currentRate,
+                Fee = _feeAmount,
+                TotalAmount = _totalAmount,
+                Status = TransferStatus.Completed.ToString(),
+                RecipientName = _recipientName,
+                RecipientEmail = _recipientEmail,
+                CreatedAt = DateTime.UtcNow,
+                CompletedAt = DateTime.UtcNow
+            };
+            
+            // Add to database
+            DbContext.Transfers.Add(transfer);
+            await DbContext.SaveChangesAsync();
+            
+            _successMessage = $"Successfully sent {_amount} {_fromCurrency} to {_recipientName}!";
+            
+            // Reset form after 2 seconds
+            await Task.Delay(2000);
+            await ResetForm();
+            
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Transfer failed: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+    
+    private async Task ResetForm()
+    {
+        _amount = 100;
+        _recipientName = "";
+        _recipientEmail = "";
+        _reference = "";
+        _successMessage = "";
+        _errorMessage = "";
+        await LoadWallets();
+        await CalculateRate();
+        StateHasChanged();
+    }
+    
+    private string GetCurrencyIcon(string code)
+    {
+        return code switch
+        {
+            "USD" => "💵",
+            "EUR" => "💶",
+            "GBP" => "💷",
+            "PKR" => "🇵🇰",
+            "AED" => "🇦🇪",
+            "SAR" => "🇸🇦",
+            "CAD" => "🇨🇦",
+            "AUD" => "🇦🇺",
+            _ => "💰"
+        };
+    }
+    
+    private class WalletInfo
+    {
+        public string CurrencyCode { get; set; } = "";
+        public decimal Balance { get; set; }
+    }
+}

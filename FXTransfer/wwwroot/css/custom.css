@@ -24,3 +24,72 @@
     opacity: 0.7;
     cursor: not-allowed;
 }
+
+.btn-glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 210, 255, 0.3);
+    border-radius: 50px;
+    padding: 12px 32px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    color: white;
+    text-decoration: none;
+    display: inline-block;
+}
+
+    .btn-glass:hover {
+        background: rgba(0, 210, 255, 0.2);
+        border-color: #00d2ff;
+        transform: translateY(-3px);
+        color: white;
+    }
+/* Better text visibility */
+.text-white-50 {
+    color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.text-muted {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.alert-info {
+    background: rgba(0, 210, 255, 0.15) !important;
+    border-color: #00d2ff !important;
+    color: #00d2ff !important;
+}
+
+.alert-danger {
+    background: rgba(220, 53, 69, 0.15) !important;
+    border-color: #dc3545 !important;
+    color: #ff6b6b !important;
+}
+
+.alert-success {
+    background: rgba(40, 167, 69, 0.15) !important;
+    border-color: #28a745 !important;
+    color: #6bcb77 !important;
+}
+
+/* Card text improvements */
+.glass-card .text-white-50,
+.glass-card .text-muted {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Table text visibility */
+.table td, .table th {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Label visibility */
+.form-label {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500;
+}
+
+/* Badge visibility */
+.badge {
+    padding: 6px 12px;
+    font-weight: 500;
+}

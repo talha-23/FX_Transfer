@@ -1,0 +1,182 @@
+﻿@page "/setpin"
+@attribute [Authorize]
+@inject IAuthService AuthService
+@inject IToastService ToastService
+@inject NavigationManager Navigation
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+<div class="container page-transition">
+    <div class="row justify-content-center">
+        <div class="col-md-6" data-aos="fade-up">
+            <div class="glass-card p-4">
+                <div class="text-center mb-4">
+                    <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #00d2ff, #f093fb); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                        <i class="bi bi-shield-lock" style="font-size: 35px; color: white;"></i>
+                    </div>
+                    <h2 class="gradient-text">Security PIN Settings</h2>
+                    <p class="text-white-50">Protect your wallet with a security PIN</p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label text-white">
+                        <i class="bi bi-wallet2 me-2"></i>Wallet PIN
+                        <small class="text-white-50 d-block">Required for adding funds</small>
+                    </label>
+                    <div class="d-flex gap-2">
+                        <input type="password" class="form-control input-futuristic flex-grow-1" @bind="_walletPIN" placeholder="4-6 digit PIN" />
+                        <button class="btn btn-outline-info" @onclick="SaveWalletPIN">
+                            <i class="bi bi-save me-1"></i> Save
+                        </button>
+                    </div>
+                    @if (_hasWalletPIN)
+                    {
+                        <small class="text-success d-block mt-1">
+                            <i class="bi bi-check-circle me-1"></i> Wallet PIN is enabled
+                        </small>
+                    }
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label text-white">
+                        <i class="bi bi-arrow-left-right me-2"></i>Transaction PIN
+                        <small class="text-white-50 d-block">Required for sending money</small>
+                    </label>
+                    <div class="d-flex gap-2">
+                        <input type="password" class="form-control input-futuristic flex-grow-1" @bind="_transactionPIN" placeholder="4-6 digit PIN" />
+                        <button class="btn btn-outline-info" @onclick="SaveTransactionPIN">
+                            <i class="bi bi-save me-1"></i> Save
+                        </button>
+                    </div>
+                    @if (_hasTransactionPIN)
+                    {
+                        <small class="text-success d-block mt-1">
+                            <i class="bi bi-check-circle me-1"></i> Transaction PIN is enabled
+                        </small>
+                    }
+                </div>
+
+                <hr style="border-color: rgba(255,255,255,0.1);" />
+
+                <div class="alert alert-info" style="background: rgba(0,210,255,0.1); border: none;">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>PIN Security Tips:</strong>
+                    <ul class="mt-2 mb-0">
+                        <li>Use a 4-6 digit PIN that's easy to remember</li>
+                        <li>Don't share your PIN with anyone</li>
+                        <li>Wallet locks after 5 failed attempts</li>
+                    </ul>
+                </div>
+
+                <div class="mt-4">
+                    <button class="btn btn-outline-danger w-100" @onclick="DisableAllPINS">
+                        <i class="bi bi-shield-slash me-2"></i>Disable All PINs
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _walletPIN = "";
+    private string _transactionPIN = "";
+    private bool _hasWalletPIN = false;
+    private bool _hasTransactionPIN = false;
+    private string _userId = "";
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _userId = await AuthService.GetCurrentUserIdAsync() ?? "";
+        await LoadCurrentSettings();
+    }
+    
+    private async Task LoadCurrentSettings()
+    {
+        var user = await UserManager.FindByIdAsync(_userId);
+        _hasWalletPIN = user?.IsWalletPINEnabled ?? false;
+        _hasTransactionPIN = user?.IsTransactionPINEnabled ?? false;
+        StateHasChanged();
+    }
+    
+    private async Task SaveWalletPIN()
+    {
+        if (string.IsNullOrEmpty(_walletPIN))
+        {
+            ToastService.ShowError("Please enter a PIN");
+            return;
+        }
+        
+        if (_walletPIN.Length < 4 || _walletPIN.Length > 6)
+        {
+            ToastService.ShowError("PIN must be 4-6 digits");
+            return;
+        }
+        
+        if (!_walletPIN.All(char.IsDigit))
+        {
+            ToastService.ShowError("PIN must contain only digits");
+            return;
+        }
+        
+        var user = await UserManager.FindByIdAsync(_userId);
+        if (user != null)
+        {
+            user.WalletPIN = _walletPIN;
+            user.IsWalletPINEnabled = true;
+            user.PINLastChanged = DateTime.UtcNow;
+            await UserManager.UpdateAsync(user);
+            ToastService.ShowSuccess("Wallet PIN saved successfully!");
+            _walletPIN = "";
+            await LoadCurrentSettings();
+        }
+    }
+    
+    private async Task SaveTransactionPIN()
+    {
+        if (string.IsNullOrEmpty(_transactionPIN))
+        {
+            ToastService.ShowError("Please enter a PIN");
+            return;
+        }
+        
+        if (_transactionPIN.Length < 4 || _transactionPIN.Length > 6)
+        {
+            ToastService.ShowError("PIN must be 4-6 digits");
+            return;
+        }
+        
+        if (!_transactionPIN.All(char.IsDigit))
+        {
+            ToastService.ShowError("PIN must contain only digits");
+            return;
+        }
+        
+        var user = await UserManager.FindByIdAsync(_userId);
+        if (user != null)
+        {
+            user.TransactionPIN = _transactionPIN;
+            user.IsTransactionPINEnabled = true;
+            user.PINLastChanged = DateTime.UtcNow;
+            await UserManager.UpdateAsync(user);
+            ToastService.ShowSuccess("Transaction PIN saved successfully!");
+            _transactionPIN = "";
+            await LoadCurrentSettings();
+        }
+    }
+    
+    private async Task DisableAllPINS()
+    {
+        var user = await UserManager.FindByIdAsync(_userId);
+        if (user != null)
+        {
+            user.WalletPIN = null;
+            user.IsWalletPINEnabled = false;
+            user.TransactionPIN = null;
+            user.IsTransactionPINEnabled = false;
+            await UserManager.UpdateAsync(user);
+            ToastService.ShowInfo("All PINs have been disabled");
+            await LoadCurrentSettings();
+        }
+    }
+}

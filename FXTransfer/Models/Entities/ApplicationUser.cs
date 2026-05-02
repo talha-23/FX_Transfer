@@ -1,58 +1,55 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System.Security.Cryptography.Xml;
+using System;
+using System.Collections.Generic;
 
 namespace FXTransfer.Models.Entities;
 
 /// <summary>
-/// SRP: This class represents user entity with authentication properties
-/// Encapsulation: All fields have controlled access via properties
+/// SRP: Application user entity extending IdentityUser
 /// </summary>
 public class ApplicationUser : IdentityUser
 {
-    /// <summary>
-    /// User's full name (First and Last)
-    /// </summary>
     public string FullName { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Unique referral code for invite system
-    /// </summary>
     public string? ReferralCode { get; set; }
-
-    /// <summary>
-    /// User ID who referred this user (null if no referral)
-    /// </summary>
     public string? ReferredBy { get; set; }
-
-    /// <summary>
-    /// Whether the user account is suspended
-    /// </summary>
     public bool IsSuspended { get; set; } = false;
-
-    /// <summary>
-    /// Registration timestamp (UTC)
-    /// </summary>
     public DateTime RegisteredAt { get; set; } = DateTime.UtcNow;
-
-    /// <summary>
-    /// User's country code for fee calculation (e.g., "US", "PK")
-    /// </summary>
     public string? CountryCode { get; set; }
-
-    /// <summary>
-    /// Whether user has premium subscription
-    /// </summary>
     public bool IsPremium { get; set; } = false;
-
-    /// <summary>
-    /// Premium subscription expiry date (null if not premium)
-    /// </summary>
     public DateTime? PremiumExpiry { get; set; }
+    public decimal TotalBonusEarned { get; set; } = 0;
+
+    // Add these properties to existing ApplicationUser class
 
     /// <summary>
-    /// Total referral bonus earned (in USD equivalent)
+    /// Wallet PIN for secure access (4-6 digits)
     /// </summary>
-    public decimal TotalBonusEarned { get; set; } = 0;
+    public string? WalletPIN { get; set; }
+
+    /// <summary>
+    /// Whether Wallet PIN is enabled
+    /// </summary>
+    public bool IsWalletPINEnabled { get; set; } = false;
+
+    /// <summary>
+    /// Transaction PIN for sending money (4-6 digits)
+    /// </summary>
+    public string? TransactionPIN { get; set; }
+
+    /// <summary>
+    /// Whether Transaction PIN is enabled
+    /// </summary>
+    public bool IsTransactionPINEnabled { get; set; } = false;
+
+    /// <summary>
+    /// Failed PIN attempts count
+    /// </summary>
+    public int FailedPINAttempts { get; set; } = 0;
+
+    /// <summary>
+    /// PIN last changed date
+    /// </summary>
+    public DateTime? PINLastChanged { get; set; }
 
     // Navigation properties
     public virtual ICollection<Wallet> Wallets { get; set; } = new List<Wallet>();

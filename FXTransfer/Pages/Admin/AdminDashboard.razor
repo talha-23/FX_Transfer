@@ -1,0 +1,218 @@
+﻿@page "/admin/dashboard"
+@attribute [Authorize(Roles = "Admin")]
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@layout AdminLayout
+
+
+<div class="container page-transition">
+    <!-- Admin Header -->
+    <div class="row mb-4" data-aos="fade-up">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="bi bi-shield-lock" style="font-size: 32px; color: #00d2ff;"></i>
+                            <h1 class="gradient-text mb-0">Admin Dashboard</h1>
+                        </div>
+                        <p class="text-white-50 mb-0">Welcome back, @_adminName! You have full system control.</p>
+                    </div>
+                    <div class="mt-2 mt-sm-0">
+                        <span class="badge" style="background: rgba(0,210,255,0.2); color: #00d2ff; padding: 8px 16px;">
+                            <i class="bi bi-shield-check me-1"></i> Administrator Access
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3" data-aos="fade-up" data-aos-delay="100">
+            <div class="glass-card stat-card p-3 text-center">
+                <i class="bi bi-people" style="font-size: 35px; color: #00d2ff;"></i>
+                <h2 class="text-white mb-0 mt-2">@_totalUsers</h2>
+                <p class="text-white-50 small mb-0">Total Users</p>
+                <small class="text-success">↑ +12 this week</small>
+            </div>
+        </div>
+        
+        <div class="col-md-3" data-aos="fade-up" data-aos-delay="200">
+            <div class="glass-card stat-card p-3 text-center">
+                <i class="bi bi-arrow-left-right" style="font-size: 35px; color: #f093fb;"></i>
+                <h2 class="text-white mb-0 mt-2">@_totalTransfers</h2>
+                <p class="text-white-50 small mb-0">Total Transfers</p>
+                <small class="text-info">$@_totalVolume.ToString("N0") volume</small>
+            </div>
+        </div>
+        
+        <div class="col-md-3" data-aos="fade-up" data-aos-delay="300">
+            <div class="glass-card stat-card p-3 text-center">
+                <i class="bi bi-exclamation-triangle" style="font-size: 35px; color: #ffc107;"></i>
+                <h2 class="text-white mb-0 mt-2">@_flaggedTransfers</h2>
+                <p class="text-white-50 small mb-0">Flagged Transfers</p>
+                <small class="text-warning">Requires review</small>
+            </div>
+        </div>
+        
+        <div class="col-md-3" data-aos="fade-up" data-aos-delay="400">
+            <div class="glass-card stat-card p-3 text-center">
+                <i class="bi bi-currency-dollar" style="font-size: 35px; color: #28a745;"></i>
+                <h2 class="text-white mb-0 mt-2">@_totalFeeCollected.ToString("N0")</h2>
+                <p class="text-white-50 small mb-0">Fees Collected</p>
+                <small class="text-success">USD</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Action Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="500">
+            <div class="glass-card p-4 text-center">
+                <div style="width: 60px; height: 60px; background: rgba(0,210,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                    <i class="bi bi-people" style="font-size: 28px; color: #00d2ff;"></i>
+                </div>
+                <h5 class="text-white">User Management</h5>
+                <p class="text-white-50 small">View, edit, suspend, or delete user accounts</p>
+                <button class="btn btn-outline-info btn-sm" @onclick="GoToUserManagement" style="border-radius: 20px;">
+                    Manage Users →
+                </button>
+            </div>
+        </div>
+        
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="600">
+            <div class="glass-card p-4 text-center">
+                <div style="width: 60px; height: 60px; background: rgba(240,147,251,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                    <i class="bi bi-arrow-left-right" style="font-size: 28px; color: #f093fb;"></i>
+                </div>
+                <h5 class="text-white">Transaction Monitor</h5>
+                <p class="text-white-50 small">View and review all user transactions</p>
+                <button class="btn btn-outline-info btn-sm" @onclick="GoToTransactionMonitor" style="border-radius: 20px;">
+                    Monitor Transactions →
+                </button>
+            </div>
+        </div>
+        
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="700">
+            <div class="glass-card p-4 text-center">
+                <div style="width: 60px; height: 60px; background: rgba(79,172,254,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                    <i class="bi bi-gear" style="font-size: 28px; color: #4facfe;"></i>
+                </div>
+                <h5 class="text-white">Fee Configuration</h5>
+                <p class="text-white-50 small">Adjust global and premium fee rates</p>
+                <button class="btn btn-outline-info btn-sm" @onclick="GoToFeeConfig" style="border-radius: 20px;">
+                    Configure Fees →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Second Row of Admin Actions -->
+    <div class="row g-4">
+        <div class="col-md-6" data-aos="fade-up" data-aos-delay="800">
+            <div class="glass-card p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-file-text" style="font-size: 28px; color: #00d2ff; margin-right: 10px;"></i>
+                    <h5 class="text-white mb-0">System Logs</h5>
+                </div>
+                <p class="text-white-50 small">View application logs and error history</p>
+                <button class="btn btn-sm btn-outline-info" @onclick="GoToSystemLogs" style="border-radius: 20px;">
+                    <i class="bi bi-eye me-1"></i> View Logs
+                </button>
+            </div>
+        </div>
+        
+        <div class="col-md-6" data-aos="fade-up" data-aos-delay="900">
+            <div class="glass-card p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-graph-up" style="font-size: 28px; color: #f093fb; margin-right: 10px;"></i>
+                    <h5 class="text-white mb-0">Analytics</h5>
+                </div>
+                <p class="text-white-50 small">View platform statistics and charts</p>
+                <button class="btn btn-sm btn-outline-info" @onclick="GoToAnalytics" style="border-radius: 20px;">
+                    <i class="bi bi-bar-chart me-1"></i> View Analytics
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Users Table -->
+    <div class="row mt-4" data-aos="fade-up" data-aos-delay="1000">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h5 class="gradient-text mb-3">
+                    <i class="bi bi-person-plus me-2"></i>Recent User Registrations
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-borderless">
+                        <thead>
+                            <tr>
+                                <th class="text-white-50">Email</th>
+                                <th class="text-white-50">Full Name</th>
+                                <th class="text-white-50">Role</th>
+                                <th class="text-white-50">Registered</th>
+                                <th class="text-white-50">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in _recentUsers)
+                            {
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <td class="text-white">@user.Email</td>
+                                    <td class="text-white">@user.FullName</td>
+                                    <td><span class="badge" style="background: rgba(0,210,255,0.2); color: #00d2ff;">@user.Role</span></td>
+                                    <td class="text-white-50">@user.RegisteredDate</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _adminName = "";
+    private int _totalUsers = 24;
+    private int _totalTransfers = 156;
+    private decimal _totalVolume = 125000;
+    private int _flaggedTransfers = 3;
+    private decimal _totalFeeCollected = 1250;
+    
+    private List<RecentUser> _recentUsers = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _adminName = await AuthService.GetCurrentUserFullNameAsync() ?? "Admin";
+        LoadRecentUsers();
+    }
+    
+    private void LoadRecentUsers()
+    {
+        _recentUsers = new List<RecentUser>
+        {
+            new() { Email = "john.doe@example.com", FullName = "John Doe", Role = "Regular", RegisteredDate = "2024-04-28" },
+            new() { Email = "jane.smith@example.com", FullName = "Jane Smith", Role = "Premium", RegisteredDate = "2024-04-27" },
+            new() { Email = "mike.wilson@example.com", FullName = "Mike Wilson", Role = "Regular", RegisteredDate = "2024-04-26" },
+            new() { Email = "sarah.johnson@example.com", FullName = "Sarah Johnson", Role = "Regular", RegisteredDate = "2024-04-25" }
+        };
+    }
+    
+    private void GoToUserManagement() => Navigation.NavigateTo("/admin/users");
+    private void GoToTransactionMonitor() => Navigation.NavigateTo("/admin/transactions");
+    private void GoToFeeConfig() => Navigation.NavigateTo("/admin/fees");
+    private void GoToSystemLogs() => Navigation.NavigateTo("/admin/logs");
+    private void GoToAnalytics() => Navigation.NavigateTo("/admin/analytics");
+    
+    private class RecentUser
+    {
+        public string Email { get; set; } = "";
+        public string FullName { get; set; } = "";
+        public string Role { get; set; } = "";
+        public string RegisteredDate { get; set; } = "";
+    }
+}

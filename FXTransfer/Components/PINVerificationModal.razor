@@ -1,0 +1,161 @@
+﻿@inject IJSRuntime JS
+
+<div class="modal fade" id="@_modalId" tabindex="-1" style="display: @(_isVisible ? "block" : "none"); background: rgba(0,0,0,0.7); z-index: 10000;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background: rgba(15,25,35,0.98); backdrop-filter: blur(15px); border: 1px solid rgba(0,210,255,0.3); border-radius: 20px;">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(0,210,255,0.2);">
+                <h5 class="modal-title gradient-text">
+                    <i class="bi bi-shield-lock me-2"></i>@_title
+                </h5>
+                <button type="button" class="btn-close btn-close-white" @onclick="Cancel"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <div class="mb-3">
+                    <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #00d2ff, #f093fb); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                        <i class="bi bi-shield-lock" style="font-size: 35px; color: white;"></i>
+                    </div>
+                    <p class="text-white-50">@_message</p>
+                </div>
+                
+                <!-- PIN Input -->
+                <div class="d-flex justify-content-center gap-3 mb-4">
+                    @for (int i = 0; i < 6; i++)
+                    {
+                        <input type="password" class="form-control text-center"
+                               style="width: 50px; height: 60px; font-size: 24px; background: rgba(255,255,255,0.1); border: 2px solid @(_pinDigits[i] != null ? "#00d2ff" : "rgba(255,255,255,0.2)"); border-radius: 12px; color: white; text-align: center;"
+                               maxlength="1"
+                               @bind="_pinDigits[i]"
+                               @bind:event="oninput" />
+                    }
+                </div>
+                
+                @if (!string.IsNullOrEmpty(_errorMessage))
+                {
+                    <div class="alert alert-danger mt-2" style="background: rgba(220,53,69,0.2); border: none;">
+                        <i class="bi bi-exclamation-triangle me-2"></i>@_errorMessage
+                    </div>
+                }
+                
+                <!-- Numeric Keypad -->
+                <div class="row g-2 mt-3">
+                    @for (int i = 1; i <= 9; i++)
+                    {
+                        <div class="col-4">
+                            <button class="btn btn-outline-info w-100" style="border-radius: 15px; padding: 15px; font-size: 24px; font-weight: bold;" @onclick='() => EnterDigit(i.ToString())'>
+                                @i
+                            </button>
+                        </div>
+                    }
+                    <div class="col-4">
+                        <button class="btn btn-outline-info w-100" style="border-radius: 15px; padding: 15px; font-size: 24px;" @onclick="ClearLastDigit">
+                            <i class="bi bi-backspace"></i>
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button class="btn btn-outline-info w-100" style="border-radius: 15px; padding: 15px; font-size: 24px;" @onclick='() => EnterDigit("0")'>
+                            0
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button class="btn btn-outline-info w-100" style="border-radius: 15px; padding: 15px; font-size: 24px;" @onclick="ClearAllDigits">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid rgba(0,210,255,0.2);">
+                <button class="btn btn-secondary" @onclick="Cancel" style="border-radius: 12px;">Cancel</button>
+                <button class="btn-neon" @onclick="VerifyPIN" disabled="@(_pinDigits.Any(d => string.IsNullOrEmpty(d)))" style="border-radius: 12px;">
+                    <i class="bi bi-check-circle me-2"></i>Verify
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _modalId = Guid.NewGuid().ToString();
+    private bool _isVisible = false;
+    private string _title = "Enter PIN";
+    private string _message = "Please enter your security PIN to continue";
+    private Func<string, Task<bool>>? _onVerify;
+    private Action? _onSuccess;
+    private Action? _onCancel;
+    private string?[] _pinDigits = new string?[6];
+    private string _errorMessage = "";
+    
+    public void Show(string title, string message, Func<string, Task<bool>> onVerify, Action onSuccess, Action onCancel)
+    {
+        _title = title;
+        _message = message;
+        _onVerify = onVerify;
+        _onSuccess = onSuccess;
+        _onCancel = onCancel;
+        _pinDigits = new string?[6];
+        _errorMessage = "";
+        _isVisible = true;
+        StateHasChanged();
+    }
+    
+    private void EnterDigit(string digit)
+    {
+        int firstEmpty = Array.FindIndex(_pinDigits, d => string.IsNullOrEmpty(d));
+        if (firstEmpty >= 0 && firstEmpty < 6)
+        {
+            _pinDigits[firstEmpty] = digit;
+            StateHasChanged();
+        }
+    }
+    
+    private void ClearLastDigit()
+    {
+        for (int i = 5; i >= 0; i--)
+        {
+            if (!string.IsNullOrEmpty(_pinDigits[i]))
+            {
+                _pinDigits[i] = null;
+                StateHasChanged();
+                break;
+            }
+        }
+    }
+    
+    private void ClearAllDigits()
+    {
+        _pinDigits = new string?[6];
+        StateHasChanged();
+    }
+    
+    private async Task VerifyPIN()
+    {
+        var pin = string.Join("", _pinDigits);
+        if (pin.Length < 4)
+        {
+            _errorMessage = "PIN must be at least 4 digits";
+            StateHasChanged();
+            return;
+        }
+        
+        if (_onVerify != null)
+        {
+            var isValid = await _onVerify(pin);
+            if (isValid)
+            {
+                _isVisible = false;
+                _onSuccess?.Invoke();
+            }
+            else
+            {
+                _errorMessage = "Invalid PIN. Please try again.";
+                _pinDigits = new string?[6];
+                StateHasChanged();
+            }
+        }
+    }
+    
+    private void Cancel()
+    {
+        _isVisible = false;
+        _onCancel?.Invoke();
+    }
+}

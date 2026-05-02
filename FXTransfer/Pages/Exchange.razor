@@ -1,5 +1,423 @@
 ﻿@page "/exchange"
 @attribute [Authorize]
+@using FXTransfer.Models.DTOs
+@using FXTransfer.Models.Entities
+@using FXTransfer.Services.Interfaces
+@using FXTransfer.Services.Implementations
+@inject ICurrencyRateService RateService
+@inject ITransferService TransferService
+@inject IFeeCalculator FeeCalculator
+@inject IToastService ToastService
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject IWalletService WalletService
 
-<h3>Currency Exchange</h3>
-<p>Exchange feature coming in Module 3.</p>
+
+<div class="container page-transition">
+    <div class="row">
+        <!-- Left Column: Exchange Form -->
+        <div class="col-lg-7" data-aos="fade-right" data-aos-duration="800">
+            <div class="glass-card p-4">
+                <div class="text-center mb-4">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #00d2ff, #f093fb); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+                        <i class="bi bi-currency-exchange" style="font-size: 28px; color: white;"></i>
+                    </div>
+                    <h2 class="gradient-text">Currency Exchange</h2>
+                    <p class="text-white-50">Convert and send money internationally</p>
+                </div>
+
+                <div class="row g-3">
+                    <!-- From Currency -->
+                    <div class="col-md-6">
+                        <label class="form-label text-white">From Currency</label>
+                        <select class="form-control input-futuristic" @bind="_fromCurrency" @bind:event="onchange">
+                            <option value="USD">🇺🇸 USD - US Dollar</option>
+                            <option value="EUR">🇪🇺 EUR - Euro</option>
+                            <option value="GBP">🇬🇧 GBP - British Pound</option>
+                            <option value="PKR">🇵🇰 PKR - Pakistani Rupee</option>
+                            <option value="AED">🇦🇪 AED - Dirham</option>
+                            <option value="SAR">🇸🇦 SAR - Riyal</option>
+                            <option value="CAD">🇨🇦 CAD - Canadian Dollar</option>
+                            <option value="AUD">🇦🇺 AUD - Australian Dollar</option>
+                        </select>
+                    </div>
+
+                    <!-- To Currency -->
+                    <div class="col-md-6">
+                        <label class="form-label text-white">To Currency</label>
+                        <select class="form-control input-futuristic" @bind="_toCurrency" @bind:event="onchange">
+                            <option value="EUR">🇪🇺 EUR - Euro</option>
+                            <option value="USD">🇺🇸 USD - US Dollar</option>
+                            <option value="GBP">🇬🇧 GBP - British Pound</option>
+                            <option value="PKR">🇵🇰 PKR - Pakistani Rupee</option>
+                            <option value="AED">🇦🇪 AED - Dirham</option>
+                            <option value="SAR">🇸🇦 SAR - Riyal</option>
+                            <option value="CAD">🇨🇦 CAD - Canadian Dollar</option>
+                            <option value="AUD">🇦🇺 AUD - Australian Dollar</option>
+                        </select>
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="col-md-6">
+                        <label class="form-label text-white">Amount</label>
+                        <input type="number" class="form-control input-futuristic" @bind="_amount" @bind:event="oninput" />
+                        <small class="text-white-50">Min: $10, Max: $50,000</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label text-white">You Get</label>
+                        <div class="input-futuristic" style="background: rgba(0,210,255,0.1); height: 50px; display: flex; align-items: center; padding: 0 15px;">
+                            <span class="fw-bold fs-4 text-white">@_convertedAmount.ToString("N2") @_toCurrency</span>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="alert text-center" style="background: rgba(0,210,255,0.1); border: 1px solid rgba(0,210,255,0.3); border-radius: 16px;">
+                            <i class="bi bi-arrow-left-right text-info me-2"></i>
+                            <span class="text-white">1 @_fromCurrency = </span>
+                            <span class="text-info fw-bold fs-5">@_currentRate.ToString("F4") @_toCurrency</span>
+                        </div>
+                    </div>
+
+                    <!-- Fee and Total -->
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between p-3" style="background: rgba(255,255,255,0.05); border-radius: 16px;">
+                            <span class="text-white-50"><i class="bi bi-percent me-2"></i>Transfer Fee</span>
+                            <span class="text-warning fw-bold fs-5">@_feeAmount.ToString("N2") @_fromCurrency</span>
+                        </div>
+                        <div class="d-flex justify-content-between p-3 mt-2" style="background: rgba(255,255,255,0.05); border-radius: 16px;">
+                            <span class="text-white-50"><i class="bi bi-calculator me-2"></i>Total Amount</span>
+                            <span class="text-white fw-bold fs-3">@_totalAmount.ToString("N2") @_fromCurrency</span>
+                        </div>
+                    </div>
+
+                    <!-- Send Money Button -->
+                    <div class="col-12 mt-3">
+                        <button class="btn-neon w-100" @onclick="SendMoney" disabled="@_isLoading" style="color: white; padding: 14px;">
+                            @if (_isLoading)
+                            {
+                                <span class="spinner-css me-2"></span>
+                                <span>Processing Transfer...</span>
+                            }
+                            else
+                            {
+                                <span><i class="bi bi-send me-2"></i>Send Money</span>
+                            }
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Popular Rates Side Panel -->
+        <div class="col-lg-5 mt-4 mt-lg-0" data-aos="fade-left" data-aos-duration="800">
+            <div class="glass-card p-4">
+                <h4 class="gradient-text mb-3">
+                    <i class="bi bi-graph-up me-2"></i>Popular Exchange Rates
+                </h4>
+                
+                <!-- Search Box -->
+                <div class="mb-3">
+                    <div class="position-relative">
+                        <i class="bi bi-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #00d2ff;"></i>
+                        <input type="text" class="form-control input-futuristic" 
+                               placeholder="Search currency (e.g., EUR, PKR)..." 
+                               style="padding-left: 45px;"
+                               @bind="_searchTerm" 
+                               @bind:event="oninput" />
+                    </div>
+                    @if (!string.IsNullOrEmpty(_searchTerm))
+                    {
+                        <small class="text-info mt-1 d-block">Found @FilteredRates.Count currencies</small>
+                    }
+                </div>
+
+                <!-- Currency List -->
+                <div style="max-height: 400px; overflow-y: auto;" class="rates-list">
+                    @if (FilteredRates.Count == 0)
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-search" style="font-size: 48px; color: rgba(255,255,255,0.2);"></i>
+                            <p class="text-white-50 mt-2">No currencies found</p>
+                            <button class="btn btn-sm btn-outline-info mt-2" @onclick="ClearSearch">Clear Search</button>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var rate in FilteredRates)
+                        {
+                            <div class="rate-item @(rate.CurrencyCode == _toCurrency ? "active-rate" : "")" 
+                                 @onclick="() => SetToCurrency(rate.CurrencyCode)">
+                                <div class="d-flex justify-content-between align-items-center p-3 mb-2 rate-card">
+                                    <div>
+                                        <div class="d-flex align-items-center">
+                                            <span class="fs-4 me-2">@GetFlagEmoji(rate.CurrencyCode)</span>
+                                            <div>
+                                                <div class="fw-bold text-white">@rate.CurrencyCode</div>
+                                                <small class="text-white-50">@rate.CurrencyName</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="text-info fw-bold">@rate.Rate.ToString("F4")</div>
+                                        <small class="text-white-50">1 USD → @rate.CurrencyCode</small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+
+                <!-- Live Update Indicator -->
+                <div class="mt-3 pt-2 text-center">
+                    <div class="d-flex align-items-center justify-content-center gap-2">
+                        <div class="spinner-css" style="width: 10px; height: 10px;"></div>
+                        <small class="text-info">Live rates from ExchangeRate-API</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .rate-item { cursor: pointer; transition: all 0.2s ease; }
+    .rate-card { background: rgba(255, 255, 255, 0.05); border-radius: 12px; transition: all 0.2s ease; }
+    .rate-item:hover .rate-card { background: rgba(0, 210, 255, 0.1) !important; transform: translateX(5px); }
+    .active-rate .rate-card { border: 1px solid #00d2ff !important; background: rgba(0, 210, 255, 0.15) !important; }
+    .rates-list::-webkit-scrollbar { width: 5px; }
+    .rates-list::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+    .rates-list::-webkit-scrollbar-thumb { background: #00d2ff; border-radius: 10px; }
+    
+    /* Number input styling */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button {
+        opacity: 0.5;
+    }
+</style>
+
+@code {
+    private string _fromCurrency = "USD";
+    private string _toCurrency = "EUR";
+    private decimal _amount = 100;
+    private decimal _convertedAmount = 0;
+    private decimal _currentRate = 0;
+    private decimal _feeAmount = 0;
+    private decimal _totalAmount = 0;
+    private bool _isPremium = false;
+    private bool _isLoading = false;
+    private string _userId = "";
+    private string _searchTerm = "";
+    private decimal _userBalance = 0;
+    private string _walletCurrency = "USD";
+    
+    private List<CurrencyRate> _popularRates = new();
+    
+    private List<CurrencyRate> FilteredRates
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_searchTerm))
+                return _popularRates;
+            return _popularRates.Where(r => 
+                r.CurrencyCode.Contains(_searchTerm.ToUpper()) || 
+                r.CurrencyName.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var roles = await AuthService.GetCurrentUserRolesAsync();
+        _isPremium = roles.Contains("Premium");
+        _userId = await AuthService.GetCurrentUserIdAsync() ?? "";
+        
+        // Get user's wallet balance
+        var wallets = await WalletService.GetUserWalletsAsync(_userId);
+        var usdWallet = wallets.FirstOrDefault(w => w.CurrencyCode == "USD");
+        if (usdWallet != null)
+        {
+            _userBalance = usdWallet.Balance;
+            _walletCurrency = "USD";
+        }
+        
+        await LoadPopularRates();
+        await CalculateConversion();
+    }
+    
+    // This runs whenever bound properties change
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            await CalculateConversion();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+    
+    private async Task CalculateConversion()
+    {
+        try
+        {
+            if (_amount <= 0)
+            {
+                _amount = 0.01m;
+            }
+            
+            _currentRate = await RateService.GetExchangeRateAsync(_fromCurrency, _toCurrency);
+            _convertedAmount = _amount * _currentRate;
+            
+            var user = new ApplicationUser { Id = _userId, IsPremium = _isPremium };
+            _feeAmount = await FeeCalculator.CalculateFeeAsync(_amount, _fromCurrency, _toCurrency, user);
+            _totalAmount = _amount + _feeAmount;
+            
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Rate calculation error: {ex.Message}");
+        }
+    }
+    
+    private void ClearSearch()
+    {
+        _searchTerm = "";
+        StateHasChanged();
+    }
+    
+    private async Task LoadPopularRates()
+    {
+        try
+        {
+            var rates = await RateService.GetRatesAsync("USD");
+            
+            _popularRates = new List<CurrencyRate>
+            {
+                new() { CurrencyCode = "EUR", CurrencyName = "Euro", Rate = rates.GetValueOrDefault("EUR", 0.92m) },
+                new() { CurrencyCode = "GBP", CurrencyName = "British Pound", Rate = rates.GetValueOrDefault("GBP", 0.79m) },
+                new() { CurrencyCode = "PKR", CurrencyName = "Pakistani Rupee", Rate = rates.GetValueOrDefault("PKR", 278.50m) },
+                new() { CurrencyCode = "AED", CurrencyName = "UAE Dirham", Rate = rates.GetValueOrDefault("AED", 3.67m) },
+                new() { CurrencyCode = "SAR", CurrencyName = "Saudi Riyal", Rate = rates.GetValueOrDefault("SAR", 3.75m) },
+                new() { CurrencyCode = "CAD", CurrencyName = "Canadian Dollar", Rate = rates.GetValueOrDefault("CAD", 1.36m) },
+                new() { CurrencyCode = "AUD", CurrencyName = "Australian Dollar", Rate = rates.GetValueOrDefault("AUD", 1.52m) },
+                new() { CurrencyCode = "JPY", CurrencyName = "Japanese Yen", Rate = rates.GetValueOrDefault("JPY", 151.83m) },
+                new() { CurrencyCode = "INR", CurrencyName = "Indian Rupee", Rate = rates.GetValueOrDefault("INR", 83.20m) },
+                new() { CurrencyCode = "CHF", CurrencyName = "Swiss Franc", Rate = rates.GetValueOrDefault("CHF", 0.91m) }
+            };
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading rates: {ex.Message}");
+            _popularRates = GetDefaultRates();
+        }
+    }
+    
+    private List<CurrencyRate> GetDefaultRates()
+    {
+        return new List<CurrencyRate>
+        {
+            new() { CurrencyCode = "EUR", CurrencyName = "Euro", Rate = 0.92m },
+            new() { CurrencyCode = "GBP", CurrencyName = "British Pound", Rate = 0.79m },
+            new() { CurrencyCode = "PKR", CurrencyName = "Pakistani Rupee", Rate = 278.50m },
+            new() { CurrencyCode = "AED", CurrencyName = "UAE Dirham", Rate = 3.67m },
+            new() { CurrencyCode = "SAR", CurrencyName = "Saudi Riyal", Rate = 3.75m },
+            new() { CurrencyCode = "CAD", CurrencyName = "Canadian Dollar", Rate = 1.36m },
+            new() { CurrencyCode = "AUD", CurrencyName = "Australian Dollar", Rate = 1.52m }
+        };
+    }
+    
+    private async Task SetToCurrency(string currencyCode)
+    {
+        _toCurrency = currencyCode;
+        await CalculateConversion();
+        StateHasChanged();
+    }
+    
+    private string GetFlagEmoji(string currencyCode)
+    {
+        return currencyCode switch
+        {
+            "USD" => "🇺🇸", "EUR" => "🇪🇺", "GBP" => "🇬🇧", "PKR" => "🇵🇰",
+            "AED" => "🇦🇪", "SAR" => "🇸🇦", "CAD" => "🇨🇦", "AUD" => "🇦🇺",
+            "JPY" => "🇯🇵", "INR" => "🇮🇳", "CHF" => "🇨🇭",
+            _ => "🌍"
+        };
+    }
+    
+    // SEND MONEY FUNCTIONALITY
+    private async Task SendMoney()
+    {
+        // Validation
+        if (_amount < 10)
+        {
+            ToastService.ShowError("Minimum transfer amount is $10");
+            return;
+        }
+        
+        if (_amount > 50000)
+        {
+            ToastService.ShowError("Maximum transfer amount is $50,000");
+            return;
+        }
+        
+        if (_totalAmount > _userBalance)
+        {
+            ToastService.ShowError($"Insufficient balance. You have ${_userBalance:F2} {_walletCurrency}, need ${_totalAmount:F2} {_fromCurrency}");
+            return;
+        }
+        
+        _isLoading = true;
+        StateHasChanged();
+        
+        try
+        {
+            var request = new TransferRequest
+            {
+                UserId = _userId,
+                FromCurrency = _fromCurrency,
+                ToCurrency = _toCurrency,
+                Amount = _amount,
+                User = new ApplicationUser { Id = _userId, IsPremium = _isPremium }
+            };
+            
+            var transfer = await TransferService.ExecuteTransferAsync(request);
+            
+            if (transfer != null && transfer.Id > 0)
+            {
+                ToastService.ShowSuccess($"✅ Transfer completed! {_amount:F2} {_fromCurrency} sent successfully!");
+                
+                // Update local balance
+                _userBalance -= _totalAmount;
+                
+                // Wait a moment then redirect
+                await Task.Delay(1500);
+                Navigation.NavigateTo("/transfers");
+            }
+            else
+            {
+                ToastService.ShowError("Transfer failed. Please try again.");
+            }
+        }
+        catch (InsufficientBalanceException ex)
+        {
+            ToastService.ShowError($"Insufficient balance: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Transfer failed: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+    
+    private class CurrencyRate
+    {
+        public string CurrencyCode { get; set; } = "";
+        public string CurrencyName { get; set; } = "";
+        public decimal Rate { get; set; }
+    }
+}

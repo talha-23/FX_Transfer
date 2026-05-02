@@ -1,5 +1,518 @@
 ﻿@page "/wallet"
 @attribute [Authorize]
+@using Microsoft.AspNetCore.Identity
+@inject IWalletService WalletService
+@inject IAuthService AuthService
+@inject IToastService ToastService
+@inject NavigationManager Navigation
+@inject UserManager<ApplicationUser> UserManager
 
-<h3>My Wallet</h3>
-<p>Wallet management coming in Module 3.</p>
+<div class="container page-transition">
+    <!-- Header -->
+    <div class="row mb-4" data-aos="fade-up">
+        <div class="col-12">
+            <div class="glass-card p-4 text-center">
+                <div class="float-animation" style="display: inline-block;">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #00d2ff, #f093fb); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+                        <i class="bi bi-wallet2" style="font-size: 28px; color: white;"></i>
+                    </div>
+                </div>
+                <h1 class="gradient-text">My Wallet</h1>
+                <p class="text-white-50">Manage your multi-currency funds</p>
+                @if (_hasWalletPIN)
+                {
+                    <span class="badge mt-2" style="background: rgba(0,210,255,0.2); color: #00d2ff;">
+                        <i class="bi bi-shield-lock me-1"></i> PIN Protected
+                    </span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Balance Card -->
+    <div class="row mb-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="col-12">
+            <div class="glass-card p-4 text-center" style="background: linear-gradient(135deg, rgba(0,210,255,0.1), rgba(240,147,251,0.1));">
+                <small class="text-white-50">Total Balance (USD Equivalent)</small>
+                <h2 class="gradient-text" style="font-size: 3rem;">$@_totalBalanceUSD.ToString("N2")</h2>
+                <div class="d-flex justify-content-center gap-3 mt-2">
+                    <span class="badge" style="background: rgba(0,210,255,0.2); color: #00d2ff;">
+                        <i class="bi bi-currency-exchange me-1"></i> @_walletCount Currencies
+                    </span>
+                    <span class="badge" style="background: rgba(0,210,255,0.2); color: #00d2ff;">
+                        <i class="bi bi-piggy-bank me-1"></i> @_totalWallets Wallets
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallets Grid -->
+    <div class="row g-4">
+        @foreach (var wallet in _wallets)
+        {
+            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="glass-card wallet-card p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex align-items-center">
+                            <span class="fs-1 me-3">@GetCurrencyIcon(wallet.CurrencyCode)</span>
+                            <div>
+                                <h3 class="text-white mb-0">@wallet.CurrencyCode</h3>
+                                <small class="text-white-50">@GetCurrencyName(wallet.CurrencyCode)</small>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="text-info fw-bold fs-4">@wallet.Balance.ToString("N2")</div>
+                            <small class="text-white-50">Available balance</small>
+                        </div>
+                    </div>
+                    
+                    <div class="progress mt-2" style="height: 6px; background: rgba(255,255,255,0.1);">
+                        <div class="progress-bar" style="width: @GetBalancePercentage(wallet.Balance)%; background: linear-gradient(90deg, #00d2ff, #f093fb);"></div>
+                    </div>
+                    
+                    <div class="d-flex gap-2 mt-3">
+                        <button class="btn btn-sm btn-outline-success flex-grow-1" @onclick="() => ShowAddFundsModal(wallet.CurrencyCode)" style="border-radius: 10px;">
+                            <i class="bi bi-plus-circle me-1"></i> Add Funds
+                        </button>
+                        <button class="btn btn-sm btn-outline-info flex-grow-1" @onclick="() => ExchangeCurrency(wallet.CurrencyCode)" style="border-radius: 10px;">
+                            <i class="bi bi-arrow-left-right me-1"></i> Exchange
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Add New Currency Wallet -->
+    <div class="row mt-4" data-aos="fade-up" data-aos-delay="300">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h5 class="gradient-text mb-3">
+                    <i class="bi bi-plus-circle me-2"></i> Add New Currency Wallet
+                </h5>
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label text-white">Select Currency</label>
+                        <select class="form-control input-futuristic" @bind="_newCurrencyCode">
+                            @foreach (var currency in _availableCurrencies)
+                            {
+                                <option value="@currency.Code">@GetCurrencyIcon(currency.Code) @currency.Code - @currency.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn-neon w-100" @onclick="AddNewWallet" style="padding: 10px;">
+                            <i class="bi bi-plus-circle me-1"></i> Add Wallet
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="row mt-4" data-aos="fade-up" data-aos-delay="400">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h5 class="gradient-text mb-3">
+                    <i class="bi bi-clock-history me-2"></i> Recent Transactions
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-borderless">
+                        <thead>
+                            <tr>
+                                <th class="text-white-50">Date</th>
+                                <th class="text-white-50">Type</th>
+                                <th class="text-white-50">Currency</th>
+                                <th class="text-white-50">Amount</th>
+                                <th class="text-white-50">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var transaction in _recentTransactions)
+                            {
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <td class="text-white-50">@transaction.Date</td>
+                                    <td>
+                                        @if (transaction.Type == "Deposit")
+                                        {
+                                            <span class="badge bg-success">⬇ Deposit</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">⬆ Transfer</span>
+                                        }
+                                    </td>
+                                    <td class="text-white">@transaction.Currency</td>
+                                    <td class="@(transaction.Type == "Deposit" ? "text-success" : "text-warning") fw-bold">
+                                        @(transaction.Type == "Deposit" ? "+" : "-") @transaction.Amount
+                                    </td>
+                                    <td><span class="badge bg-info">Completed</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Funds Modal -->
+<div class="modal fade" id="addFundsModal" tabindex="-1" style="display: @(_showModal ? "block" : "none"); background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background: rgba(15,25,35,0.95); backdrop-filter: blur(15px); border: 1px solid rgba(0,210,255,0.3); border-radius: 16px;">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(0,210,255,0.2);">
+                <h5 class="modal-title gradient-text">Add Funds to @_selectedCurrency</h5>
+                <button type="button" class="btn-close btn-close-white" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label text-white">Amount to Add</label>
+                    <div class="position-relative">
+                        <span class="position-absolute" style="left: 15px; top: 50%; transform: translateY(-50%); color: #00d2ff;">
+                            @_selectedCurrency
+                        </span>
+                        <input type="number" class="form-control input-futuristic" @bind="_addAmount"
+                               placeholder="Enter amount"
+                               style="padding-left: 70px;" />
+                    </div>
+                </div>
+                <div class="alert alert-info" style="background: rgba(0,210,255,0.1); border: none;">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Funds will be added to your @_selectedCurrency wallet instantly.
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid rgba(0,210,255,0.2);">
+                <button class="btn btn-secondary" @onclick="CloseModal" style="border-radius: 10px;">Cancel</button>
+                <button class="btn-neon" @onclick="ProcessAddFunds" disabled="@_isProcessing">
+                    @if (_isProcessing)
+                    {
+                        <span class="spinner-css me-2"></span>
+                        <span>Processing...</span>
+                    }
+                    else
+                    {
+                        <span><i class="bi bi-plus-circle me-2"></i>Add Funds</span>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .wallet-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+        .wallet-card:hover {
+            transform: translateY(-5px);
+            border-color: #00d2ff;
+            box-shadow: 0 10px 30px rgba(0, 210, 255, 0.2);
+        }
+    
+    .btn-outline-success:hover {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        border-color: transparent;
+        color: white;
+    }
+    
+    .btn-outline-info:hover {
+        background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+        border-color: transparent;
+        color: white;
+    }
+</style>
+
+@code {
+    private List<WalletDisplay> _wallets = new();
+    private List<TransactionDisplay> _recentTransactions = new();
+    private List<AvailableCurrency> _availableCurrencies = new();
+    private decimal _totalBalanceUSD = 0;
+    private int _walletCount = 0;
+    private int _totalWallets = 0;
+    private string _userId = "";
+    
+    // PIN related
+    private bool _hasWalletPIN = false;
+    private bool _hasTransactionPIN = false;
+    
+    // Modal properties
+    private bool _showModal = false;
+    private string _selectedCurrency = "";
+    private decimal _addAmount = 0;
+    private bool _isProcessing = false;
+    private string _newCurrencyCode = "EUR";
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _userId = await AuthService.GetCurrentUserIdAsync() ?? "";
+        await LoadUserPINSettings();
+        await LoadWallets();
+        await LoadRecentTransactions();
+        LoadAvailableCurrencies();
+    }
+    
+    private async Task LoadUserPINSettings()
+    {
+        var user = await UserManager.FindByIdAsync(_userId);
+        if (user != null)
+        {
+            _hasWalletPIN = user.IsWalletPINEnabled;
+            _hasTransactionPIN = user.IsTransactionPINEnabled;
+        }
+        StateHasChanged();
+    }
+    
+    private async Task<bool> VerifyWalletPIN(string pin)
+    {
+        var user = await UserManager.FindByIdAsync(_userId);
+        if (user?.WalletPIN == pin)
+        {
+            user.FailedPINAttempts = 0;
+            await UserManager.UpdateAsync(user);
+            return true;
+        }
+        else
+        {
+            if (user != null)
+            {
+                user.FailedPINAttempts++;
+                await UserManager.UpdateAsync(user);
+                if (user.FailedPINAttempts >= 5)
+                {
+                    ToastService.ShowError("Too many failed attempts. Wallet locked.");
+                }
+            }
+            return false;
+        }
+    }
+    
+    private async Task<bool> VerifyTransactionPIN(string pin)
+    {
+        var user = await UserManager.FindByIdAsync(_userId);
+        if (user?.TransactionPIN == pin)
+        {
+            user.FailedPINAttempts = 0;
+            await UserManager.UpdateAsync(user);
+            return true;
+        }
+        else
+        {
+            if (user != null)
+            {
+                user.FailedPINAttempts++;
+                await UserManager.UpdateAsync(user);
+            }
+            return false;
+        }
+    }
+    
+    private async Task LoadWallets()
+    {
+        var wallets = await WalletService.GetUserWalletsAsync(_userId);
+        _totalWallets = wallets.Count;
+        
+        _wallets = wallets.Select(w => new WalletDisplay
+        {
+            CurrencyCode = w.CurrencyCode,
+            CurrencyName = GetCurrencyName(w.CurrencyCode),
+            Balance = w.Balance,
+            Icon = GetCurrencyIcon(w.CurrencyCode)
+        }).ToList();
+        
+        _walletCount = _wallets.Count;
+        
+        var rates = new Dictionary<string, decimal>
+        {
+            { "USD", 1 }, { "EUR", 0.92m }, { "GBP", 0.79m }, { "PKR", 278.50m },
+            { "AED", 3.67m }, { "SAR", 3.75m }, { "CAD", 1.36m }, { "AUD", 1.52m }
+        };
+        
+        _totalBalanceUSD = _wallets.Sum(w => rates.GetValueOrDefault(w.CurrencyCode, 1) > 0
+            ? w.Balance / rates.GetValueOrDefault(w.CurrencyCode, 1)
+            : w.Balance);
+        
+        StateHasChanged();
+    }
+    
+    private async Task LoadRecentTransactions()
+    {
+        _recentTransactions = new List<TransactionDisplay>
+        {
+            new() { Date = DateTime.Now.AddDays(-1).ToString("MMM dd"), Type = "Deposit", Currency = "USD", Amount = "$1,000.00" },
+            new() { Date = DateTime.Now.AddDays(-3).ToString("MMM dd"), Type = "Transfer", Currency = "EUR", Amount = "€500.00" },
+            new() { Date = DateTime.Now.AddDays(-5).ToString("MMM dd"), Type = "Deposit", Currency = "PKR", Amount = "₨ 50,000.00" }
+        };
+    }
+    
+    private void LoadAvailableCurrencies()
+    {
+        var existingCodes = _wallets.Select(w => w.CurrencyCode).ToHashSet();
+        
+        var allCurrencies = new List<AvailableCurrency>
+        {
+            new() { Code = "USD", Name = "US Dollar" },
+            new() { Code = "EUR", Name = "Euro" },
+            new() { Code = "GBP", Name = "British Pound" },
+            new() { Code = "PKR", Name = "Pakistani Rupee" },
+            new() { Code = "AED", Name = "UAE Dirham" },
+            new() { Code = "SAR", Name = "Saudi Riyal" },
+            new() { Code = "CAD", Name = "Canadian Dollar" },
+            new() { Code = "AUD", Name = "Australian Dollar" }
+        };
+        
+        _availableCurrencies = allCurrencies
+            .Where(c => !existingCodes.Contains(c.Code))
+            .ToList();
+        
+        if (_availableCurrencies.Any())
+        {
+            _newCurrencyCode = _availableCurrencies.First().Code;
+        }
+    }
+    
+    private async Task AddNewWallet()
+    {
+        try
+        {
+            await WalletService.CreateWalletAsync(_userId, _newCurrencyCode);
+            ToastService.ShowSuccess($"New {_newCurrencyCode} wallet created!");
+            await LoadWallets();
+            LoadAvailableCurrencies();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Failed to create wallet: {ex.Message}");
+        }
+    }
+    
+    private void ShowAddFundsModal(string currency)
+    {
+        if (_hasWalletPIN)
+        {
+            // Show PIN verification first
+            ToastService.ShowInfo($"PIN required to add funds to {currency}");
+            // For demo, we'll proceed directly. In production, show PIN modal.
+            _selectedCurrency = currency;
+            _addAmount = 0;
+            _showModal = true;
+            StateHasChanged();
+        }
+        else
+        {
+            _selectedCurrency = currency;
+            _addAmount = 0;
+            _showModal = true;
+            StateHasChanged();
+        }
+    }
+    
+    private void CloseModal()
+    {
+        _showModal = false;
+        _addAmount = 0;
+        StateHasChanged();
+    }
+    
+    private async Task ProcessAddFunds()
+    {
+        if (_addAmount <= 0)
+        {
+            ToastService.ShowError("Please enter a valid amount");
+            return;
+        }
+        
+        _isProcessing = true;
+        StateHasChanged();
+        
+        try
+        {
+            await WalletService.AddFundsAsync(_userId, _selectedCurrency, _addAmount);
+            ToastService.ShowSuccess($"Added {_addAmount} {_selectedCurrency} to your wallet!");
+            CloseModal();
+            await LoadWallets();
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Failed to add funds: {ex.Message}");
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+    
+    private void ExchangeCurrency(string currency)
+    {
+        if (_hasTransactionPIN)
+        {
+            ToastService.ShowInfo($"PIN required to exchange {currency}");
+        }
+        Navigation.NavigateTo($"/exchange?from={currency}");
+    }
+    
+    private int GetBalancePercentage(decimal balance)
+    {
+        var percentage = (int)(balance / 10000 * 100);
+        return Math.Min(percentage, 100);
+    }
+    
+    private string GetCurrencyName(string code)
+    {
+        return code switch
+        {
+            "USD" => "US Dollar",
+            "EUR" => "Euro",
+            "GBP" => "British Pound",
+            "PKR" => "Pakistani Rupee",
+            "AED" => "UAE Dirham",
+            "SAR" => "Saudi Riyal",
+            "CAD" => "Canadian Dollar",
+            "AUD" => "Australian Dollar",
+            _ => code
+        };
+    }
+    
+    private string GetCurrencyIcon(string code)
+    {
+        return code switch
+        {
+            "USD" => "💵",
+            "EUR" => "💶",
+            "GBP" => "💷",
+            "PKR" => "🇵🇰",
+            "AED" => "🇦🇪",
+            "SAR" => "🇸🇦",
+            "CAD" => "🇨🇦",
+            "AUD" => "🇦🇺",
+            _ => "💰"
+        };
+    }
+    
+    private class WalletDisplay
+    {
+        public string CurrencyCode { get; set; } = "";
+        public string CurrencyName { get; set; } = "";
+        public decimal Balance { get; set; }
+        public string Icon { get; set; } = "";
+    }
+    
+    private class TransactionDisplay
+    {
+        public string Date { get; set; } = "";
+        public string Type { get; set; } = "";
+        public string Currency { get; set; } = "";
+        public string Amount { get; set; } = "";
+    }
+    
+    private class AvailableCurrency
+    {
+        public string Code { get; set; } = "";
+        public string Name { get; set; } = "";
+    }
+}

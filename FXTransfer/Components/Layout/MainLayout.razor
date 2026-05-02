@@ -1,6 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthProvider
 
 <div class="page-transition">
     <!-- Futuristic Navbar -->
@@ -21,23 +22,32 @@
             
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
-                    @if (_isLoggedIn && !_isSuspended)
+                    @if (_isLoggedIn)
                     {
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="/dashboard">
-                                <i class="bi bi-speedometer2"></i> Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="/exchange">
-                                <i class="bi bi-currency-exchange"></i> Exchange
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="/wallet">
-                                <i class="bi bi-wallet2"></i> Wallet
-                            </a>
-                        </li>
+                        @if (!_isSuspended)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/dashboard">
+                                    <i class="bi bi-speedometer2"></i> Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/exchange">
+                                    <i class="bi bi-currency-exchange"></i> Exchange
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/wallet">
+                                    <i class="bi bi-wallet2"></i> Wallet
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/transfers">
+                                    <i class="bi bi-clock-history"></i> Transfers
+                                </a>
+                            </li>
+                        }
+                        
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                                 <div style="width: 35px; height: 35px; background: linear-gradient(135deg, #00d2ff, #f093fb); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
@@ -52,7 +62,7 @@
                             </ul>
                         </li>
                     }
-                    else if (!_isLoggedIn)
+                    else
                     {
                         <li class="nav-item">
                             <a class="nav-link text-white" href="/login">
@@ -84,7 +94,7 @@
                 <i class="bi bi-currency-exchange"></i> FXTransfer - The Future of Currency Exchange
             </p>
             <p class="small text-white-50 mt-2">
-                &copy; 2026 All rights reserved | Powered by MT Technology
+                &copy; 2026 All rights reserved | Powered by Next-Gen Technology
             </p>
         </div>
     </footer>
@@ -98,6 +108,18 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadUserInfo();
+        
+        // Subscribe to authentication state changes
+        AuthProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+    }
+    
+    private async void OnAuthenticationStateChanged(Task<AuthenticationState> task)
+    {
+        await InvokeAsync(async () =>
+        {
+            await LoadUserInfo();
+            StateHasChanged();
+        });
     }
     
     private async Task LoadUserInfo()
@@ -109,6 +131,15 @@
             var roles = await AuthService.GetCurrentUserRolesAsync();
             _isSuspended = roles.Contains("Suspended");
         }
+        else
+        {
+            _userFullName = "";
+        }
         StateHasChanged();
+    }
+    
+    public void Dispose()
+    {
+        AuthProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
     }
 }

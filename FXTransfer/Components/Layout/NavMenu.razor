@@ -35,8 +35,8 @@
             </div>
             
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/transfers">
-                    📜 Transfers
+                <NavLink class="nav-link" href="/liverates">
+                    📈 Live Rates
                 </NavLink>
             </div>
             
@@ -45,19 +45,72 @@
                     👛 Wallet
                 </NavLink>
             </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/setpin">
+                    <i class="bi bi-shield-lock"></i> Security PIN
+                </NavLink>
+            </div>
+            
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/transfers">
+                    📜 Transfers
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/sendmoney">
+                    💸 Send Money
+                </NavLink>
+            </div>
+            
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/alerts">
+                    🔔 Rate Alerts
+                </NavLink>
+            </div>
+            
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/profile">
+                    👤 Profile
+                </NavLink>
+            </div>
         }
         
         @if (_isAdmin)
         {
             <div class="nav-item px-3 mt-3">
-                <div class="text-white-50 small px-3 mb-2">ADMIN</div>
+                <div class="text-white-50 small px-3 mb-2">⚙️ ADMIN ZONE</div>
                 <NavLink class="nav-link" href="/admin/dashboard">
-                    ⚙️ Admin Dashboard
+                    🛡️ Admin Dashboard
+                </NavLink>
+                <NavLink class="nav-link" href="/admin/users">
+                    👥 User Management
+                </NavLink>
+                <NavLink class="nav-link" href="/admin/transactions">
+                    🔄 Transactions
+                </NavLink>
+                <NavLink class="nav-link" href="/admin/fees">
+                    💰 Fee Config
+                </NavLink>
+                <NavLink class="nav-link" href="/admin/logs">
+                    📋 System Logs
+                </NavLink>
+                <NavLink class="nav-link" href="/admin/analytics">
+                    📊 Analytics
                 </NavLink>
             </div>
         }
         
-        @if (!_isLoggedIn)
+        @if (_isLoggedIn)
+        {
+            <div class="nav-item px-3 mt-3">
+                <div class="text-white-50 small px-3 mb-2">🔓 ACCOUNT</div>
+                <NavLink class="nav-link" href="/logout">
+                    🚪 Logout
+                </NavLink>
+            </div>
+        }
+        else
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="/login">
@@ -72,6 +125,69 @@
         }
     </nav>
 </div>
+
+<style>
+    .navbar-toggler {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .top-row {
+        height: 3.5rem;
+        background-color: rgba(0,0,0,0.4);
+    }
+
+    .navbar-brand {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .nav-item {
+        font-size: 0.9rem;
+        padding-bottom: 0.5rem;
+    }
+
+    .nav-item:first-of-type {
+        padding-top: 1rem;
+    }
+
+    .nav-item:last-of-type {
+        padding-bottom: 1rem;
+    }
+
+    .nav-item ::deep a {
+        color: #d7d7d7;
+        border-radius: 4px;
+        height: 3rem;
+        display: flex;
+        align-items: center;
+        line-height: 3rem;
+    }
+
+    .nav-item ::deep a.active {
+        background-color: rgba(255,255,255,0.25);
+        color: white;
+    }
+
+    .nav-item ::deep a:hover {
+        background-color: rgba(255,255,255,0.1);
+        color: white;
+    }
+
+    @@media (min-width: 641px) {
+        .navbar-toggler {
+            display: none;
+        }
+
+        .collapse {
+            display: block;
+        }
+        
+        .nav-scrollable {
+            height: calc(100vh - 3.5rem);
+            overflow-y: auto;
+        }
+    }
+</style>
 
 @code {
     private bool collapseNavMenu = true;
@@ -94,5 +210,6 @@
             _isAdmin = roles.Contains("Admin");
             _isSuspended = roles.Contains("Suspended");
         }
+        StateHasChanged();
     }
 }

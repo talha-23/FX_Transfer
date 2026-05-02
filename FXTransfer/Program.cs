@@ -7,20 +7,8 @@ using FXTransfer.Seeders;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
-
-// Configure Serilog
-Log.Logger = new LoggerConfiguration()
-    .WriteTo.File("wwwroot/logs/error.log",
-        rollingInterval: RollingInterval.Day,
-        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] {Message}{NewLine}{Exception}")
-    .MinimumLevel.Information()
-    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add Serilog
-builder.Host.UseSerilog();
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
@@ -29,7 +17,7 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Identity - FIXED (removed Cookies from inside IdentityOptions)
+// Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.Password.RequireDigit = true;
@@ -48,13 +36,26 @@ builder.Services.AddScoped<FxAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
     provider.GetRequiredService<FxAuthenticationStateProvider>());
 
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Module 2 Services
+builder.Services.AddHttpClient<ICurrencyRateService, ExchangeRateApiService>();
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<IFeeCalculator, StandardFeeCalculator>();
+builder.Services.AddScoped<PremiumFeeCalculator>();
+builder.Services.AddScoped<ITransferService, TransferService>();
+builder.Services.AddScoped<IWalletService, WalletService>();
+builder.Services.AddScoped<IToastService, ToastService>();
+builder.Services.AddScoped<IAlertService, AlertService>();
+
 // Services
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Authorization
 builder.Services.AddAuthorization();
 
-// Cookie configuration for Remember Me (this is the correct place)
+// Cookie configuration
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/login";
@@ -68,7 +69,6 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
-// Configure pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -85,19 +85,16 @@ app.UseAuthorization();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
-// Seed database
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
         await AdminSeeder.SeedAsync(services);
-        Log.Information("Database seeded successfully!");
         Console.WriteLine("✅ Database seeded!");
     }
     catch (Exception ex)
     {
-        Log.Error(ex, "Error seeding database");
         Console.WriteLine($"❌ Seed error: {ex.Message}");
     }
 }
