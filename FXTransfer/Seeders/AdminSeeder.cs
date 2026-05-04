@@ -3,11 +3,12 @@ using FXTransfer.Models.Entities;
 using FXTransfer.Models.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace FXTransfer.Seeders;
 
 /// <summary>
-/// SRP: Handles seeding initial admin user and demo accounts
+/// SRP: Handles seeding initial admin user and demo accounts with wallets
 /// </summary>
 public static class AdminSeeder
 {
@@ -17,150 +18,179 @@ public static class AdminSeeder
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<ApplicationDbContext>>();
 
-        // Ensure database is created
-        await context.Database.EnsureCreatedAsync();
-
-        // Create roles if they don't exist
-        foreach (UserRole role in Enum.GetValues(typeof(UserRole)))
+        try
         {
-            var roleName = role.ToString();
-            if (!await roleManager.RoleExistsAsync(roleName))
+            // Ensure database is created
+            await context.Database.EnsureCreatedAsync();
+
+            // Create roles if they don't exist
+            foreach (UserRole role in Enum.GetValues(typeof(UserRole)))
             {
-                await roleManager.CreateAsync(new IdentityRole(roleName));
+                var roleName = role.ToString();
+                if (!await roleManager.RoleExistsAsync(roleName))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(roleName));
+                    logger.LogInformation($"Created role: {roleName}");
+                }
             }
+
+            // Seed Admin User
+            await CreateUserWithWallets(
+                userManager, context, logger,
+                "admin@fxtransfer.com", "Admin@123",
+                "General Asim Munir", UserRole.Admin,
+                isPremium: true,
+                premiumExpiry: DateTime.UtcNow.AddYears(10),
+                walletBalance: 50000);
+
+            // Seed Premium User
+            await CreateUserWithWallets(
+                userManager, context, logger,
+                "premium@fxtransfer.com", "Premium@123",
+                "Abdul Moeed", UserRole.Premium,
+                isPremium: true,
+                premiumExpiry: DateTime.UtcNow.AddMonths(6),
+                walletBalance: 10000);
+
+            // Seed Regular User
+            await CreateUserWithWallets(
+                userManager, context, logger,
+                "user@fxtransfer.com", "User@123",
+                "Talha", UserRole.Regular,
+                isPremium: false,
+                walletBalance: 5000);
+
+            // Seed Suspended User (for testing)
+            await CreateUserWithWallets(
+                userManager, context, logger,
+                "suspended@fxtransfer.com", "Suspended@123",
+                "Suspended Demo User", UserRole.Suspended,
+                isPremium: false,
+                isSuspended: true,
+                walletBalance: 0);
+
+            // Seed additional test user with different currencies
+            await CreateUserWithWallets(
+                userManager, context, logger,
+                "test@fxtransfer.com", "Test@123",
+                "Test User", UserRole.Regular,
+                isPremium: false,
+                walletBalance: 2500);
+
+            await context.SaveChangesAsync();
+            logger.LogInformation("Database seeding completed successfully");
         }
-
-        // Seed Admin User
-        var adminEmail = "admin@fxtransfer.com";
-        var adminUser = await userManager.FindByEmailAsync(adminEmail);
-
-        if (adminUser == null)
+        catch (Exception ex)
         {
-            adminUser = new ApplicationUser
+            logger.LogError(ex, "An error occurred while seeding the database");
+            throw;
+        }
+    }
+
+    private static async Task CreateUserWithWallets(
+        UserManager<ApplicationUser> userManager,
+        ApplicationDbContext context,
+        ILogger logger,
+        string email,
+        string password,
+        string fullName,
+        UserRole role,
+        bool isPremium = false,
+        DateTime? premiumExpiry = null,
+        bool isSuspended = false,
+        decimal walletBalance = 5000)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+
+        if (user == null)
+        {
+            user = new ApplicationUser
             {
-                UserName = adminEmail,
-                Email = adminEmail,
-                FullName = "System Administrator",
+                UserName = email,
+                Email = email,
+                FullName = fullName,
                 EmailConfirmed = true,
                 RegisteredAt = DateTime.UtcNow,
                 ReferralCode = GenerateReferralCode(),
-                IsPremium = true,
-                PremiumExpiry = DateTime.UtcNow.AddYears(10)
+                IsPremium = isPremium,
+                PremiumExpiry = premiumExpiry,
+                IsSuspended = isSuspended
             };
 
-            var result = await userManager.CreateAsync(adminUser, "Admin@123");
+            var result = await userManager.CreateAsync(user, password);
             if (result.Succeeded)
             {
-                await userManager.AddToRoleAsync(adminUser, UserRole.Admin.ToString());
-                Console.WriteLine("Admin user created successfully");
+                await userManager.AddToRoleAsync(user, role.ToString());
+                logger.LogInformation($"Created user: {email} with role: {role}");
+            }
+            else
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                logger.LogError($"Failed to create user {email}: {errors}");
+                return;
             }
         }
 
-        // Seed Premium User
-        var premiumEmail = "premium@fxtransfer.com";
-        var premiumUser = await userManager.FindByEmailAsync(premiumEmail);
+        // Create wallets for the user if they don't exist
+        var defaultCurrencies = new[] { "USD", "EUR", "GBP", "PKR", "AED", "SAR" };
 
-        if (premiumUser == null)
+        foreach (var currency in defaultCurrencies)
         {
-            premiumUser = new ApplicationUser
+            if (!context.Wallets.Any(w => w.UserId == user.Id && w.CurrencyCode == currency))
             {
-                UserName = premiumEmail,
-                Email = premiumEmail,
-                FullName = "Premium Demo User",
-                EmailConfirmed = true,
-                RegisteredAt = DateTime.UtcNow,
-                ReferralCode = GenerateReferralCode(),
-                IsPremium = true,
-                PremiumExpiry = DateTime.UtcNow.AddMonths(6)
-            };
+                decimal initialBalance = 0;
 
-            var result = await userManager.CreateAsync(premiumUser, "Premium@123");
-            if (result.Succeeded)
-            {
-                await userManager.AddToRoleAsync(premiumUser, UserRole.Premium.ToString());
-                await SeedUserWallets(context, premiumUser.Id);
-                Console.WriteLine("Premium user created successfully");
+                // Set initial balances based on currency and user role
+                if (currency == "USD")
+                {
+                    initialBalance = walletBalance;
+                }
+                else if (currency == "EUR" && (role == UserRole.Premium || role == UserRole.Admin))
+                {
+                    initialBalance = 2000;
+                }
+                else if (currency == "GBP" && (role == UserRole.Premium || role == UserRole.Admin))
+                {
+                    initialBalance = 1500;
+                }
+                else if (currency == "PKR")
+                {
+                    initialBalance = 500000; // 500,000 PKR for testing
+                }
+                else if (currency == "AED" && role == UserRole.Admin)
+                {
+                    initialBalance = 10000;
+                }
+                else if (currency == "SAR" && role == UserRole.Admin)
+                {
+                    initialBalance = 10000;
+                }
+                else
+                {
+                    initialBalance = 0;
+                }
+
+                context.Wallets.Add(new Wallet
+                {
+                    UserId = user.Id,
+                    CurrencyCode = currency,
+                    Balance = initialBalance,
+                    CreatedAt = DateTime.UtcNow,
+                    LastUpdatedAt = DateTime.UtcNow
+                });
+
+                if (initialBalance > 0)
+                {
+                    logger.LogInformation($"Created {currency} wallet for user {email} with balance: {initialBalance}");
+                }
             }
         }
-
-        // Seed Regular User
-        var regularEmail = "user@fxtransfer.com";
-        var regularUser = await userManager.FindByEmailAsync(regularEmail);
-
-        if (regularUser == null)
-        {
-            regularUser = new ApplicationUser
-            {
-                UserName = regularEmail,
-                Email = regularEmail,
-                FullName = "Regular Demo User",
-                EmailConfirmed = true,
-                RegisteredAt = DateTime.UtcNow,
-                ReferralCode = GenerateReferralCode(),
-                IsPremium = false
-            };
-
-            var result = await userManager.CreateAsync(regularUser, "User@123");
-            if (result.Succeeded)
-            {
-                await userManager.AddToRoleAsync(regularUser, UserRole.Regular.ToString());
-                await SeedUserWallets(context, regularUser.Id);
-                Console.WriteLine("Regular user created successfully");
-            }
-        }
-
-        // Seed Suspended User
-        var suspendedEmail = "suspended@fxtransfer.com";
-        var suspendedUser = await userManager.FindByEmailAsync(suspendedEmail);
-
-        if (suspendedUser == null)
-        {
-            suspendedUser = new ApplicationUser
-            {
-                UserName = suspendedEmail,
-                Email = suspendedEmail,
-                FullName = "Suspended Demo User",
-                EmailConfirmed = true,
-                RegisteredAt = DateTime.UtcNow,
-                ReferralCode = GenerateReferralCode(),
-                IsSuspended = true,
-                IsPremium = false
-            };
-
-            var result = await userManager.CreateAsync(suspendedUser, "Suspended@123");
-            if (result.Succeeded)
-            {
-                await userManager.AddToRoleAsync(suspendedUser, UserRole.Suspended.ToString());
-                Console.WriteLine("Suspended user created successfully");
-            }
-        }
-
-        await context.SaveChangesAsync();
     }
 
     private static string GenerateReferralCode()
     {
         return Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
-    }
-
-    private static async Task SeedUserWallets(ApplicationDbContext context, string userId)
-    {
-        var defaultCurrencies = new[] { "USD", "EUR", "GBP", "PKR" };
-
-        foreach (var currency in defaultCurrencies)
-        {
-            if (!context.Wallets.Any(w => w.UserId == userId && w.CurrencyCode == currency))
-            {
-                context.Wallets.Add(new Wallet
-                {
-                    UserId = userId,
-                    CurrencyCode = currency,
-                    Balance = currency == "USD" ? 5000 : 0
-                });
-            }
-        }
-
-        await context.SaveChangesAsync();
     }
 }

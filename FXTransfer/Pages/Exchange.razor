@@ -2,6 +2,7 @@
 @attribute [Authorize]
 @using FXTransfer.Models.DTOs
 @using FXTransfer.Models.Entities
+@using FXTransfer.Models.Enums
 @using FXTransfer.Services.Interfaces
 @using FXTransfer.Services.Implementations
 @inject ICurrencyRateService RateService
@@ -11,6 +12,10 @@
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
 @inject IWalletService WalletService
+@using FXTransfer.Data
+@inject ApplicationDbContext DbContext
+@inject INotificationService NotificationService  
+@inject IJSRuntime JS
 
 
 <div class="container page-transition">
@@ -30,37 +35,41 @@
                     <!-- From Currency -->
                     <div class="col-md-6">
                         <label class="form-label text-white">From Currency</label>
-                        <select class="form-control input-futuristic" @bind="_fromCurrency" @bind:event="onchange">
-                            <option value="USD">🇺🇸 USD - US Dollar</option>
-                            <option value="EUR">🇪🇺 EUR - Euro</option>
-                            <option value="GBP">🇬🇧 GBP - British Pound</option>
-                            <option value="PKR">🇵🇰 PKR - Pakistani Rupee</option>
-                            <option value="AED">🇦🇪 AED - Dirham</option>
-                            <option value="SAR">🇸🇦 SAR - Riyal</option>
-                            <option value="CAD">🇨🇦 CAD - Canadian Dollar</option>
-                            <option value="AUD">🇦🇺 AUD - Australian Dollar</option>
+                        <select class="form-control input-futuristic" @bind="_fromCurrency">
+                            @foreach (var wallet in _userWallets)
+                            {
+                                <option value="@wallet.CurrencyCode">
+                                    @GetCurrencyIcon(wallet.CurrencyCode) @wallet.CurrencyCode - Balance: @wallet.Balance.ToString("N2")
+                                </option>
+                            }
                         </select>
+                        <small class="text-white-50">Available: <span class="text-info fw-bold">@_selectedWalletBalance.ToString("N2") @_fromCurrency</span></small>
                     </div>
 
                     <!-- To Currency -->
                     <div class="col-md-6">
                         <label class="form-label text-white">To Currency</label>
-                        <select class="form-control input-futuristic" @bind="_toCurrency" @bind:event="onchange">
-                            <option value="EUR">🇪🇺 EUR - Euro</option>
-                            <option value="USD">🇺🇸 USD - US Dollar</option>
-                            <option value="GBP">🇬🇧 GBP - British Pound</option>
-                            <option value="PKR">🇵🇰 PKR - Pakistani Rupee</option>
-                            <option value="AED">🇦🇪 AED - Dirham</option>
-                            <option value="SAR">🇸🇦 SAR - Riyal</option>
-                            <option value="CAD">🇨🇦 CAD - Canadian Dollar</option>
-                            <option value="AUD">🇦🇺 AUD - Australian Dollar</option>
+                        <select class="form-control input-futuristic" @bind="_toCurrency">
+                            @foreach (var wallet in _userWallets.Where(w => w.CurrencyCode != _fromCurrency))
+                            {
+                                <option value="@wallet.CurrencyCode">
+                                    @GetCurrencyIcon(wallet.CurrencyCode) @wallet.CurrencyCode - Balance: @wallet.Balance.ToString("N2")
+                                </option>
+                            }
                         </select>
                     </div>
 
                     <!-- Amount -->
                     <div class="col-md-6">
                         <label class="form-label text-white">Amount</label>
-                        <input type="number" class="form-control input-futuristic" @bind="_amount" @bind:event="oninput" />
+                        <input type="number" class="form-control input-futuristic @(_amount > _selectedWalletBalance ? "input-error" : "")" @bind="_amount" />
+                        @if (_amount > _selectedWalletBalance)
+                        {
+                            <div class="error-message mt-1">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                Amount exceeds available balance
+                            </div>
+                        }
                         <small class="text-white-50">Min: $10, Max: $50,000</small>
                     </div>
 
@@ -69,6 +78,13 @@
                         <div class="input-futuristic" style="background: rgba(0,210,255,0.1); height: 50px; display: flex; align-items: center; padding: 0 15px;">
                             <span class="fw-bold fs-4 text-white">@_convertedAmount.ToString("N2") @_toCurrency</span>
                         </div>
+                    </div>
+
+                    <!-- Calculate Button -->
+                    <div class="col-12">
+                        <button class="btn btn-outline-info w-100" @onclick="CalculateConversion" style="border-radius: 50px; padding: 12px;">
+                            <i class="bi bi-calculator me-2"></i>Calculate Rate
+                        </button>
                     </div>
 
                     <div class="col-12">
@@ -83,7 +99,7 @@
                     <div class="col-12">
                         <div class="d-flex justify-content-between p-3" style="background: rgba(255,255,255,0.05); border-radius: 16px;">
                             <span class="text-white-50"><i class="bi bi-percent me-2"></i>Transfer Fee</span>
-                            <span class="text-warning fw-bold fs-5">@_feeAmount.ToString("N2") @_fromCurrency</span>
+                            <span class="text-warning fw-bold">@_feeAmount.ToString("N2") @_fromCurrency</span>
                         </div>
                         <div class="d-flex justify-content-between p-3 mt-2" style="background: rgba(255,255,255,0.05); border-radius: 16px;">
                             <span class="text-white-50"><i class="bi bi-calculator me-2"></i>Total Amount</span>
@@ -91,19 +107,24 @@
                         </div>
                     </div>
 
-                    <!-- Send Money Button -->
+                    <!-- Action Buttons -->
                     <div class="col-12 mt-3">
-                        <button class="btn-neon w-100" @onclick="SendMoney" disabled="@_isLoading" style="color: white; padding: 14px;">
-                            @if (_isLoading)
-                            {
-                                <span class="spinner-css me-2"></span>
-                                <span>Processing Transfer...</span>
-                            }
-                            else
-                            {
-                                <span><i class="bi bi-send me-2"></i>Send Money</span>
-                            }
-                        </button>
+                        <div class="d-flex gap-3">
+                                    <button class="btn-neon flex-grow-1" @onclick="TransferToOwnWallet" disabled="@_isLoading" style="color: white;">        
+                             @if (_isLoading)
+                                {
+                                    <span class="spinner-css me-2"></span>
+                                    <span>Processing...</span>
+                                }
+                                else
+                                {
+                                    <span><i class="bi bi-arrow-left-right me-2"></i>Transfer to My Wallet</span>
+                                }
+                            </button>
+                            <a href="/sendmoney" class="btn btn-outline-info flex-grow-1" style="border-radius: 50px; padding: 12px; text-decoration: none; text-align: center;">
+                                <i class="bi bi-send me-2"></i>Send to Someone
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -189,10 +210,37 @@
     .rates-list::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
     .rates-list::-webkit-scrollbar-thumb { background: #00d2ff; border-radius: 10px; }
     
-    /* Number input styling */
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button {
         opacity: 0.5;
+    }
+    
+    .input-error {
+        border-color: #dc3545 !important;
+        background: rgba(220, 53, 69, 0.1) !important;
+    }
+    
+    .error-message {
+        color: #ff6b6b;
+        font-size: 0.75rem;
+        background: rgba(220, 53, 69, 0.15);
+        padding: 6px 10px;
+        border-radius: 8px;
+        display: inline-block;
+    }
+    
+    .spinner-css {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        display: inline-block;
+        animation: spin 0.6s linear infinite;
+    }
+    
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
     }
 </style>
 
@@ -208,9 +256,9 @@
     private bool _isLoading = false;
     private string _userId = "";
     private string _searchTerm = "";
-    private decimal _userBalance = 0;
-    private string _walletCurrency = "USD";
+    private decimal _selectedWalletBalance = 0;
     
+    private List<UserWallet> _userWallets = new();
     private List<CurrencyRate> _popularRates = new();
     
     private List<CurrencyRate> FilteredRates
@@ -232,52 +280,154 @@
         _isPremium = roles.Contains("Premium");
         _userId = await AuthService.GetCurrentUserIdAsync() ?? "";
         
-        // Get user's wallet balance
-        var wallets = await WalletService.GetUserWalletsAsync(_userId);
-        var usdWallet = wallets.FirstOrDefault(w => w.CurrencyCode == "USD");
-        if (usdWallet != null)
-        {
-            _userBalance = usdWallet.Balance;
-            _walletCurrency = "USD";
-        }
-        
+        await LoadUserWallets();
         await LoadPopularRates();
         await CalculateConversion();
     }
     
-    // This runs whenever bound properties change
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnParametersSetAsync()
     {
-        if (!firstRender)
+        await CalculateConversion();
+    }
+    
+    private async Task LoadUserWallets()
+    {
+        var wallets = await WalletService.GetUserWalletsAsync(_userId);
+        _userWallets = wallets.Select(w => new UserWallet
         {
-            await CalculateConversion();
+            CurrencyCode = w.CurrencyCode,
+            Balance = w.Balance
+        }).ToList();
+        
+        if (_userWallets.Any())
+        {
+            _fromCurrency = _userWallets.First().CurrencyCode;
+            _selectedWalletBalance = _userWallets.First().Balance;
+            
+            // Set to currency to a different wallet
+            var otherWallet = _userWallets.FirstOrDefault(w => w.CurrencyCode != _fromCurrency);
+            if (otherWallet != null)
+            {
+                _toCurrency = otherWallet.CurrencyCode;
+            }
         }
-        await base.OnAfterRenderAsync(firstRender);
+        
+        StateHasChanged();
+    }
+    
+    private async Task UpdateWalletBalance()
+    {
+        var wallet = _userWallets.FirstOrDefault(w => w.CurrencyCode == _fromCurrency);
+        _selectedWalletBalance = wallet?.Balance ?? 0;
+        StateHasChanged();
     }
     
     private async Task CalculateConversion()
+{
+    try
     {
-        try
+        if (_amount <= 0)
         {
-            if (_amount <= 0)
-            {
-                _amount = 0.01m;
-            }
-            
-            _currentRate = await RateService.GetExchangeRateAsync(_fromCurrency, _toCurrency);
-            _convertedAmount = _amount * _currentRate;
-            
-            var user = new ApplicationUser { Id = _userId, IsPremium = _isPremium };
-            _feeAmount = await FeeCalculator.CalculateFeeAsync(_amount, _fromCurrency, _toCurrency, user);
-            _totalAmount = _amount + _feeAmount;
-            
-            await InvokeAsync(StateHasChanged);
+            _amount = 0.01m;
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Rate calculation error: {ex.Message}");
-        }
+        
+        _currentRate = await RateService.GetExchangeRateAsync(_fromCurrency, _toCurrency);
+        _convertedAmount = _amount * _currentRate;
+        
+        var user = new ApplicationUser { Id = _userId, IsPremium = _isPremium };
+        _feeAmount = await FeeCalculator.CalculateFeeAsync(_amount, _fromCurrency, _toCurrency, user);
+        _totalAmount = _amount + _feeAmount;
+        
+        await UpdateWalletBalance();
+        StateHasChanged();
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Rate calculation error: {ex.Message}");
+        ToastService.ShowError("Failed to calculate rate");
+    }
+}
+    
+    private async Task TransferToOwnWallet()
+{
+    try
+    {
+        Console.WriteLine("Transfer started");
+        
+        if (_amount <= 0)
+        {
+            await JS.InvokeVoidAsync("alert", "Please enter a valid amount");
+            return;
+        }
+        
+        if (_amount < 10)
+        {
+            await JS.InvokeVoidAsync("alert", "Minimum transfer amount is $10");
+            return;
+        }
+        
+        if (_amount > 50000)
+        {
+            await JS.InvokeVoidAsync("alert", "Maximum transfer amount is $50,000");
+            return;
+        }
+        
+        if (_fromCurrency == _toCurrency)
+        {
+            await JS.InvokeVoidAsync("alert", "Cannot transfer to the same currency");
+            return;
+        }
+        
+        await CalculateConversion();
+        
+        if (_totalAmount > _selectedWalletBalance)
+        {
+            await JS.InvokeVoidAsync("alert", $"Insufficient balance!\nRequired: {_totalAmount:F2} {_fromCurrency}\nAvailable: {_selectedWalletBalance:F2} {_fromCurrency}");
+            return;
+        }
+        
+        _isLoading = true;
+        StateHasChanged();
+        
+        await WalletService.DeductBalanceAsync(_userId, _fromCurrency, _totalAmount);
+        await WalletService.AddFundsAsync(_userId, _toCurrency, _convertedAmount);
+        
+        var transfer = new Transfer
+        {
+            UserId = _userId,
+            FromCurrency = _fromCurrency,
+            ToCurrency = _toCurrency,
+            Amount = _amount,
+            ConvertedAmount = _convertedAmount,
+            ExchangeRate = _currentRate,
+            Fee = _feeAmount,
+            TotalAmount = _totalAmount,
+            Status = "Completed",
+            RecipientName = "Self Transfer",
+            RecipientEmail = await AuthService.GetCurrentUserEmailAsync() ?? "",
+            CreatedAt = DateTime.UtcNow,
+            CompletedAt = DateTime.UtcNow
+        };
+        
+        DbContext.Transfers.Add(transfer);
+        await DbContext.SaveChangesAsync();
+        
+        await LoadUserWallets();
+        await CalculateConversion();
+        
+        await JS.InvokeVoidAsync("alert", $"✅ SUCCESS!\n\nConverted: {_amount:F2} {_fromCurrency}\nReceived: {_convertedAmount:F2} {_toCurrency}\nFee: {_feeAmount:F2} {_fromCurrency}");
+        
+        _isLoading = false;
+        StateHasChanged();
+    }
+    catch (Exception ex)
+    {
+        await JS.InvokeVoidAsync("alert", $"❌ Transfer failed!\n\n{ex.Message}");
+        Console.WriteLine($"Error: {ex.Message}");
+        _isLoading = false;
+        StateHasChanged();
+    }
+}
     
     private void ClearSearch()
     {
@@ -345,73 +495,14 @@
         };
     }
     
-    // SEND MONEY FUNCTIONALITY
-    private async Task SendMoney()
+    private string GetCurrencyIcon(string code)
     {
-        // Validation
-        if (_amount < 10)
+        return code switch
         {
-            ToastService.ShowError("Minimum transfer amount is $10");
-            return;
-        }
-        
-        if (_amount > 50000)
-        {
-            ToastService.ShowError("Maximum transfer amount is $50,000");
-            return;
-        }
-        
-        if (_totalAmount > _userBalance)
-        {
-            ToastService.ShowError($"Insufficient balance. You have ${_userBalance:F2} {_walletCurrency}, need ${_totalAmount:F2} {_fromCurrency}");
-            return;
-        }
-        
-        _isLoading = true;
-        StateHasChanged();
-        
-        try
-        {
-            var request = new TransferRequest
-            {
-                UserId = _userId,
-                FromCurrency = _fromCurrency,
-                ToCurrency = _toCurrency,
-                Amount = _amount,
-                User = new ApplicationUser { Id = _userId, IsPremium = _isPremium }
-            };
-            
-            var transfer = await TransferService.ExecuteTransferAsync(request);
-            
-            if (transfer != null && transfer.Id > 0)
-            {
-                ToastService.ShowSuccess($"✅ Transfer completed! {_amount:F2} {_fromCurrency} sent successfully!");
-                
-                // Update local balance
-                _userBalance -= _totalAmount;
-                
-                // Wait a moment then redirect
-                await Task.Delay(1500);
-                Navigation.NavigateTo("/transfers");
-            }
-            else
-            {
-                ToastService.ShowError("Transfer failed. Please try again.");
-            }
-        }
-        catch (InsufficientBalanceException ex)
-        {
-            ToastService.ShowError($"Insufficient balance: {ex.Message}");
-        }
-        catch (Exception ex)
-        {
-            ToastService.ShowError($"Transfer failed: {ex.Message}");
-        }
-        finally
-        {
-            _isLoading = false;
-            StateHasChanged();
-        }
+            "USD" => "💵", "EUR" => "💶", "GBP" => "💷", "PKR" => "🇵🇰",
+            "AED" => "🇦🇪", "SAR" => "🇸🇦", "CAD" => "🇨🇦", "AUD" => "🇦🇺",
+            _ => "💰"
+        };
     }
     
     private class CurrencyRate
@@ -419,5 +510,11 @@
         public string CurrencyCode { get; set; } = "";
         public string CurrencyName { get; set; } = "";
         public decimal Rate { get; set; }
+    }
+    
+    private class UserWallet
+    {
+        public string CurrencyCode { get; set; } = "";
+        public decimal Balance { get; set; }
     }
 }

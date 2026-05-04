@@ -1,10 +1,507 @@
 ﻿@page "/transfers"
 @attribute [Authorize]
+@using Microsoft.EntityFrameworkCore
+@using FXTransfer.Data
+@using FXTransfer.Models.Entities
+@using FXTransfer.Models.Enums
+@inject IAuthService AuthService
+@inject IToastService ToastService
+@inject NavigationManager Navigation
+@inject ApplicationDbContext DbContext
+@inject IJSRuntime JSRuntime
 
 <div class="container page-transition">
-    <div class="glass-card p-5 text-center">
-        <i class="bi bi-clock-history" style="font-size: 60px; color: #00d2ff;"></i>
-        <h2 class="gradient-text mt-3">Transaction History</h2>
-        <p class="text-white-50">Coming in Module 3!</p>
+    <div class="row mb-4" data-aos="fade-up">
+        <div class="col-12">
+            <div class="glass-card p-4 text-center">
+                <div class="float-animation" style="display: inline-block;">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #00d2ff, #f093fb); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+                        <i class="bi bi-clock-history" style="font-size: 28px; color: white;"></i>
+                    </div>
+                </div>
+                <h1 class="gradient-text">Transaction History</h1>
+                <p class="text-white-50">View and manage your transfer history</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center">
+                <i class="bi bi-arrow-left-right" style="font-size: 28px; color: #00d2ff;"></i>
+                <h3 class="text-white mt-2">@_totalTransfers</h3>
+                <p class="text-white-50 small">Total Transfers</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center">
+                <i class="bi bi-currency-dollar" style="font-size: 28px; color: #28a745;"></i>
+                <h3 class="text-white mt-2">$@_totalAmount.ToString("N2")</h3>
+                <p class="text-white-50 small">Total Transferred</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center">
+                <i class="bi bi-percent" style="font-size: 28px; color: #f093fb;"></i>
+                <h3 class="text-white mt-2">$@_totalFees.ToString("N2")</h3>
+                <p class="text-white-50 small">Total Fees Paid</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center">
+                <i class="bi bi-calendar" style="font-size: 28px; color: #4facfe;"></i>
+                <h3 class="text-white mt-2">@_avgPerMonth</h3>
+                <p class="text-white-50 small">Avg per Month</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4" data-aos="fade-up" data-aos-delay="200">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h5 class="gradient-text mb-3">
+                    <i class="bi bi-funnel me-2"></i>Filter Transactions
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label text-white">From Date</label>
+                        <input type="date" class="form-control input-futuristic" @bind="_fromDate" @bind:event="oninput" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-white">To Date</label>
+                        <input type="date" class="form-control input-futuristic" @bind="_toDate" @bind:event="oninput" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-white">Currency</label>
+                        <select class="form-control input-futuristic" @bind="_filterCurrency">
+                            <option value="">All Currencies</option>
+                            <option value="USD">USD - US Dollar</option>
+                            <option value="EUR">EUR - Euro</option>
+                            <option value="GBP">GBP - British Pound</option>
+                            <option value="PKR">PKR - Pakistani Rupee</option>
+                            <option value="AED">AED - Dirham</option>
+                            <option value="SAR">SAR - Riyal</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-white">Status</label>
+                        <select class="form-control input-futuristic" @bind="_filterStatus">
+                            <option value="">All Status</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Failed">Failed</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-white">Search</label>
+                        <input style="color:white" type="text" class="form-control input-futuristic" @bind="_searchTerm" placeholder="Search by recipient name, email or reference..." />
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div class="d-flex gap-2 w-100">
+                            <button class="btn-neon flex-grow-1" @onclick="ApplyFilters">
+                                <i class="bi bi-search me-2"></i>Apply Filters
+                            </button>
+                            <button class="btn btn-outline-secondary" @onclick="ResetFilters">
+                                <i class="bi bi-arrow-repeat me-2"></i>Reset
+                            </button>
+                            <button class="btn btn-outline-success" @onclick="ExportToCSV">
+                                <i class="bi bi-file-spreadsheet me-2"></i>Export CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="row" data-aos="fade-up" data-aos-delay="300">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <div class="table-responsive">
+                    <table class="table table-borderless">
+                        <thead>
+                            <tr style="border-bottom: 2px solid rgba(0,210,255,0.2);">
+                                <th class="text-info">Date</th>
+                                <th class="text-info">From/To</th>
+                                <th class="text-info">Amount</th>
+                                <th class="text-info">Rate</th>
+                                <th class="text-info">Fee</th>
+                                <th class="text-info">Recipient</th>
+                                <th class="text-info">Status</th>
+                                <th class="text-info">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!_filteredTransfers.Any())
+                            {
+                                <tr>
+                                    <td colspan="8" class="text-center py-5">
+                                        <i class="bi bi-inbox" style="font-size: 48px; color: rgba(255,255,255,0.2);"></i>
+                                        <p class="text-white-50 mt-2">No transactions found</p>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var transfer in _filteredTransfers)
+                                {
+                                    <tr style="border-bottom: 1px solid rgba(0,210,255,0.1);" class="transaction-row">
+                                        <td style="color: #000000;">
+                                            <i class="bi bi-calendar3 me-1 text-info" style="font-size: 12px;"></i>
+                                            @transfer.CreatedAt.ToString("MMM dd, yyyy HH:mm")
+                                        </td>
+                                        <td style="color: #000000;">
+                                            <span class="fw-bold">@transfer.FromCurrency</span>
+                                            <i class="bi bi-arrow-right-short text-info mx-1"></i>
+                                            <span class="fw-bold">@transfer.ToCurrency</span>
+                                        </td>
+                                        <td style="color: #000000;" class="fw-bold">
+                                            @transfer.Amount.ToString("N2") @transfer.FromCurrency
+                                        </td>
+                                        <td style="color: #000000;">
+                                            @transfer.ExchangeRate.ToString("F4")
+                                        </td>
+                                        <td style="color: #000000;">
+                                            @transfer.Fee.ToString("N2") @transfer.FromCurrency
+                                        </td>
+                                        <td style="color: #000000;">
+                                            <div>@transfer.RecipientName</div>
+                                            <small class="text-info">@transfer.RecipientEmail</small>
+                                        </td>
+                                        <td>
+                                            @if (transfer.Status == "Completed")
+                                            {
+                                                <span class="badge bg-success">✅ Completed</span>
+                                            }
+                                            else if (transfer.Status == "Pending")
+                                            {
+                                                <span class="badge bg-warning">⏳ Pending</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">❌ Failed</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-info" @onclick="() => ViewDetails(transfer.Id)" style="border-radius: 20px;">
+                                                <i class="bi bi-eye"></i> Details
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (_totalPages > 1)
+                {
+                    <div class="d-flex justify-content-center mt-4">
+                        <nav>
+                            <ul class="pagination">
+                                <li class="page-item @(_currentPage == 1 ? "disabled" : "")">
+                                    <button class="page-link" @onclick="() => GoToPage(_currentPage - 1)" style="background: rgba(255,255,255,0.1); color: white;">
+                                        Previous
+                                    </button>
+                                </li>
+                                @for (int i = 1; i <= _totalPages; i++)
+                                {
+                                    <li class="page-item @(_currentPage == i ? "active" : "")">
+                                        <button class="page-link" @onclick="() => GoToPage(i)" style="background: @(_currentPage == i ? "#00d2ff" : "rgba(255,255,255,0.1)"); color: white;">
+                                            @i
+                                        </button>
+                                    </li>
+                                }
+                                <li class="page-item @(_currentPage == _totalPages ? "disabled" : "")">
+                                    <button class="page-link" @onclick="() => GoToPage(_currentPage + 1)" style="background: rgba(255,255,255,0.1); color: white;">
+                                        Next
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- Transaction Details Modal - Custom Overlay (No Bootstrap JS issues) -->
+@if (_showModal && _selectedTransfer != null)
+{
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+        <div style="background: linear-gradient(135deg, #1a1a3e, #0f0c29); border: 1px solid rgba(0,210,255,0.3); border-radius: 20px; width: 650px; max-width: 90%; max-height: 90%; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(0,210,255,0.2); padding: 20px 25px;">
+                <h5 class="modal-title gradient-text" style="margin: 0;">
+                    <i class="bi bi-info-circle me-2"></i>Transaction Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" @onclick="CloseModal" style="background: none; border: none; font-size: 24px; cursor: pointer; color: white;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 25px;">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="p-3" style="background: rgba(0,210,255,0.1); border-radius: 12px;">
+                            <small class="text-white-50 d-block mb-1">Transaction ID</small>
+                            <p class="text-white mb-0 fw-bold">#@_selectedTransfer.Id</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3" style="background: rgba(0,210,255,0.1); border-radius: 12px;">
+                            <small class="text-white-50 d-block mb-1">Date & Time</small>
+                            <p class="text-white mb-0">@_selectedTransfer.CreatedAt.ToString("dd MMM yyyy HH:mm:ss")</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3" style="background: rgba(240,147,251,0.1); border-radius: 12px;">
+                            <small class="text-white-50 d-block mb-1">Amount Sent</small>
+                            <p class="text-info fw-bold mb-0 fs-4">@_selectedTransfer.Amount.ToString("N2") @_selectedTransfer.FromCurrency</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3" style="background: rgba(240,147,251,0.1); border-radius: 12px;">
+                            <small class="text-white-50 d-block mb-1">Amount Received</small>
+                            <p class="text-success fw-bold mb-0 fs-4">@_selectedTransfer.ConvertedAmount.ToString("N2") @_selectedTransfer.ToCurrency</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3" style="background: rgba(79,172,254,0.1); border-radius: 12px;">
+                            <small class="text-white-50 d-block mb-1">Exchange Rate</small>
+                            <p class="text-white mb-0">1 @_selectedTransfer.FromCurrency = @_selectedTransfer.ExchangeRate.ToString("F4") @_selectedTransfer.ToCurrency</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3" style="background: rgba(79,172,254,0.1); border-radius: 12px;">
+                            <small class="text-white-50 d-block mb-1">Transfer Fee</small>
+                            <p class="text-warning mb-0 fw-bold">@_selectedTransfer.Fee.ToString("N2") @_selectedTransfer.FromCurrency</p>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="p-3" style="background: rgba(0,210,255,0.08); border-radius: 12px;">
+                            <small class="text-white-50 d-block mb-2">Recipient Details</small>
+                            <p class="text-white mb-1"><strong>Name:</strong> @_selectedTransfer.RecipientName</p>
+                            <p class="text-white mb-0"><strong>Email:</strong> @_selectedTransfer.RecipientEmail</p>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="p-3" style="background: rgba(0,210,255,0.08); border-radius: 12px;">
+                            <small class="text-white-50 d-block mb-2">Status</small>
+                            <div>
+                                @if (_selectedTransfer.Status == "Completed")
+                                {
+                                    <span class="badge bg-success" style="font-size: 14px; padding: 6px 12px;">✅ Completed</span>
+                                }
+                                else if (_selectedTransfer.Status == "Pending")
+                                {
+                                    <span class="badge bg-warning" style="font-size: 14px; padding: 6px 12px;">⏳ Pending</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger" style="font-size: 14px; padding: 6px 12px;">❌ Failed</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid rgba(0,210,255,0.2); padding: 20px 25px;">
+                <button class="btn btn-secondary" @onclick="CloseModal" style="border-radius: 10px; padding: 8px 20px;">Close</button>
+                <button class="btn-neon" @onclick="DownloadReceipt" style="padding: 8px 20px;">
+                    <i class="bi bi-download me-2"></i>Download Receipt
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .transaction-row {
+        transition: all 0.2s ease;
+    }
+    
+        .transaction-row:hover {
+            background: rgba(0, 210, 255, 0.05);
+            transform: translateX(5px);
+        }
+    
+    .page-link {
+        border: none;
+        margin: 0 3px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+    
+        .page-link:hover {
+            background: #00d2ff !important;
+            transform: translateY(-2px);
+        }
+    
+    .page-item.active .page-link {
+        background: #00d2ff !important;
+        border-color: #00d2ff;
+    }
+
+    .btn-close-white {
+        color: white;
+        font-size: 28px;
+        line-height: 1;
+        opacity: 0.8;
+        transition: opacity 0.2s;
+    }
+
+        .btn-close-white:hover {
+            opacity: 1;
+        }
+</style>
+
+@code {
+    private string _userId = "";
+    private List<Transfer> _allTransfers = new();
+    private List<Transfer> _filteredTransfers = new();
+    
+    // Filters
+    private DateTime? _fromDate = DateTime.Now.AddMonths(-1);
+    private DateTime? _toDate = DateTime.Now;
+    private string _filterCurrency = "";
+    private string _filterStatus = "";
+    private string _searchTerm = "";
+    
+    // Pagination
+    private int _currentPage = 1;
+    private int _pageSize = 10;
+    private int _totalPages = 1;
+    
+    // Statistics
+    private int _totalTransfers = 0;
+    private decimal _totalAmount = 0;
+    private decimal _totalFees = 0;
+    private string _avgPerMonth = "0";
+    
+    // Modal
+    private bool _showModal = false;
+    private Transfer? _selectedTransfer;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _userId = await AuthService.GetCurrentUserIdAsync() ?? "";
+        await LoadTransfers();
+        ApplyFilters();
+    }
+    
+    private async Task LoadTransfers()
+    {
+        _allTransfers = await DbContext.Transfers
+            .Where(t => t.UserId == _userId)
+            .OrderByDescending(t => t.CreatedAt)
+            .ToListAsync();
+        
+        // Calculate statistics
+        _totalTransfers = _allTransfers.Count;
+        _totalAmount = _allTransfers.Sum(t => t.Amount);
+        _totalFees = _allTransfers.Sum(t => t.Fee);
+        
+        var monthsCount = Math.Max(1, (DateTime.Now - _allTransfers.Select(t => t.CreatedAt).DefaultIfEmpty(DateTime.Now).Min()).Days / 30);
+        _avgPerMonth = (_totalAmount / monthsCount).ToString("N0");
+    }
+    
+    private void ApplyFilters()
+    {
+        var query = _allTransfers.AsQueryable();
+        
+        // Date filter
+        if (_fromDate.HasValue)
+            query = query.Where(t => t.CreatedAt >= _fromDate.Value);
+        if (_toDate.HasValue)
+            query = query.Where(t => t.CreatedAt <= _toDate.Value.AddDays(1));
+        
+        // Currency filter
+        if (!string.IsNullOrEmpty(_filterCurrency))
+            query = query.Where(t => t.FromCurrency == _filterCurrency || t.ToCurrency == _filterCurrency);
+        
+        // Status filter
+        if (!string.IsNullOrEmpty(_filterStatus))
+            query = query.Where(t => t.Status == _filterStatus);
+        
+        // Search filter
+        if (!string.IsNullOrEmpty(_searchTerm))
+        {
+            query = query.Where(t =>
+                (t.RecipientName != null && t.RecipientName.Contains(_searchTerm)) ||
+                (t.RecipientEmail != null && t.RecipientEmail.Contains(_searchTerm)));
+        }
+        
+        var filtered = query.ToList();
+        _totalPages = (int)Math.Ceiling((double)filtered.Count / _pageSize);
+        _filteredTransfers = filtered.Skip((_currentPage - 1) * _pageSize).Take(_pageSize).ToList();
+        
+        StateHasChanged();
+    }
+    
+    private void ResetFilters()
+    {
+        _fromDate = DateTime.Now.AddMonths(-1);
+        _toDate = DateTime.Now;
+        _filterCurrency = "";
+        _filterStatus = "";
+        _searchTerm = "";
+        _currentPage = 1;
+        ApplyFilters();
+    }
+    
+    private void GoToPage(int page)
+    {
+        if (page < 1 || page > _totalPages) return;
+        _currentPage = page;
+        ApplyFilters();
+    }
+    
+    private async Task ExportToCSV()
+    {
+        try
+        {
+            var csv = new System.Text.StringBuilder();
+            csv.AppendLine("Date,From Currency,To Currency,Amount,Exchange Rate,Fee,Total,Recipient,Status");
+            
+            foreach (var t in _allTransfers)
+            {
+                csv.AppendLine($"{t.CreatedAt:yyyy-MM-dd HH:mm},{t.FromCurrency},{t.ToCurrency},{t.Amount},{t.ExchangeRate},{t.Fee},{t.TotalAmount},{t.RecipientEmail},{t.Status}");
+            }
+            
+            // Create download
+            var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+            var base64 = Convert.ToBase64String(bytes);
+            var url = $"data:text/csv;charset=utf-8;base64,{base64}";
+            await JSRuntime.InvokeVoidAsync("open", url);
+            ToastService.ShowSuccess("Transactions exported successfully!");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Export failed: {ex.Message}");
+        }
+    }
+    
+    private void ViewDetails(int id)
+    {
+        _selectedTransfer = _allTransfers.FirstOrDefault(t => t.Id == id);
+        _showModal = true;
+        StateHasChanged();
+    }
+    
+    private void CloseModal()
+    {
+        _showModal = false;
+        _selectedTransfer = null;
+        StateHasChanged();
+    }
+    
+    private async Task DownloadReceipt()
+    {
+        if (_selectedTransfer != null)
+        {
+            ToastService.ShowInfo("Receipt download coming soon!");
+        }
+    }
+}

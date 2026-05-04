@@ -1,0 +1,97 @@
+﻿@page "/help"
+
+<div class="container page-transition">
+    <div class="row justify-content-center">
+        <div class="col-lg-10" data-aos="fade-up">
+            <div class="glass-card p-4">
+                <div class="text-center mb-4">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #00d2ff, #f093fb); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+                        <i class="bi bi-question-circle" style="font-size: 28px; color: white;"></i>
+                    </div>
+                    <h1 class="gradient-text">Help Center</h1>
+                    <p class="text-white-50">Frequently Asked Questions</p>
+                    <div class="mt-3">
+                        <div class="position-relative">
+                            <i class="bi bi-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #00d2ff;"></i>
+                            <input type="text" class="form-control input-futuristic" @bind="_searchTerm" placeholder="Search FAQs..." style="padding-left: 45px;" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    @foreach (var faq in FilteredFaqs)
+                    {
+                        <div class="col-12">
+                            <div class="faq-item p-3" style="background: rgba(255,255,255,0.05); border-radius: 12px;">
+                                <div class="d-flex justify-content-between align-items-center" @onclick="() => ToggleFaq(faq.Id)">
+                                    <h6 class="text-white mb-0">@faq.Question</h6>
+                                    <i class="bi @(faq.IsOpen ? "bi-dash-circle" : "bi-plus-circle") text-info"></i>
+                                </div>
+                                @if (faq.IsOpen)
+                                {
+                                    <div class="mt-2">
+                                        <p class="text-white-50 mb-0 small">@faq.Answer</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .faq-item {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+        .faq-item:hover {
+            background: rgba(0, 210, 255, 0.1) !important;
+            transform: translateX(5px);
+        }
+</style>
+
+@code {
+    private string _searchTerm = "";
+    private List<FaqItem> _faqs = new();
+    
+    private List<FaqItem> FilteredFaqs => string.IsNullOrEmpty(_searchTerm)
+        ? _faqs
+        : _faqs.Where(f => f.Question.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                           f.Answer.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+    
+    protected override void OnInitialized()
+    {
+        _faqs = new List<FaqItem>
+        {
+            new() { Id = 1, Question = "How do I send money?", Answer = "Go to Send Money page, enter recipient details, amount, and click Send Money. The funds will be transferred instantly." },
+            new() { Id = 2, Question = "What are the transfer fees?", Answer = "Standard users pay 2% fee. Premium users get 50% discount (1% fee). Minimum fee is $1, maximum is $50." },
+            new() { Id = 3, Question = "How long does a transfer take?", Answer = "Most transfers are completed instantly. International transfers typically take 1-2 business days." },
+            new() { Id = 4, Question = "How do I become a Premium member?", Answer = "Go to your Profile page and click 'Upgrade to Premium'. Premium membership gives you 50% off on all fees." },
+            new() { Id = 5, Question = "Is my money safe?", Answer = "Yes! We use bank-level 256-bit SSL encryption and fraud protection systems." },
+            new() { Id = 6, Question = "How do I set up rate alerts?", Answer = "Go to Rate Alerts page, select currency pair, set target rate, and you'll be notified when the rate hits your target." },
+            new() { Id = 7, Question = "What currencies are supported?", Answer = "We support USD, EUR, GBP, PKR, AED, SAR, CAD, AUD, JPY, CNY, INR, CHF, and more!" },
+            new() { Id = 8, Question = "How do I get a referral bonus?", Answer = "Share your unique referral code with friends. When they sign up and make their first transfer, you both get $5!" },
+            new() { Id = 9, Question = "How to set up Security PIN?", Answer = "Go to Security PIN page in the menu. Set a 4-6 digit PIN to protect your wallet and transactions." },
+            new() { Id = 10, Question = "Why was my transfer flagged?", Answer = "Transfers over $5,000 may require additional verification for security reasons. Contact support for assistance." }
+        };
+    }
+    
+    private void ToggleFaq(int id)
+    {
+        var faq = _faqs.FirstOrDefault(f => f.Id == id);
+        if (faq != null) faq.IsOpen = !faq.IsOpen;
+        StateHasChanged();
+    }
+    
+    private class FaqItem
+    {
+        public int Id { get; set; }
+        public string Question { get; set; } = "";
+        public string Answer { get; set; } = "";
+        public bool IsOpen { get; set; } = false;
+    }
+}

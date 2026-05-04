@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FXTransfer.Models.Entities;
 
-public class RateAlert
+public class Notification
 {
     [Key]
     public int Id { get; set; }
@@ -12,24 +12,23 @@ public class RateAlert
     public string UserId { get; set; } = string.Empty;
 
     [Required]
-    [MaxLength(3)]
-    public string FromCurrency { get; set; } = string.Empty;
+    [MaxLength(100)]
+    public string Title { get; set; } = string.Empty;
 
     [Required]
-    [MaxLength(3)]
-    public string ToCurrency { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
 
-    [Required]
-    public decimal TargetRate { get; set; }
+    [MaxLength(50)]
+    public string Type { get; set; } = "info"; // success, error, warning, info
 
-    public bool IsTriggered { get; set; } = false;
+    public bool IsRead { get; set; } = false;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public DateTime? TriggeredAt { get; set; }
+    public string? RelatedEntityId { get; set; }
 
-    [MaxLength(20)]
-    public string AlertType { get; set; } = "Above"; // Above, Below
+    [MaxLength(50)]
+    public string? RelatedEntityType { get; set; }
 
     [ForeignKey("UserId")]
     public virtual ApplicationUser? User { get; set; }

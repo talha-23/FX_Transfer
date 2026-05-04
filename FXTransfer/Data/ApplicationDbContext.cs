@@ -1,6 +1,7 @@
 ﻿using FXTransfer.Models.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using FXTransfer.Models.Entities;
 
 namespace FXTransfer.Data;
 
@@ -16,6 +17,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<FeeConfiguration> FeeConfigurations { get; set; }
     public DbSet<AdminActionLog> AdminActionLogs { get; set; }
     public DbSet<RateAlert> RateAlerts { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,0 +1,567 @@
+﻿@page "/profile"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Identity
+@using FXTransfer.Data
+@using Microsoft.EntityFrameworkCore
+@inject IAuthService AuthService
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IToastService ToastService
+@inject NavigationManager Navigation
+@inject ApplicationDbContext DbContext
+@inject IJSRuntime JSRuntime
+@inject IWalletService WalletService
+
+<div class="container page-transition">
+    <div class="row justify-content-center">
+        <div class="col-lg-8" data-aos="fade-up">
+            <div class="glass-card p-4">
+                <div class="text-center mb-4">
+                    <div class="float-animation" style="display: inline-block;">
+                        <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #00d2ff, #f093fb); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                            <i class="bi bi-person-circle" style="font-size: 35px; color: white;"></i>
+                        </div>
+                    </div>
+                    <h1 class="gradient-text">My Profile</h1>
+                    <p class="text-white-50">Manage your account information</p>
+                </div>
+
+                @if (!string.IsNullOrEmpty(_successMessage))
+                {
+                    <div class="alert alert-success mb-3" style="background: rgba(40,167,69,0.2); border: 1px solid #28a745; border-radius: 12px ;color:aliceblue">
+                        <i class="bi bi-check-circle me-2"></i> @_successMessage
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(_errorMessage))
+                {
+                    <div class="alert alert-danger mb-3" style="background: rgba(220,53,69,0.2); border: 1px solid #dc3545; border-radius: 12px;">
+                        <i class="bi bi-exclamation-triangle me-2"></i> @_errorMessage
+                    </div>
+                }
+
+                <!-- Tabs -->
+                <ul class="nav nav-tabs mb-4" style="border-bottom-color: rgba(0,210,255,0.2); gap: 5px;">
+                    <li class="nav-item">
+                        <button class="nav-link @(_activeTab == "profile" ? "active" : "")"
+                                @onclick='() => _activeTab = "profile"'
+                                style="border-radius: 10px; padding: 10px 20px;">
+                            <i class="bi bi-person me-1"></i> Profile Info
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link @(_activeTab == "password" ? "active" : "")"
+                                @onclick='() => _activeTab = "password"'
+                                style="border-radius: 10px; padding: 10px 20px;">
+                            <i class="bi bi-shield-lock me-1"></i> Change Password
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link @(_activeTab == "stats" ? "active" : "")"
+                                @onclick='() => _activeTab = "stats"'
+                                style="border-radius: 10px; padding: 10px 20px;">
+                            <i class="bi bi-graph-up me-1"></i> Account Stats
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Profile Info Tab -->
+                @if (_activeTab == "profile")
+                {
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-white">Full Name</label>
+                            <input type="text" class="form-control input-futuristic" @bind="_fullName" style="color:white" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-white">Email Address</label>
+                            <input type="email" class="form-control input-futuristic" value="@_email" style="color:white" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-white">Phone Number</label>
+                            <input type="tel" class="form-control input-futuristic" @bind="_phoneNumber" placeholder="+92 300 1234567" style="color:white" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-white">Country</label>
+                            <select class="form-control input-futuristic" @bind="_country">
+                                <option value="">Select Country</option>
+                                <option value="Pakistan">Pakistan</option>
+                                <option value="United States">United States</option>
+                                <option value="United Kingdom">United Kingdom</option>
+                                <option value="UAE">UAE</option>
+                                <option value="Saudi Arabia">Saudi Arabia</option>
+                                <option value="Canada">Canada</option>
+                                <option value="Australia">Australia</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-white">Referral Code</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control input-futuristic" value="@_referralCode" style="color:white" />
+                                <button class="btn btn-outline-info" @onclick="CopyReferralCode" style="border-radius: 0 12px 12px 0;">
+                                    <i class="bi bi-clipboard"></i> Copy
+                                </button>
+                            </div>
+                            <small class="text-info mt-1 d-block">Share this code with friends to earn bonuses!</small>
+                        </div>
+
+                        <!-- Account Status Section -->
+                        <div class="col-12">
+                            <label class="form-label text-white">Account Status</label>
+                            <div class="d-flex align-items-center gap-3 flex-wrap">
+                                <span class="badge @(_isPremium ? "bg-warning" : "bg-secondary")" style="padding: 8px 16px; font-size: 14px;">
+                                    @(_isPremium ? "✨ Premium Member" : "Standard Member")
+                                </span>
+                                
+                                <button class="btn btn-sm @(_isPremium ? "btn-outline-danger" : "btn-outline-warning")"
+                                        @onclick="TogglePremiumModal"
+                                        style="border-radius: 20px;">
+                                    @if (_isPremium)
+                                    {
+                                        <span><i class="bi bi-x-circle me-1"></i> Cancel Premium</span>
+                                    }
+                                    else
+                                    {
+                                        <span><i class="bi bi-arrow-up me-1"></i> Upgrade to Premium</span>
+                                    }
+                                </button>
+                                
+                                @if (_isPremium && !string.IsNullOrEmpty(_premiumExpiry))
+                                {
+                                    <small class="text-white-50">Expires: @_premiumExpiry</small>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-3">
+                            <button class="btn-neon" @onclick="UpdateProfile" style="padding: 12px 30px;">
+                                <i class="bi bi-save me-2"></i>Save Changes
+                            </button>
+                        </div>
+                    </div>
+                }
+
+                <!-- Change Password Tab -->
+                @if (_activeTab == "password")
+                {
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label text-white">Current Password</label>
+                            <input type="password" class="form-control input-futuristic" @bind="_currentPassword" style="color:white" placeholder="Enter the old password" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-white">New Password</label>
+                            <input type="password" class="form-control input-futuristic" @bind="_newPassword" style="color:white" placeholder="Enter the new password" />
+                            <small class="text-white-50">Minimum 6 characters</small>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-white">Confirm New Password</label>
+                            <input type="password" class="form-control input-futuristic" @bind="_confirmPassword" style="color:white" placeholder="Re-enter the new password" />
+                        </div>
+                        <div class="col-12">
+                            <button class="btn-neon" @onclick="ChangePassword" style="padding: 12px 30px;">
+                                <i class="bi bi-key me-2"></i>Change Password
+                            </button>
+                        </div>
+                    </div>
+                }
+
+                <!-- Account Stats Tab -->
+                @if (_activeTab == "stats")
+                {
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="glass-card p-3 text-center" style="background: rgba(0,210,255,0.08);">
+                                <i class="bi bi-calendar-check" style="font-size: 35px; color: #00d2ff;"></i>
+                                <h2 class="text-white mt-2 mb-0">@_memberSince</h2>
+                                <p class="text-white-50 small mb-0">Member Since</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="glass-card p-3 text-center" style="background: rgba(240,147,251,0.08);">
+                                <i class="bi bi-arrow-left-right" style="font-size: 35px; color: #f093fb;"></i>
+                                <h2 class="text-white mt-2 mb-0">@_totalTransfers</h2>
+                                <p class="text-white-50 small mb-0">Total Transfers</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="glass-card p-3 text-center" style="background: rgba(79,172,254,0.08);">
+                                <i class="bi bi-currency-dollar" style="font-size: 35px; color: #4facfe;"></i>
+                                <h2 class="text-white mt-2 mb-0">$@_totalSent.ToString("N2")</h2>
+                                <p class="text-white-50 small mb-0">Total Sent</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="glass-card p-3 text-center" style="background: rgba(255,193,7,0.08);">
+                                <i class="bi bi-wallet2" style="font-size: 35px; color: #ffc107;"></i>
+                                <h2 class="text-white mt-2 mb-0">$@_totalBalance.ToString("N2")</h2>
+                                <p class="text-white-50 small mb-0">Wallet Balance</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Premium Confirmation Modal -->
+@if (_showPremiumModal)
+{
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10000;">
+        <div style="background: linear-gradient(135deg, #1a1a3e, #0f0c29); border: 1px solid @(_isPremium ? "rgba(220,53,69,0.3)" : "rgba(0,210,255,0.3)"); border-radius: 20px; width: 450px; max-width: 90%;">
+            <div style="border-bottom: 1px solid rgba(0,210,255,0.2); padding: 15px 20px;">
+                <h5 style="margin: 0; background: linear-gradient(135deg, #00d2ff, #f093fb); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                    <i class="bi bi-gem me-2"></i>@(_isPremium ? "Cancel Premium" : "Upgrade to Premium")
+                </h5>
+            </div>
+            <div style="padding: 20px;">
+                <div class="text-center mb-3">
+                    <div style="width: 70px; height: 70px; background: @(_isPremium ? "linear-gradient(135deg, #dc3545, #c82333)" : "linear-gradient(135deg, #f093fb, #f5576c)"); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                        <i class="bi @(_isPremium ? "bi-x-circle" : "bi-gem")" style="font-size: 35px; color: white;"></i>
+                    </div>
+                </div>
+                
+                @if (_isPremium)
+                {
+                    <p class="text-white text-center">Are you sure you want to cancel your Premium membership?</p>
+                    <p class="text-white-50 small text-center">You will lose all premium benefits including 50% fee discount.</p>
+                }
+                else
+                {
+                    <h4 class="text-center gradient-text" style="margin: 0 0 15px 0;">Premium Benefits</h4>
+                    <div style="margin-bottom: 15px;">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            <span class="text-white">50% off on all transfer fees</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            <span class="text-white">Priority customer support</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            <span class="text-white">Higher transfer limits</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            <span class="text-white">Exclusive premium badge</span>
+                        </div>
+                    </div>
+                    <div class="alert alert-info" style="background: rgba(0,210,255,0.15) ; border: none; border-radius: 12px; text-align: center;">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Premium Membership: <strong>$9.99/month</strong>
+                    </div>
+                }
+            </div>
+            <div style="border-top: 1px solid rgba(0,210,255,0.2); padding: 15px 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="btn btn-secondary" @onclick="CloseModal" style="border-radius: 10px;">Cancel</button>
+                <button class="btn @(_isPremium ? "btn-danger" : "btn-neon")" @onclick="ConfirmAction" style="border-radius: 10px;">
+                    @(_isPremium ? "Yes, Cancel Premium" : "Pay $9.99 & Upgrade")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .nav-tabs .nav-link {
+        color: rgba(255, 255, 255, 0.7);
+        transition: all 0.3s ease;
+    }
+    
+        .nav-tabs .nav-link:hover {
+            color: #00d2ff;
+            transform: translateY(-2px);
+        }
+    
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, rgba(0,210,255,0.2), rgba(240,147,251,0.1));
+            color: #00d2ff !important;
+            border-bottom: 2px solid #00d2ff;
+        }
+    
+    .input-futuristic {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        padding: 12px 16px;
+        color: white;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+    
+        .input-futuristic:focus {
+            border-color: #00d2ff;
+            box-shadow: 0 0 15px rgba(0,210,255,0.2);
+            outline: none;
+            background: rgba(255, 255, 255, 0.12);
+        }
+    
+        .input-futuristic:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    
+    .btn-neon {
+        background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+        border: none;
+        color: white;
+        padding: 8px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+</style>
+
+@code {
+    private string _activeTab = "profile";
+    private string _userId = "";
+    private string _fullName = "";
+    private string _email = "";
+    private string _phoneNumber = "";
+    private string _country = "";
+    private string _referralCode = "";
+    private bool _isPremium = false;
+    private string _premiumExpiry = "";
+    private string _memberSince = "";
+    private int _totalTransfers = 0;
+    private decimal _totalSent = 0;
+    private decimal _totalBalance = 0;
+    
+    private string _currentPassword = "";
+    private string _newPassword = "";
+    private string _confirmPassword = "";
+    
+    private string _successMessage = "";
+    private string _errorMessage = "";
+    
+    // Modal
+    private bool _showPremiumModal = false;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _userId = await AuthService.GetCurrentUserIdAsync() ?? "";
+        await LoadUserData();
+        await LoadUserStats();
+    }
+    
+    private async Task LoadUserData()
+    {
+        var user = await UserManager.FindByIdAsync(_userId);
+        if (user != null)
+        {
+            _fullName = user.FullName;
+            _email = user.Email ?? "";
+            _phoneNumber = user.PhoneNumber ?? "";
+            _country = user.CountryCode ?? "";
+            _referralCode = user.ReferralCode ?? "Not available";
+            _isPremium = user.IsPremium;
+            _memberSince = user.RegisteredAt.ToString("MMM dd, yyyy");
+            if (user.PremiumExpiry.HasValue)
+            {
+                _premiumExpiry = user.PremiumExpiry.Value.ToString("MMM dd, yyyy");
+            }
+        }
+        StateHasChanged();
+    }
+    
+    private async Task LoadUserStats()
+    {
+        var transfers = await DbContext.Transfers
+            .Where(t => t.UserId == _userId && t.Status == "Completed")
+            .ToListAsync();
+        
+        _totalTransfers = transfers.Count;
+        _totalSent = transfers.Sum(t => t.Amount);
+        
+        var wallets = await WalletService.GetUserWalletsAsync(_userId);
+        _totalBalance = wallets.Where(w => w.CurrencyCode == "USD").Sum(w => w.Balance);
+        if (_totalBalance == 0 && wallets.Any())
+        {
+            _totalBalance = wallets.First().Balance;
+        }
+        
+        StateHasChanged();
+    }
+    
+    private async Task UpdateProfile()
+    {
+        if (string.IsNullOrWhiteSpace(_fullName))
+        {
+            _errorMessage = "Full name is required";
+            return;
+        }
+        
+        try
+        {
+            var user = await UserManager.FindByIdAsync(_userId);
+            if (user != null)
+            {
+                user.FullName = _fullName;
+                user.PhoneNumber = _phoneNumber;
+                user.CountryCode = _country;
+                
+                var result = await UserManager.UpdateAsync(user);
+                if (result.Succeeded)
+                {
+                    _successMessage = "Profile updated successfully!";
+                    _errorMessage = "";
+                    ToastService.ShowSuccess("Profile updated!");
+                }
+                else
+                {
+                    _errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error: {ex.Message}";
+        }
+        
+        StateHasChanged();
+    }
+    
+    private async Task ChangePassword()
+    {
+        if (string.IsNullOrWhiteSpace(_currentPassword))
+        {
+            _errorMessage = "Current password is required";
+            return;
+        }
+        
+        if (string.IsNullOrWhiteSpace(_newPassword))
+        {
+            _errorMessage = "New password is required";
+            return;
+        }
+        
+        if (_newPassword.Length < 6)
+        {
+            _errorMessage = "Password must be at least 6 characters";
+            return;
+        }
+        
+        if (_newPassword != _confirmPassword)
+        {
+            _errorMessage = "New passwords do not match";
+            return;
+        }
+        
+        try
+        {
+            var user = await UserManager.FindByIdAsync(_userId);
+            if (user != null)
+            {
+                var result = await UserManager.ChangePasswordAsync(user, _currentPassword, _newPassword);
+                if (result.Succeeded)
+                {
+                    _successMessage = "Password changed successfully! Please login again.";
+                    _errorMessage = "";
+                    ToastService.ShowSuccess("Password changed!");
+                    
+                    await Task.Delay(2000);
+                    await SignInManager.SignOutAsync();
+                    Navigation.NavigateTo("/login");
+                }
+                else
+                {
+                    _errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Error: {ex.Message}";
+        }
+        
+        StateHasChanged();
+    }
+    
+    private void TogglePremiumModal()
+    {
+        _showPremiumModal = true;
+        StateHasChanged();
+    }
+    
+    private void CloseModal()
+    {
+        _showPremiumModal = false;
+        StateHasChanged();
+    }
+    
+    private async Task ConfirmAction()
+    {
+        _showPremiumModal = false;
+        
+        if (_isPremium)
+        {
+            // Cancel Premium
+            try
+            {
+                var user = await UserManager.FindByIdAsync(_userId);
+                if (user != null)
+                {
+                    user.IsPremium = false;
+                    user.PremiumExpiry = null;
+                    var result = await UserManager.UpdateAsync(user);
+                    
+                    if (result.Succeeded)
+                    {
+                        _successMessage = "Premium membership cancelled. You are now a Standard member.";
+                        _isPremium = false;
+                        ToastService.ShowInfo("Premium membership cancelled");
+                        await LoadUserData();
+                    }
+                    else
+                    {
+                        _errorMessage = "Failed to cancel premium. Please try again.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _errorMessage = $"Error: {ex.Message}";
+            }
+        }
+        else
+        {
+            // Upgrade to Premium
+            try
+            {
+                var user = await UserManager.FindByIdAsync(_userId);
+                if (user != null)
+                {
+                    user.IsPremium = true;
+                    user.PremiumExpiry = DateTime.UtcNow.AddMonths(1);
+                    var result = await UserManager.UpdateAsync(user);
+                    
+                    if (result.Succeeded)
+                    {
+                        _successMessage = "🎉 Congratulations! You are now a Premium member!";
+                        _isPremium = true;
+                        _premiumExpiry = user.PremiumExpiry.Value.ToString("MMM dd, yyyy");
+                        ToastService.ShowSuccess("Welcome to Premium!");
+                        await LoadUserData();
+                    }
+                    else
+                    {
+                        _errorMessage = "Upgrade failed. Please try again.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _errorMessage = $"Error: {ex.Message}";
+            }
+        }
+        
+        StateHasChanged();
+    }
+    
+    private async Task CopyReferralCode()
+    {
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", _referralCode);
+        ToastService.ShowSuccess("Referral code copied!");
+    }
+}

@@ -1,0 +1,166 @@
+﻿@page "/referrals"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Identity
+@using FXTransfer.Data
+@using Microsoft.EntityFrameworkCore
+@inject UserManager<ApplicationUser> UserManager
+@inject IReferralService ReferralService
+@inject IAuthService AuthService
+@inject IToastService ToastService
+@inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
+
+<div class="container page-transition">
+    <div class="row justify-content-center">
+        <div class="col-lg-8" data-aos="fade-up">
+            <div class="glass-card p-4">
+                <div class="text-center mb-4">
+                    <div class="float-animation" style="display: inline-block;">
+                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #00d2ff, #f093fb); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+                            <i class="bi bi-gift" style="font-size: 28px; color: white;"></i>
+                        </div>
+                    </div>
+                    <h1 class="gradient-text">Referral Program</h1>
+                    <p class="text-white-50">Invite friends and earn $5 for each referral!</p>
+                </div>
+
+                <!-- Referral Stats -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="p-3 text-center" style="background: rgba(0,210,255,0.1); border-radius: 16px;">
+                            <i class="bi bi-cash-stack" style="font-size: 35px; color: #28a745;"></i>
+                            <h2 class="text-white mt-2">$@_totalBonus.ToString("N2")</h2>
+                            <p class="text-white-50 small">Total Bonus Earned</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 text-center" style="background: rgba(240,147,251,0.1); border-radius: 16px;">
+                            <i class="bi bi-people" style="font-size: 35px; color: #00d2ff;"></i>
+                            <h2 class="text-white mt-2">@_referralCount</h2>
+                            <p class="text-white-50 small">Friends Referred</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Referral Code Section -->
+                <div class="p-4 mb-4" style="background: rgba(0,210,255,0.08); border-radius: 16px;">
+                    <h5 class="gradient-text mb-3">Your Referral Code</h5>
+                    <div class="input-group">
+                        <input type="text" class="form-control input-futuristic" id="referralCode" value="@_referralCode" readonly style="font-size: 1.2rem; font-weight: bold;">
+                        <button class="btn btn-outline-info" @onclick="CopyReferralCode">
+                            <i class="bi bi-clipboard me-1"></i> Copy
+                        </button>
+                    </div>
+                    <div class="mt-2">
+                        <button class="btn btn-sm btn-outline-success" @onclick="ShareReferral">
+                            <i class="bi bi-share me-1"></i> Share via Email
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary ms-2" @onclick="ShareWhatsApp">
+                            <i class="bi bi-whatsapp me-1"></i> WhatsApp
+                        </button>
+                    </div>
+                    <small class="text-white-50 d-block mt-2">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Share this code with friends. When they sign up and make their first transfer, you both earn $5!
+                    </small>
+                </div>
+
+                <!-- Referral Link Section -->
+                <div class="p-4 mb-4" style="background: rgba(240,147,251,0.08); border-radius: 16px;">
+                    <h5 class="gradient-text mb-3">Your Referral Link</h5>
+                    <div class="input-group">
+                        <input type="text" class="form-control input-futuristic" id="referralLink" value="@_referralLink" readonly>
+                        <button class="btn btn-outline-info" @onclick="CopyReferralLink">
+                            <i class="bi bi-clipboard me-1"></i> Copy
+                        </button>
+                    </div>
+                </div>
+
+                <!-- How It Works -->
+                <div class="p-4" style="background: rgba(79,172,254,0.08); border-radius: 16px;">
+                    <h5 class="gradient-text mb-3">How It Works</h5>
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="p-3">
+                                <div class="mb-2">1️⃣</div>
+                                <h6 class="text-white">Share Your Code</h6>
+                                <small class="text-white-50">Share your unique referral code with friends</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3">
+                                <div class="mb-2">2️⃣</div>
+                                <h6 class="text-white">Friend Signs Up</h6>
+                                <small class="text-white-50">They enter your code during registration</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3">
+                                <div class="mb-2">3️⃣</div>
+                                <h6 class="text-white">Earn $5 Bonus</h6>
+                                <small class="text-white-50">You both get $5 after their first transfer</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    input[readonly] {
+        cursor: pointer;
+        background: rgba(255,255,255,0.05);
+    }
+</style>
+
+@code {
+    private string _userId = "";
+    private string _referralCode = "";
+    private string _referralLink = "";
+    private decimal _totalBonus = 0;
+    private int _referralCount = 0;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _userId = await AuthService.GetCurrentUserIdAsync() ?? "";
+        _referralCode = await ReferralService.GenerateReferralCodeAsync(_userId);
+        _referralLink = $"https://localhost:5001/register?ref={_referralCode}";
+        _totalBonus = await ReferralService.GetReferralBonusAsync(_userId);
+        await LoadReferralCount();
+    }
+    
+    private async Task LoadReferralCount()
+    {
+        var users = await UserManager.Users.Where(u => u.ReferredBy == _userId).ToListAsync();
+        _referralCount = users.Count;
+    }
+    
+    private async Task CopyReferralCode()
+    {
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", _referralCode);
+        ToastService.ShowSuccess("Referral code copied!");
+    }
+    
+    private async Task CopyReferralLink()
+    {
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", _referralLink);
+        ToastService.ShowSuccess("Referral link copied!");
+    }
+    
+    private async Task ShareReferral()
+    {
+        var subject = "Join FXTransfer using my referral code!";
+        var body = $"Hey! Join FXTransfer using my referral code: {_referralCode}. You'll get $5 bonus on your first transfer! Sign up here: {_referralLink}";
+        var mailto = $"mailto:?subject={Uri.EscapeDataString(subject)}&body={Uri.EscapeDataString(body)}";
+        Navigation.NavigateTo(mailto);
+    }
+    
+    private async Task ShareWhatsApp()
+    {
+        var text = $"Join FXTransfer using my referral code: {_referralCode}. Get $5 bonus! {_referralLink}";
+        var whatsappUrl = $"https://wa.me/?text={Uri.EscapeDataString(text)}";
+        Navigation.NavigateTo(whatsappUrl);
+    }
+}

@@ -14,7 +14,8 @@ public interface IAlertService
     /// <summary>
     /// Creates a new rate alert
     /// </summary>
-    Task<RateAlert> CreateAlertAsync(string userId, string fromCurrency, string toCurrency, decimal targetRate);
+    //Task<RateAlert> CreateAlertAsync(string userId, string fromCurrency, string toCurrency, decimal targetRate);
+    Task<RateAlert> CreateAlertAsync(string userId, string fromCurrency, string toCurrency, decimal targetRate, string alertType = "Above");
 
     /// <summary>
     /// Gets all alerts for a user

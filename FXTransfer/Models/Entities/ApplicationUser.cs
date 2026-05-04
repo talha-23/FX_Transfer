@@ -51,6 +51,11 @@ public class ApplicationUser : IdentityUser
     /// </summary>
     public DateTime? PINLastChanged { get; set; }
 
+    // Add these properties
+    public bool TwoFactorEnabled { get; set; } = false;
+    public string? TwoFactorCode { get; set; }
+    public DateTime? TwoFactorCodeExpiry { get; set; }
+
     // Navigation properties
     public virtual ICollection<Wallet> Wallets { get; set; } = new List<Wallet>();
     public virtual ICollection<Transfer> Transfers { get; set; } = new List<Transfer>();

@@ -28,7 +28,7 @@ public class AlertService : IAlertService
         _logger = logger;
     }
 
-    public async Task<RateAlert> CreateAlertAsync(string userId, string fromCurrency, string toCurrency, decimal targetRate)
+    public async Task<RateAlert> CreateAlertAsync(string userId, string fromCurrency, string toCurrency, decimal targetRate, string alertType = "Above")
     {
         var alert = new RateAlert
         {
@@ -36,12 +36,14 @@ public class AlertService : IAlertService
             FromCurrency = fromCurrency.ToUpper(),
             ToCurrency = toCurrency.ToUpper(),
             TargetRate = targetRate,
+            AlertType = alertType,
             CreatedAt = DateTime.UtcNow,
             IsTriggered = false
         };
 
         _context.RateAlerts.Add(alert);
         await _context.SaveChangesAsync();
+
         return alert;
     }
 

@@ -1,0 +1,86 @@
+﻿@page "/2fa"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Identity
+@using FXTransfer.Data
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IAuthService AuthService
+@inject IToastService ToastService
+@inject NavigationManager Navigation
+
+<div class="container page-transition">
+    <div class="row justify-content-center">
+        <div class="col-md-6" data-aos="fade-up">
+            <div class="glass-card p-4">
+                <div class="text-center mb-4">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #00d2ff, #f093fb); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+                        <i class="bi bi-shield-lock" style="font-size: 28px; color: white;"></i>
+                    </div>
+                    <h1 class="gradient-text">Two-Factor Authentication</h1>
+                    <p class="text-white-50">Secure your account with 2FA</p>
+                </div>
+
+                @if (!_isEnabled)
+                {
+                    <div class="alert alert-info mb-3">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Protect your account by enabling two-factor authentication. You'll receive a verification code via email for large transfers.
+                    </div>
+                    
+                    <button class="btn-neon w-100" @onclick="Enable2FA">
+                        <i class="bi bi-shield-lock me-2"></i>Enable 2FA
+                    </button>
+                }
+                else
+                {
+                    <div class="alert alert-success mb-3">
+                        <i class="bi bi-check-circle me-2"></i>
+                        2FA is enabled on your account
+                    </div>
+                    
+                    <button class="btn btn-outline-danger w-100" @onclick="Disable2FA">
+                        <i class="bi bi-shield-slash me-2"></i>Disable 2FA
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _userId = "";
+    private bool _isEnabled = false;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _userId = await AuthService.GetCurrentUserIdAsync() ?? "";
+        var user = await UserManager.FindByIdAsync(_userId);
+        _isEnabled = user?.TwoFactorEnabled ?? false;
+    }
+    
+    private async Task Enable2FA()
+    {
+        var user = await UserManager.FindByIdAsync(_userId);
+        if (user != null)
+        {
+            user.TwoFactorEnabled = true;
+            await UserManager.UpdateAsync(user);
+            _isEnabled = true;
+            ToastService.ShowSuccess("2FA enabled successfully!");
+            StateHasChanged();
+        }
+    }
+    
+    private async Task Disable2FA()
+    {
+        var user = await UserManager.FindByIdAsync(_userId);
+        if (user != null)
+        {
+            user.TwoFactorEnabled = false;
+            await UserManager.UpdateAsync(user);
+            _isEnabled = false;
+            ToastService.ShowSuccess("2FA disabled");
+            StateHasChanged();
+        }
+    }
+}

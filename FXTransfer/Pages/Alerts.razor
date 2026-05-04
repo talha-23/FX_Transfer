@@ -1,0 +1,337 @@
+﻿@page "/alerts"
+@attribute [Authorize]
+@using Microsoft.EntityFrameworkCore
+@using FXTransfer.Data
+@using FXTransfer.Models.Entities
+@inject IAuthService AuthService
+@inject IAlertService AlertService
+@inject IToastService ToastService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<div class="container page-transition">
+    <div class="row mb-4" data-aos="fade-up">
+        <div class="col-12">
+            <div class="glass-card p-4 text-center">
+                <div class="float-animation" style="display: inline-block;">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #00d2ff, #f093fb); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+                        <i class="bi bi-bell" style="font-size: 28px; color: white;"></i>
+                    </div>
+                </div>
+                <h1 class="gradient-text">Rate Alerts</h1>
+                <p class="text-white-50">Get notified when exchange rates hit your target</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Alert Form -->
+    <div class="row mb-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h5 class="gradient-text mb-3">
+                    <i class="bi bi-plus-circle me-2"></i>Create New Alert
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label text-white">From Currency</label>
+                        <select class="form-control input-futuristic" @bind="_newAlertFromCurrency">
+                            <option value="USD">USD - US Dollar</option>
+                            <option value="EUR">EUR - Euro</option>
+                            <option value="GBP">GBP - British Pound</option>
+                            <option value="PKR">PKR - Pakistani Rupee</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label text-white">To Currency</label>
+                        <select class="form-control input-futuristic" @bind="_newAlertToCurrency">
+                            <option value="PKR">PKR - Pakistani Rupee</option>
+                            <option value="USD">USD - US Dollar</option>
+                            <option value="EUR">EUR - Euro</option>
+                            <option value="GBP">GBP - British Pound</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-white">Alert Type</label>
+                        <select class="form-control input-futuristic" @bind="_newAlertType">
+                            <option value="Above">Above</option>
+                            <option value="Below">Below</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label text-white">Target Rate</label>
+                        <input type="number" class="form-control input-futuristic" @bind="_newTargetRate" step="0.01" />
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button class="btn-neon w-100" @onclick="CreateAlert" disabled="@_isCreating">
+                            @if (_isCreating)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                <span>Creating...</span>
+                            }
+                            else
+                            {
+                                <span><i class="bi bi-bell me-2"></i>Create Alert</span>
+                            }
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Alerts List -->
+    <div class="row" data-aos="fade-up" data-aos-delay="200">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h5 class="gradient-text mb-3">
+                    <i class="bi bi-bell-fill me-2"></i>Your Active Alerts
+                    <span class="badge bg-info ms-2">@_alerts.Count</span>
+                </h5>
+            
+                @if (!_alerts.Any())
+                {
+                    <div class="text-center py-5">
+                        <i class="bi bi-bell-slash" style="font-size: 48px; color: rgba(255,255,255,0.2);"></i>
+                        <p class="text-white-50 mt-2">No active alerts. Create one above!</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-borderless">
+                            <thead>
+                                <tr style="border-bottom: 2px solid rgba(0,210,255,0.2);">
+                                    <th class="text-info">From</th>
+                                    <th class="text-info">To</th>
+                                    <th class="text-info">Condition</th>
+                                    <th class="text-info">Target Rate</th>
+                                    <th class="text-info">Current Rate</th>
+                                    <th class="text-info">Status</th>
+                                    <th class="text-info">Created</th>
+                                    <th class="text-info">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var alert in _alerts)
+                                {
+                                    <tr style="border-bottom: 1px solid rgba(0,210,255,0.1);">
+                                        <td style="color: #000000;">@alert.FromCurrency</td>
+                                        <td style="color: #000000;">@alert.ToCurrency</td>
+                                        <td style="color: #000000;">@alert.AlertType</td>
+                                        <td style="color: #000000;" class="fw-bold">@alert.TargetRate.ToString("F4")</td>
+                                        <td style="color: #000000;">
+                                            @if (_currentRates.ContainsKey(alert.ToCurrency))
+                                            {
+                                                <span>@_currentRates[alert.ToCurrency].ToString("F4")</span>
+                                                @if (alert.AlertType == "Above" && _currentRates[alert.ToCurrency] >= alert.TargetRate)
+                                                {
+                                                    <i class="bi bi-check-circle-fill text-success ms-1"></i>
+                                                }
+                                                else if (alert.AlertType == "Below" && _currentRates[alert.ToCurrency] <= alert.TargetRate)
+                                                {
+                                                    <i class="bi bi-check-circle-fill text-success ms-1"></i>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span>--</span>
+                                            }
+                                        </td>
+                                        <td style="color: #000000;">
+                                            @if (!alert.IsTriggered)
+                                            {
+                                                <span class="badge bg-success">Active</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Triggered</span>
+                                            }
+                                        </td>
+                                        <td style="color: #000000;">@alert.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteAlert(alert.Id)" style="border-radius: 20px;">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .input-futuristic {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        padding: 10px 15px;
+        color: white;
+        transition: all 0.3s ease;
+    }
+    
+        .input-futuristic:focus {
+            border-color: #00d2ff;
+            box-shadow: 0 0 15px rgba(0,210,255,0.2);
+            outline: none;
+        }
+    
+    .btn-neon {
+        background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+        border: none;
+        color: white;
+        padding: 10px 25px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+        .btn-neon:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,210,255,0.4);
+        }
+    
+        .btn-neon:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+</style>
+
+@code {
+    private string _userId = "";
+    private List<RateAlert> _alerts = new();
+    private Dictionary<string, decimal> _currentRates = new();
+    private System.Timers.Timer? _timer;
+    
+    // New alert form
+    private string _newAlertFromCurrency = "USD";
+    private string _newAlertToCurrency = "PKR";
+    private string _newAlertType = "Above";
+    private decimal _newTargetRate = 280;
+    private bool _isCreating = false;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _userId = await AuthService.GetCurrentUserIdAsync() ?? "";
+        await LoadAlerts();
+        await LoadCurrentRates();
+        
+        // Start auto-check every 30 seconds
+        _timer = new System.Timers.Timer(30000);
+        _timer.Elapsed += async (sender, e) => await OnTimerElapsed();
+        _timer.Start();
+    }
+    
+    private async Task OnTimerElapsed()
+    {
+        await InvokeAsync(async () =>
+        {
+            await CheckAlerts();
+        });
+    }
+    
+    private async Task LoadAlerts()
+    {
+        try
+        {
+            _alerts = await AlertService.GetUserAlertsAsync(_userId);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading alerts: {ex.Message}");
+        }
+    }
+    
+    private async Task LoadCurrentRates()
+    {
+        try
+        {
+            // You'll need to inject ICurrencyRateService
+            // For now, using sample rates
+            _currentRates = new Dictionary<string, decimal>
+            {
+                { "PKR", 279.50m },
+                { "USD", 1.00m },
+                { "EUR", 0.92m },
+                { "GBP", 0.79m }
+            };
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading rates: {ex.Message}");
+        }
+    }
+    
+    private async Task CheckAlerts()
+    {
+        await AlertService.CheckAndTriggerAlertsAsync();
+        await LoadAlerts(); // Refresh alerts after checking
+        await LoadCurrentRates();
+        StateHasChanged();
+    }
+    
+    private async Task CreateAlert()
+    {
+        if (_newTargetRate <= 0)
+        {
+            ToastService.ShowError("Please enter a valid target rate");
+            return;
+        }
+        
+        _isCreating = true;
+        StateHasChanged();
+        
+        try
+        {
+            await AlertService.CreateAlertAsync(
+                _userId,
+                _newAlertFromCurrency,
+                _newAlertToCurrency,
+                _newTargetRate,
+                _newAlertType
+            );
+            
+            ToastService.ShowSuccess("Alert created successfully!");
+            
+            // Reset form
+            _newTargetRate = _newAlertFromCurrency == "USD" && _newAlertToCurrency == "PKR" ? 280 : 1;
+            
+            // Reload alerts
+            await LoadAlerts();
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Failed to create alert: {ex.Message}");
+        }
+        finally
+        {
+            _isCreating = false;
+            StateHasChanged();
+        }
+    }
+    
+    private async Task DeleteAlert(int alertId)
+    {
+        try
+        {
+            await AlertService.DeleteAlertAsync(alertId);
+            ToastService.ShowSuccess("Alert deleted successfully!");
+            await LoadAlerts();
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Failed to delete alert: {ex.Message}");
+        }
+    }
+    
+    public void Dispose()
+    {
+        _timer?.Stop();
+        _timer?.Dispose();
+    }
+}

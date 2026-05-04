@@ -1,0 +1,213 @@
+﻿@inject INotificationService NotificationService
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="notification-bell" @onclick="ToggleDropdown">
+    <button class="btn btn-link text-white position-relative">
+        <i class="bi bi-bell" style="font-size: 1.5rem;"></i>
+        @if (_unreadCount > 0)
+        {
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                @(_unreadCount > 9 ? "9+" : _unreadCount)
+            </span>
+        }
+    </button>
+    
+    @if (_showDropdown)
+    {
+        <div class="notification-dropdown">
+            <div class="dropdown-header">
+                <span>Notifications</span>
+                @if (_unreadCount > 0)
+                {
+                    <button class="btn btn-sm btn-link text-info" @onclick="MarkAllRead">Mark all read</button>
+                }
+            </div>
+            <div class="dropdown-body">
+                @if (!_notifications.Any())
+                {
+                    <div class="text-center py-4">
+                        <i class="bi bi-bell-slash" style="font-size: 35px; color: rgba(255,255,255,0.3);"></i>
+                        <p class="text-white-50 mt-2 small">No notifications</p>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var notification in _notifications)
+                    {
+                        <div class="notification-item @(!notification.IsRead ? "unread" : "")" @onclick="() => MarkRead(notification.Id)">
+                            <div class="d-flex">
+                                <div class="notification-icon me-2">
+                                    @if (notification.Type == "success")
+                                    {
+                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                    }
+                                    else if (notification.Type == "error")
+                                    {
+                                        <i class="bi bi-x-circle-fill text-danger"></i>
+                                    }
+                                    else if (notification.Type == "warning")
+                                    {
+                                        <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-info-circle-fill text-info"></i>
+                                    }
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-white small">@notification.Title</div>
+                                    <div class="text-white-50 small">@notification.Message</div>
+                                    <div class="text-white-50 small mt-1">@TimeAgo(notification.CreatedAt)</div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+            <div class="dropdown-footer">
+                <button class="btn btn-sm btn-outline-info w-100" @onclick="GoToNotifications">
+                    View All Notifications
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .notification-bell {
+        position: relative;
+        display: inline-block;
+    }
+    
+        .notification-bell button {
+            padding: 0;
+            margin: 0;
+            text-decoration: none;
+        }
+    
+            .notification-bell button:hover {
+                opacity: 0.8;
+            }
+    
+    .notification-dropdown {
+        position: absolute;
+        top: 45px;
+        right: 0;
+        width: 350px;
+        background: rgba(15, 25, 35, 0.98);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(0, 210, 255, 0.3);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+    }
+    
+    .dropdown-header {
+        padding: 12px 15px;
+        border-bottom: 1px solid rgba(0, 210, 255, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+        color: white;
+    }
+    
+    .dropdown-body {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .notification-item {
+        padding: 12px 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+        .notification-item:hover {
+            background: rgba(0, 210, 255, 0.1);
+        }
+    
+        .notification-item.unread {
+            background: rgba(0, 210, 255, 0.08);
+        }
+    
+    .dropdown-footer {
+        padding: 10px;
+        border-top: 1px solid rgba(0, 210, 255, 0.2);
+    }
+    
+    .notification-icon i {
+        font-size: 1.2rem;
+    }
+</style>
+
+@code {
+    private List<Notification> _notifications = new();
+    private int _unreadCount = 0;
+    private bool _showDropdown = false;
+    private string _userId = "";
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _userId = await AuthService.GetCurrentUserIdAsync() ?? "";
+        if (!string.IsNullOrEmpty(_userId))
+        {
+            await LoadNotifications();
+            
+            // Subscribe to new notifications
+            NotificationService.NewNotification += OnNewNotification;
+        }
+    }
+    
+    private async Task LoadNotifications()
+    {
+        _notifications = await NotificationService.GetUserNotificationsAsync(_userId);
+        _unreadCount = _notifications.Count(n => !n.IsRead);
+        StateHasChanged();
+    }
+    
+    private void OnNewNotification(object? sender, NotificationEventArgs e)
+    {
+        InvokeAsync(async () =>
+        {
+            await LoadNotifications();
+            StateHasChanged();
+        });
+    }
+    
+    private void ToggleDropdown()
+    {
+        _showDropdown = !_showDropdown;
+        StateHasChanged();
+    }
+    
+    private async Task MarkRead(int notificationId)
+    {
+        await NotificationService.MarkAsReadAsync(notificationId);
+        await LoadNotifications();
+    }
+    
+    private async Task MarkAllRead()
+    {
+        await NotificationService.MarkAllAsReadAsync(_userId);
+        await LoadNotifications();
+    }
+    
+    private void GoToNotifications()
+    {
+        _showDropdown = false;
+        Navigation.NavigateTo("/notifications");
+    }
+    
+    private string TimeAgo(DateTime date)
+    {
+        var timeSpan = DateTime.UtcNow - date;
+        
+        if (timeSpan.TotalMinutes < 1) return "Just now";
+        if (timeSpan.TotalMinutes < 60) return $"{(int)timeSpan.TotalMinutes} min ago";
+        if (timeSpan.TotalHours < 24) return $"{(int)timeSpan.TotalHours} hours ago";
+        return $"{timeSpan.Days} days ago";
+    }
+}

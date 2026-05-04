@@ -172,10 +172,16 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadRates();
-        
-        // Auto refresh every 30 seconds
+    
+        // Auto refresh every 30 seconds - FIXED with InvokeAsync
         var timer = new System.Timers.Timer(30000);
-        timer.Elapsed += async (sender, e) => await RefreshRates();
+        timer.Elapsed += async (sender, e) =>
+        {
+            await InvokeAsync(async () =>
+            {
+                await RefreshRates();
+            });
+        };
         timer.Start();
     }
     
@@ -264,14 +270,14 @@
     }
     
     private async Task RefreshRates()
-    {
-        _isRefreshing = true;
-        StateHasChanged();
-        await LoadRates();
-        ToastService.ShowSuccess("Exchange rates refreshed!");
-        _isRefreshing = false;
-        StateHasChanged();
-    }
+{
+    _isRefreshing = true;
+    await InvokeAsync(StateHasChanged);
+    await LoadRates();
+    ToastService.ShowSuccess("Exchange rates refreshed!");
+    _isRefreshing = false;
+    await InvokeAsync(StateHasChanged);
+}
     
     private void SetAsTargetCurrency(string currencyCode)
     {
