@@ -384,6 +384,7 @@
         {
             { "USD", 1 }, { "EUR", 0.92m }, { "GBP", 0.79m }, { "PKR", 278.50m },
             { "AED", 3.67m }, { "SAR", 3.75m }, { "CAD", 1.36m }, { "AUD", 1.52m }
+            ,{ "KWD", 0.31m }
         };
         
         _totalBalanceUSD = _wallets.Sum(w => rates.GetValueOrDefault(w.CurrencyCode, 1) > 0
@@ -427,7 +428,8 @@
             new() { Code = "AED", Name = "UAE Dirham" },
             new() { Code = "SAR", Name = "Saudi Riyal" },
             new() { Code = "CAD", Name = "Canadian Dollar" },
-            new() { Code = "AUD", Name = "Australian Dollar" }
+            new() { Code = "AUD", Name = "Australian Dollar" },
+            new() {Code="KWD", Name= "Kawaiti Dinar"},
         };
         
         _availableCurrencies = allCurrencies
@@ -521,9 +523,14 @@
         Navigation.NavigateTo($"/exchange?from={currency}");
     }
     
-    private int GetBalancePercentage(decimal balance)
+    private Double GetBalancePercentage(decimal balance)
     {
-        var percentage = (int)(balance / 10000 * 100);
+        if (balance <= 0) return 0;
+    
+        // Use a reference point - if balance > 10000, cap at 100%
+        var maxReference = 10000m;
+        var percentage = (Double)(balance / maxReference * 100);
+    
         return Math.Min(percentage, 100);
     }
     
@@ -539,6 +546,7 @@
             "SAR" => "Saudi Riyal",
             "CAD" => "Canadian Dollar",
             "AUD" => "Australian Dollar",
+
             _ => code
         };
     }

@@ -8,6 +8,8 @@
 @inject IToastService ToastService
 @inject IFeeService FeeService
 @using FeeConfigEntity = FXTransfer.Models.Entities.FeeConfiguration
+@using FXTransfer.Services.Implementations
+@using Microsoft.EntityFrameworkCore;  
 
 <div class="page-transition">
     <div class="glass-card p-4 mb-4">
@@ -160,37 +162,21 @@
 
     private async Task SaveStandardFee()
     {
-        _isSaving = true;
-        try
+        var feeConfig = await DbContext.FeeConfigurations.FirstOrDefaultAsync();
+        if (feeConfig == null)
         {
-            var feeConfig = await DbContext.FeeConfigurations.FirstOrDefaultAsync();
-            if (feeConfig == null)
-            {
-                feeConfig = new FeeConfigEntity();
-                DbContext.FeeConfigurations.Add(feeConfig);
-            }
-
-            feeConfig.FeePercentage = _standardFee;
-            feeConfig.MinimumFee = _minimumFee;
-            feeConfig.MaximumFee = _maximumFee;
-            feeConfig.PremiumDiscount = _premiumDiscount; // Preserve premium discount
-            feeConfig.LastUpdated = DateTime.UtcNow;
-
-            await DbContext.SaveChangesAsync();
-            
-            // Refresh the fee service cache
-            await FeeService.RefreshFeeSettingsAsync();
-            
-            ToastService.ShowSuccess("Standard fee settings saved successfully!");
+            feeConfig = new Models.Entities.FeeConfiguration();
+            DbContext.FeeConfigurations.Add(feeConfig);
         }
-        catch (Exception ex)
-        {
-            ToastService.ShowError($"Error saving fees: {ex.Message}");
-        }
-        finally
-        {
-            _isSaving = false;
-        }
+    
+        feeConfig.FeePercentage = _standardFee;
+        feeConfig.MinimumFee = _minimumFee;
+        feeConfig.MaximumFee = _maximumFee;
+        feeConfig.LastUpdated = DateTime.UtcNow;
+    
+        await DbContext.SaveChangesAsync();
+    
+        ToastService.ShowSuccess($"Standard fee updated to {_standardFee}%");
     }
 
     private async Task SavePremiumDiscount()

@@ -64,19 +64,8 @@ public class TransferService : ITransferService
             // Calculate converted amount
             var convertedAmount = request.Amount * exchangeRate;
 
-            // Select fee calculator based on user type
-            IFeeCalculator feeCalculator;
-            if (request.User != null && request.User.IsPremium)
-            {
-                feeCalculator = new PremiumFeeCalculator();
-            }
-            else
-            {
-                feeCalculator = new StandardFeeCalculator();
-            }
-
-            // Calculate fee using the selected calculator
-            var fee = await feeCalculator.CalculateFeeAsync(request.Amount, request.FromCurrency, request.ToCurrency, request.User);
+            // Calculate fee using the injected fee calculator
+            var fee = await _feeCalculator.CalculateFeeAsync(request.Amount, request.FromCurrency, request.ToCurrency, request.User);
 
             var totalAmount = request.Amount + fee;
 
@@ -136,6 +125,7 @@ public class TransferService : ITransferService
             throw;
         }
     }
+
     /// <summary>
     /// Gets user transfer history with pagination
     /// </summary>

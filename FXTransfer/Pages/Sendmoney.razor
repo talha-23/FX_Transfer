@@ -4,6 +4,8 @@
 @using FXTransfer.Models.Entities
 @using FXTransfer.Models.Enums
 @using FXTransfer.Data
+@using FXTransfer.Services.Implementations
+@using Microsoft.EntityFrameworkCore
 @inject ICurrencyRateService RateService
 @inject IWalletService WalletService
 @inject ITransferService TransferService
@@ -14,7 +16,7 @@
 @inject ApplicationDbContext DbContext
 @inject IJSRuntime JS
 @inject INotificationService NotificationService
-@inject IFeeCalculator FeeCalculator
+
 
 <style>
     .fade-in {
@@ -171,7 +173,16 @@
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-white-50">Transfer Fee</span>
                                 <span class="text-warning fw-bold">@_feeAmount.ToString("N2") @_fromCurrency</span>
-                                <span class="text-info">@(_isPremium ? "Premium (1%)" : "Standard (2%)")</span>
+                                <span class="text-info">
+                                    @if (_isPremium)
+                                    {
+                                        @($"Premium ({(_currentFeePercentage / 2).ToString("F1")}%)")
+                                    }
+                                    else
+                                    {
+                                        @($"Standard ({_currentFeePercentage.ToString("F1")}%)")
+                                    }
+                                </span>
                             </div>
                             <div class="d-flex justify-content-between">
                                 <span class="text-white-50">Total to Deduct</span>
@@ -263,6 +274,8 @@
     private string _transactionMessage = "";
     private string _messageType = "";
     private bool _showMessage = false;
+    private decimal _currentFeePercentage = 2.0m;
+
     
     private List<WalletInfo> _wallets = new();
     
@@ -271,6 +284,7 @@
         _userId = await AuthService.GetCurrentUserIdAsync() ?? "";
         var roles = await AuthService.GetCurrentUserRolesAsync();
         _isPremium = roles.Contains("Premium");
+        await LoadCurrentFeePercentage();
         await LoadWallets();
         await CalculateRate();
     }
@@ -323,6 +337,14 @@
         _toCurrency = e.Value?.ToString() ?? "EUR";
         await CalculateRate();
     }
+    private async Task LoadCurrentFeePercentage()
+    {
+        var config = await DbContext.FeeConfigurations.FirstOrDefaultAsync();
+        if (config != null)
+        {
+            _currentFeePercentage = config.FeePercentage;
+        }
+    }
 
     private async Task ShowTempMessage(string message, string type)
     {
@@ -337,22 +359,42 @@
         StateHasChanged();
     }
 
+    private string _feePercentageDisplay = "";
+
     private async Task CalculateRate()
     {
+        Console.WriteLine($"UserId: {_userId}");
+        Console.WriteLine($"IsPremium from role check: {_isPremium}");
         try
         {
             if (_amount <= 0)
             {
                 _amount = 0.01m;
             }
-            
+        
             _currentRate = await RateService.GetExchangeRateAsync(_fromCurrency, _toCurrency);
             _convertedAmount = _amount * _currentRate;
-            
-            var user = new ApplicationUser { Id = _userId, IsPremium = _isPremium };
-            _feeAmount = await FeeCalculator.CalculateFeeAsync(_amount, _fromCurrency, _toCurrency, user);
+        
+            // DIRECT DATABASE CHECK FOR PREMIUM STATUS
+            var userFromDb = await DbContext.Users.FirstOrDefaultAsync(u => u.Id == _userId);
+            bool isUserPremium = userFromDb?.IsPremium ?? false;
+        
+            // Get base fee from database
+            var config = await DbContext.FeeConfigurations.FirstOrDefaultAsync();
+            var baseRate = config?.FeePercentage ?? 2.0m;
+        
+            // Apply premium discount (50% off)
+            var effectiveRate = isUserPremium ? baseRate * 0.5m : baseRate;
+        
+            _feeAmount = _amount * (effectiveRate / 100);
             _totalAmount = _amount + _feeAmount;
-            
+        
+            // Update display
+            _feePercentageDisplay = isUserPremium ? $"Premium ({baseRate / 2:F1}%)" : $"Standard ({baseRate:F1}%)";
+        
+            // Also update the _isPremium flag for UI display
+            _isPremium = isUserPremium;
+        
             await UpdateWalletBalance();
             StateHasChanged();
         }
@@ -361,7 +403,7 @@
             _errorMessage = $"Error loading rates: {ex.Message}";
         }
     }
-    
+
     private async Task SendMoney()
     {
         _errorMessage = "";

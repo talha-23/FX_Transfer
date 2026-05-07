@@ -1,14 +1,21 @@
-﻿using System.Threading.Tasks;
+﻿using FXTransfer.Data;
 using FXTransfer.Models.Entities;
 using FXTransfer.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace FXTransfer.Services.Implementations;
 
 public class StandardFeeCalculator : IFeeCalculator
 {
-    private const decimal DEFAULT_FEE_PERCENTAGE = 2.0m;  // 2% for regular users
+    private readonly ApplicationDbContext _context;
     private const decimal MINIMUM_FEE = 1.0m;
     private const decimal MAXIMUM_FEE = 50.0m;
+
+    public StandardFeeCalculator(ApplicationDbContext context)
+    {
+        _context = context;
+    }
 
     public async Task<decimal> CalculateFeeAsync(decimal amount, string fromCurrency, string toCurrency, ApplicationUser? user)
     {
@@ -23,8 +30,9 @@ public class StandardFeeCalculator : IFeeCalculator
         return calculatedFee;
     }
 
-    public Task<decimal> GetFeePercentageAsync(ApplicationUser? user)
+    public async Task<decimal> GetFeePercentageAsync(ApplicationUser? user)
     {
-        return Task.FromResult(DEFAULT_FEE_PERCENTAGE);  // Returns 2%
+        var config = await _context.FeeConfigurations.FirstOrDefaultAsync();
+        return config?.FeePercentage ?? 2.0m;
     }
 }

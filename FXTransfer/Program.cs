@@ -42,7 +42,15 @@ builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
 // Services
 builder.Services.AddHttpClient<ICurrencyRateService, ExchangeRateApiService>();
 builder.Services.AddMemoryCache();
-builder.Services.AddScoped<IFeeCalculator, StandardFeeCalculator>();
+builder.Services.AddScoped<StandardFeeCalculator>();
+builder.Services.AddScoped<PremiumFeeCalculator>();
+builder.Services.AddScoped<IFeeCalculator>(sp =>
+{
+    var context = sp.GetRequiredService<ApplicationDbContext>();
+    return new StandardFeeCalculator(context);
+});
+
+
 builder.Services.AddScoped<ITransferService, TransferService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<IToastService, ToastService>();
@@ -52,11 +60,9 @@ builder.Services.AddScoped<IReferralService, ReferralService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddHostedService<AlertBackgroundService>();
-builder.Services.AddScoped<IFeeCalculator, StandardFeeCalculator>();
-builder.Services.AddScoped<PremiumFeeCalculator>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddMemoryCache(); // Add memory cache
-builder.Services.AddScoped<IFeeService, FeeService>();
+
 
 
 // Authorization
@@ -75,6 +81,13 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var feeConfig = await context.FeeConfigurations.FirstOrDefaultAsync();
+    
+}
 
 if (!app.Environment.IsDevelopment())
 {

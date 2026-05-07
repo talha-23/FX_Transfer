@@ -134,7 +134,7 @@ public static class AdminSeeder
         }
 
         // Create wallets for the user if they don't exist
-        var defaultCurrencies = new[] { "USD", "EUR", "GBP", "PKR", "AED", "SAR" };
+        var defaultCurrencies = new[] { "USD", "EUR", "GBP", "PKR", "AED", "SAR", "KWD" };
 
         foreach (var currency in defaultCurrencies)
         {
