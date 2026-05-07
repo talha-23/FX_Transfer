@@ -46,6 +46,12 @@ public class AlertService : IAlertService
 
         return alert;
     }
+    public async Task<List<RateAlert>> GetAllActiveAlertsAsync()
+    {
+        return await _context.RateAlerts
+            .Where(a => !a.IsTriggered)
+            .ToListAsync();
+    }
 
     public async Task<List<RateAlert>> GetUserAlertsAsync(string userId)
     {
@@ -67,7 +73,64 @@ public class AlertService : IAlertService
 
     public async Task CheckAndTriggerAlertsAsync()
     {
-        // Implementation for background service
-        await Task.CompletedTask;
+        try
+        {
+            var activeAlerts = await GetAllActiveAlertsAsync();
+
+            foreach (var alert in activeAlerts)
+            {
+                var rates = await _rateService.GetRatesAsync(alert.FromCurrency);
+
+                if (rates.ContainsKey(alert.ToCurrency))
+                {
+                    var currentRate = rates[alert.ToCurrency];
+                    bool shouldTrigger = false;
+
+                    if (alert.AlertType == "Above" && currentRate >= alert.TargetRate)
+                        shouldTrigger = true;
+                    else if (alert.AlertType == "Below" && currentRate <= alert.TargetRate)
+                        shouldTrigger = true;
+
+                    if (shouldTrigger)
+                    {
+                        alert.IsTriggered = true;
+                        alert.TriggeredAt = DateTime.UtcNow;
+
+                        // Create notification for user
+                        await CreateNotificationAsync(
+                            alert.UserId,
+                            "🔔 Rate Alert Triggered",
+                            $"Exchange rate for {alert.FromCurrency}/{alert.ToCurrency} hit {currentRate:F4} (Target: {alert.TargetRate:F4})",
+                            "success"
+                        );
+
+                        _logger.LogInformation($"Alert {alert.Id} triggered!");
+                    }
+                }
+            }
+
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking alerts");
+        }
+    }
+
+    // Add this helper method to create notifications
+    private async Task CreateNotificationAsync(string userId, string title, string message, string type)
+    {
+        var notification = new Notification
+        {
+            UserId = userId,
+            Title = title,
+            Message = message,
+            Type = type,
+            CreatedAt = DateTime.UtcNow,
+            IsRead = false
+        };
+
+        _context.Notifications.Add(notification);
+        await _context.SaveChangesAsync();
     }
 }

@@ -6,6 +6,9 @@
 @inject IToastService ToastService
 @inject NavigationManager Navigation
 @inject UserManager<ApplicationUser> UserManager
+@using FXTransfer.Data
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext DbContext
 
 <div class="container page-transition">
     <!-- Header -->
@@ -72,7 +75,7 @@
                     </div>
                     
                     <div class="d-flex gap-2 mt-3">
-                        <button class="btn btn-sm btn-outline-success flex-grow-1" @onclick="() => ShowAddFundsModal(wallet.CurrencyCode)" style="border-radius: 10px;">
+                        <button class="btn btn-sm btn-outline-success flex-grow-1" @onclick="() => GoToAddFunds(wallet.CurrencyCode)" style="border-radius: 10px;">
                             <i class="bi bi-plus-circle me-1"></i> Add Funds
                         </button>
                         <button class="btn btn-sm btn-outline-info flex-grow-1" @onclick="() => ExchangeCurrency(wallet.CurrencyCode)" style="border-radius: 10px;">
@@ -115,48 +118,86 @@
     <div class="row mt-4" data-aos="fade-up" data-aos-delay="400">
         <div class="col-12">
             <div class="glass-card p-4">
-                <h5 class="gradient-text mb-3">
-                    <i class="bi bi-clock-history me-2"></i> Recent Transactions
-                </h5>
-                <div class="table-responsive">
-                    <table class="table table-borderless">
-                        <thead>
-                            <tr>
-                                <th class="text-white-50">Date</th>
-                                <th class="text-white-50">Type</th>
-                                <th class="text-white-50">Currency</th>
-                                <th class="text-white-50">Amount</th>
-                                <th class="text-white-50">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var transaction in _recentTransactions)
-                            {
-                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                    <td class="text-white-50">@transaction.Date</td>
-                                    <td>
-                                        @if (transaction.Type == "Deposit")
-                                        {
-                                            <span class="badge bg-success">⬇ Deposit</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-warning">⬆ Transfer</span>
-                                        }
-                                    </td>
-                                    <td class="text-white">@transaction.Currency</td>
-                                    <td class="@(transaction.Type == "Deposit" ? "text-success" : "text-warning") fw-bold">
-                                        @(transaction.Type == "Deposit" ? "+" : "-") @transaction.Amount
-                                    </td>
-                                    <td><span class="badge bg-info">Completed</span></td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="gradient-text mb-0">
+                        <i class="bi bi-clock-history me-2"></i>Recent Transactions
+                    </h5>
+                    <button class="btn btn-sm btn-outline-info" @onclick="ViewAllTransactions" style="border-radius: 20px;">
+                        View All <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
                 </div>
+        
+                @if (_recentTransactions.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-borderless">
+                            <thead>
+                                <tr style="border-bottom: 2px solid rgba(0,210,255,0.2);">
+                                    <th class="text-info small fw-semibold">Date</th>
+                                    <th class="text-info small fw-semibold">Type</th>
+                                    <th class="text-info small fw-semibold">Currency</th>
+                                    <th class="text-info small fw-semibold">Amount</th>
+                                    <th class="text-info small fw-semibold">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var transaction in _recentTransactions)
+                                {
+                                    <tr style="border-bottom: 1px solid rgba(0,210,255,0.1); transition: all 0.2s ease;" class="transaction-row">
+                                        <td class="text-dark py-3">
+                                            <i class="bi bi-calendar3 me-1 text-info" style="font-size: 12px;"></i>
+                                            @transaction.Date
+                                        </td>
+                                        <td class="py-3">
+                                            @if (transaction.Type == "Exchange")
+                                            {
+                                                <span class="badge" style="background: rgba(0,210,255,0.2); color: #00d2ff; padding: 6px 12px; border-radius: 20px;">
+                                                    <i class="bi bi-arrow-left-right me-1"></i> Exchange
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge" style="background: rgba(240,147,251,0.2); color: #f093fb; padding: 6px 12px; border-radius: 20px;">
+                                                    <i class="bi bi-send me-1"></i> Transfer
+                                                </span>
+                                            }
+                                        </td>
+                                        <td class="text-dark py-3 fw-semibold">
+                                            <span class="px-2 py-1" style="background: rgba(255,255,255,0.08); border-radius: 8px;">
+                                                @transaction.Currency
+                                            </span>
+                                        </td>
+                                        <td class="text-info fw-bold py-3">
+                                            @transaction.Amount
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="badge" style="background: rgba(0,210,255,0.15); color: #00d2ff; padding: 5px 12px; border-radius: 20px;">
+                                                <i class="bi bi-check-circle-fill me-1" style="font-size: 10px;"></i>
+                                                @transaction.Status
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <div class="mb-3">
+                            <i class="bi bi-inbox" style="font-size: 64px; color: rgba(0,210,255,0.3);"></i>
+                        </div>
+                        <p class="text-white-50 mb-3">No transactions yet</p>
+                        <button class="btn-neon" @onclick="GoToSendMoney" style="padding: 8px 24px; font-size: 14px;">
+                            <i class="bi bi-send me-2"></i>Make your first transfer
+                        </button>
+                    </div>
+                }
             </div>
         </div>
     </div>
+
 </div>
 
 <!-- Add Funds Modal -->
@@ -255,6 +296,14 @@
         await LoadRecentTransactions();
         LoadAvailableCurrencies();
     }
+    private void ViewAllTransactions()
+    {
+        Navigation.NavigateTo("/transfers");
+    }
+    private void GoToSendMoney()
+    {
+        Navigation.NavigateTo("/sendmoney");
+    }
     
     private async Task LoadUserPINSettings()
     {
@@ -265,6 +314,11 @@
             _hasTransactionPIN = user.IsTransactionPINEnabled;
         }
         StateHasChanged();
+    }
+
+    private void GoToAddFunds(string currency)
+    {
+        Navigation.NavigateTo($"/addfunds?currency={currency}");
     }
     
     private async Task<bool> VerifyWalletPIN(string pin)
@@ -341,12 +395,23 @@
     
     private async Task LoadRecentTransactions()
     {
-        _recentTransactions = new List<TransactionDisplay>
+        // Load REAL transactions from database
+        var transfers = await DbContext.Transfers
+            .Where(t => t.UserId == _userId)
+            .OrderByDescending(t => t.CreatedAt)
+            .Take(5)
+            .ToListAsync();
+    
+        _recentTransactions = transfers.Select(t => new TransactionDisplay
         {
-            new() { Date = DateTime.Now.AddDays(-1).ToString("MMM dd"), Type = "Deposit", Currency = "USD", Amount = "$1,000.00" },
-            new() { Date = DateTime.Now.AddDays(-3).ToString("MMM dd"), Type = "Transfer", Currency = "EUR", Amount = "€500.00" },
-            new() { Date = DateTime.Now.AddDays(-5).ToString("MMM dd"), Type = "Deposit", Currency = "PKR", Amount = "₨ 50,000.00" }
-        };
+            Date = t.CreatedAt.ToString("MMM dd, yyyy HH:mm"),
+            Type = t.RecipientName == "Self Transfer" ? "Exchange" : "Transfer",
+            Currency = $"{t.FromCurrency} → {t.ToCurrency}",
+            Amount = $"{t.Amount:N2} {t.FromCurrency}",
+            Status = t.Status
+        }).ToList();
+    
+        StateHasChanged();
     }
     
     private void LoadAvailableCurrencies()
@@ -501,6 +566,7 @@
         public decimal Balance { get; set; }
         public string Icon { get; set; } = "";
     }
+
     
     private class TransactionDisplay
     {
@@ -508,6 +574,7 @@
         public string Type { get; set; } = "";
         public string Currency { get; set; } = "";
         public string Amount { get; set; } = "";
+        public string Status { get; set; } = "";
     }
     
     private class AvailableCurrency
@@ -516,3 +583,32 @@
         public string Name { get; set; } = "";
     }
 }
+
+<style>
+    .transaction-row {
+        transition: all 0.2s ease;
+    }
+    
+        .transaction-row:hover {
+            background: rgba(0, 210, 255, 0.08);
+            transform: translateX(5px);
+            border-radius: 12px;
+        }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    /* Ensure all text is visible */
+    .text-white {
+        color: #ffffff !important;
+    }
+    
+    .text-info {
+        color: #00d2ff !important;
+    }
+    
+    .text-white-50 {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+</style>

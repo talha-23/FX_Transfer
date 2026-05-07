@@ -1,8 +1,300 @@
 ﻿@page "/admin/transactions"
 @attribute [Authorize(Roles = "Admin")]
 @layout AdminLayout
+@using Microsoft.EntityFrameworkCore
+@using FXTransfer.Data
+@inject ApplicationDbContext DbContext
+@inject IToastService ToastService
 
-<div class="glass-card p-4">
-    <h2 class="gradient-text">Transaction Monitor</h2>
-    <p class="text-white-50">Coming soon - Transaction monitoring</p>
+<div class="page-transition">
+    <div class="glass-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h1 class="gradient-text mb-2">
+                    <i class="bi bi-arrow-left-right me-2"></i>Transaction Monitor
+                </h1>
+                <p class="text-white-50 mb-0">Monitor and review all user transactions</p>
+            </div>
+            <div class="mt-2 mt-sm-0">
+                <span class="badge" style="background: rgba(0,210,255,0.2); color: #00d2ff;">
+                    <i class="bi bi-cash-stack me-1"></i> Total Volume: $@_totalVolume.ToString("N0")
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="glass-card p-3">
+                <div class="position-relative">
+                    <i class="bi bi-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #00d2ff;"></i>
+                    <input type="text" class="form-control input-futuristic" @bind="_searchTerm" placeholder="Search by user or recipient..." style="padding-left: 45px; color: white" />
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card p-3">
+                <select class="form-control input-futuristic" @bind="_statusFilter">
+                    <option value="">All Status</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Failed">Failed</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card p-3">
+                <input type="date" class="form-control input-futuristic" @bind="_fromDate" />
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="glass-card p-3">
+                <button class="btn-neon w-100" @onclick="RefreshTransactions">
+                    <i class="bi bi-search me-1"></i> Filter
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center">
+                <i class="bi bi-arrow-left-right" style="font-size: 28px; color: #00d2ff;"></i>
+                <h3 class="text-white mt-2">@_totalTransactions</h3>
+                <p class="text-white-50 small">Total Transactions</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center">
+                <i class="bi bi-currency-dollar" style="font-size: 28px; color: #28a745;"></i>
+                <h3 class="text-white mt-2">$@_totalVolume.ToString("N0")</h3>
+                <p class="text-white-50 small">Total Volume</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center">
+                <i class="bi bi-percent" style="font-size: 28px; color: #f093fb;"></i>
+                <h3 class="text-white mt-2">$@_totalFees.ToString("N0")</h3>
+                <p class="text-white-50 small">Total Fees Collected</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center">
+                <i class="bi bi-person-check" style="font-size: 28px; color: #4facfe;"></i>
+                <h3 class="text-white mt-2">@_uniqueUsers</h3>
+                <p class="text-white-50 small">Active Users</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="glass-card p-4">
+        <div class="table-responsive">
+            <table class="table table-borderless">
+                <thead>
+                    <tr style="border-bottom: 2px solid rgba(0,210,255,0.2);">
+                        <th class="text-info">Date</th>
+                        <th class="text-info">User</th>
+                        <th class="text-info">From/To</th>
+                        <th class="text-info">Amount</th>
+                        <th class="text-info">Fee</th>
+                        <th class="text-info">Recipient</th>
+                        <th class="text-info">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!_transactions.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <i class="bi bi-inbox" style="font-size: 48px; color: rgba(255,255,255,0.2);"></i>
+                                <p class="text-white-50 mt-2" style="color:lavenderblush">No transactions found</p>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var transaction in _transactions)
+                        {
+                            <tr style="border-bottom: 1px solid rgba(0,210,255,0.1);" class="transaction-row">
+                                <td class="text-black-50 py-3">@transaction.Date</td>
+                                <td class="text-black py-3">@transaction.UserName</td>
+                                <td class="text-black py-3">@transaction.FromCurrency → @transaction.ToCurrency</td>
+                                <td class="text-info fw-bold py-3">@transaction.Amount</td>
+                                <td class="text-warning py-3">@transaction.Fee</td>
+                                <td class="text-black-50 py-3">@transaction.Recipient</td>
+                                <td class="py-3">
+                                    @if (transaction.Status == "Completed")
+                                    {
+                                        <span class="badge bg-success">✅ Completed</span>
+                                    }
+                                    else if (transaction.Status == "Pending")
+                                    {
+                                        <span class="badge bg-warning">⏳ Pending</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">❌ Failed</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (_totalPages > 1)
+        {
+            <div class="d-flex justify-content-center mt-4">
+                <ul class="pagination">
+                    <li class="page-item @(_currentPage == 1 ? "disabled" : "")">
+                        <button class="page-link" @onclick="() => GoToPage(_currentPage - 1)">Previous</button>
+                    </li>
+                    @for (int i = 1; i <= _totalPages; i++)
+                    {
+                        <li class="page-item @(_currentPage == i ? "active" : "")">
+                            <button class="page-link" @onclick="() => GoToPage(i)">@i</button>
+                        </li>
+                    }
+                    <li class="page-item @(_currentPage == _totalPages ? "disabled" : "")">
+                        <button class="page-link" @onclick="() => GoToPage(_currentPage + 1)">Next</button>
+                    </li>
+                </ul>
+            </div>
+        }
+    </div>
 </div>
+
+<style>
+    .transaction-row {
+        transition: all 0.2s ease;
+    }
+    
+        .transaction-row:hover {
+            background: rgba(0, 210, 255, 0.05);
+            transform: translateX(5px);
+        }
+    
+    .page-link {
+        background: rgba(255,255,255,0.1);
+        border: none;
+        color: white;
+        margin: 0 3px;
+        border-radius: 8px;
+    }
+    
+        .page-link:hover {
+            background: #00d2ff;
+            color: white;
+        }
+    
+    .page-item.active .page-link {
+        background: #00d2ff;
+    }
+</style>
+
+@code {
+    private List<TransactionDto> _transactions = new();
+    private List<TransactionDto> _allTransactions = new();
+    private string _searchTerm = "";
+    private string _statusFilter = "";
+    private DateTime? _fromDate;
+    private int _currentPage = 1;
+    private int _pageSize = 15;
+    private int _totalPages = 1;
+    private int _totalTransactions = 0;
+    private decimal _totalVolume = 0;
+    private decimal _totalFees = 0;
+    private int _uniqueUsers = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTransactions();
+    }
+
+    private async Task LoadTransactions()
+    {
+        var transfers = await DbContext.Transfers
+            .Include(t => t.User)
+            .OrderByDescending(t => t.CreatedAt)
+            .ToListAsync();
+        
+        _allTransactions = transfers.Select(t => new TransactionDto
+        {
+            Id = t.Id,
+            Date = t.CreatedAt.ToString("MMM dd, yyyy HH:mm"),
+            UserName = t.User?.FullName ?? "Unknown",
+            UserEmail = t.User?.Email ?? "",
+            FromCurrency = t.FromCurrency,
+            ToCurrency = t.ToCurrency,
+            Amount = $"{t.Amount:N2} {t.FromCurrency}",
+            Fee = $"{t.Fee:N2} {t.FromCurrency}",
+            Recipient = t.RecipientName ?? "Self Transfer",
+            Status = t.Status
+        }).ToList();
+        
+        _totalTransactions = _allTransactions.Count;
+        _totalVolume = transfers.Sum(t => t.Amount);
+        _totalFees = transfers.Sum(t => t.Fee);
+        _uniqueUsers = transfers.Select(t => t.UserId).Distinct().Count();
+        
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        var query = _allTransactions.AsQueryable();
+        
+        if (!string.IsNullOrEmpty(_searchTerm))
+        {
+            query = query.Where(t => t.UserName.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                                      t.Recipient.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase));
+        }
+        
+        if (!string.IsNullOrEmpty(_statusFilter))
+        {
+            query = query.Where(t => t.Status == _statusFilter);
+        }
+        
+        if (_fromDate.HasValue)
+        {
+            query = query.Where(t => DateTime.Parse(t.Date) >= _fromDate.Value);
+        }
+        
+        var filtered = query.ToList();
+        _totalPages = (int)Math.Ceiling((double)filtered.Count / _pageSize);
+        _transactions = filtered.Skip((_currentPage - 1) * _pageSize).Take(_pageSize).ToList();
+        StateHasChanged();
+    }
+
+    private void RefreshTransactions()
+    {
+        _currentPage = 1;
+        ApplyFilters();
+    }
+
+    private void GoToPage(int page)
+    {
+        if (page < 1 || page > _totalPages) return;
+        _currentPage = page;
+        ApplyFilters();
+    }
+
+    private class TransactionDto
+    {
+        public int Id { get; set; }
+        public string Date { get; set; } = "";
+        public string UserName { get; set; } = "";
+        public string UserEmail { get; set; } = "";
+        public string FromCurrency { get; set; } = "";
+        public string ToCurrency { get; set; } = "";
+        public string Amount { get; set; } = "";
+        public string Fee { get; set; } = "";
+        public string Recipient { get; set; } = "";
+        public string Status { get; set; } = "";
+    }
+}

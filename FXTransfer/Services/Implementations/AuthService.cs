@@ -143,18 +143,21 @@ public class AuthService : IAuthService
 
     public async Task<IList<string>> GetCurrentUserRolesAsync()
     {
-        var authState = await _authProvider.GetAuthenticationStateAsync();
-        var email = authState.User.FindFirst(ClaimTypes.Email)?.Value;
-
-        if (!string.IsNullOrEmpty(email))
+        try
         {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user != null)
-            {
-                return await _userManager.GetRolesAsync(user);
-            }
+            var user = await _userManager.GetUserAsync(_signInManager.Context.User);
+            if (user == null) return new List<string>();
+            return await _userManager.GetRolesAsync(user);
         }
-        return new List<string>();
+        catch (ObjectDisposedException)
+        {
+            return new List<string>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting user roles");
+            return new List<string>();
+        }
     }
 
     public async Task<string?> GetCurrentUserIdAsync()

@@ -21,6 +21,8 @@ public interface IAlertService
     /// Gets all alerts for a user
     /// </summary>
     Task<List<RateAlert>> GetUserAlertsAsync(string userId);
+    Task<List<RateAlert>> GetAllActiveAlertsAsync();
+
 
     /// <summary>
     /// Deletes an alert

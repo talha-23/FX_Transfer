@@ -4,6 +4,9 @@
 @inject IWalletService WalletService
 @inject IToastService ToastService
 @inject NavigationManager Navigation
+@using FXTransfer.Data
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext DbContext
 
 <div class="container page-transition">
     <!-- Welcome Section -->
@@ -80,58 +83,63 @@
     </div>
 
     <!-- Recent Activity Section -->
-    <div class="row mt-5" data-aos="fade-up" data-aos-delay="600">
+    <div class="row mt-5">
         <div class="col-12">
             <div class="glass-card p-4">
-                <h4 class="gradient-text mb-3">
-                    <i class="bi bi-clock-history me-2"></i>Recent Activity
-                </h4>
-                
-                @if (_recentTransfers.Any())
-                {
-                    <div class="table-responsive">
-                        <table class="table table-borderless">
-                            <thead>
+                <h4 class="gradient-text mb-3">Recent Activity</h4>
+                <div class="table-responsive">
+                    <table class="table table-borderless">
+                        <thead>
+                            <tr style="border-bottom: 2px solid rgba(0,210,255,0.2);">
+                                <th class="text-info">Date</th>
+                                <th class="text-info">Type</th>
+                                <th class="text-info">From/To</th>
+                                <th class="text-info">Amount</th>
+                                <th class="text-info">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!_recentTransfers.Any())
+                            {
                                 <tr>
-                                    <th class="text-white-50">Date</th>
-                                    <th class="text-white-50">From/To</th>
-                                    <th class="text-white-50">Amount</th>
-                                    <th class="text-white-50">Status</th>
+                                    <td colspan="5" class="text-center py-4">
+                                        <i class="bi bi-inbox" style="font-size: 48px; color: rgba(255,255,255,0.2);"></i>
+                                        <p class="text-white-50 mt-2">No recent transactions</p>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var transfer in _recentTransfers)
+                            }
+                            else
+                            {
+                                @foreach (var transaction in _recentTransfers)
                                 {
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                        <td class="text-white-50">@transfer.Date</td>
-                                        <td class="text-white">@transfer.From → @transfer.To</td>
-                                        <td class="text-white">@transfer.Amount</td>
+                                    <tr style="border-bottom: 1px solid rgba(0,210,255,0.1);">
+                                        <td class="text-success-emphasis fw-semibold" style="color: #0a3622 !important;">@transaction.Date</td>
                                         <td>
-                                            <span class="badge" style="background: rgba(0,210,255,0.2); color: #00d2ff;">
-                                                Completed
-                                            </span>
+                                            @if (transaction.Type == "Exchange")
+                                            {
+                                                <span class="badge" style="background: rgba(0,210,255,0.2); color: #00d2ff;">🔄 Exchange</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge" style="background: rgba(240,147,251,0.2); color: #f093fb;">📤 Transfer</span>
+                                            }
+                                        </td>
+                                        <td class="fw-semibold" style="color: #0a3622 !important;">@transaction.From → @transaction.To</td>
+                                        <td class="text-info fw-bold">@transaction.Amount</td>
+                                        <td>
+                                            <span class="badge bg-success">✅ @transaction.Status</span>
                                         </td>
                                     </tr>
                                 }
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="text-center mt-3">
-                        <button class="btn btn-sm btn-outline-info" @onclick="GoToTransfers" style="border-radius: 20px;">
-                            View All Transactions <i class="bi bi-arrow-right ms-1"></i>
-                        </button>
-                    </div>
-                }
-                else
-                {
-                    <div class="text-center py-4">
-                        <i class="bi bi-inbox" style="font-size: 48px; color: rgba(255,255,255,0.2);"></i>
-                        <p class="text-white-50 mt-2">No recent transactions</p>
-                        <button class="btn-neon mt-2" @onclick="GoToExchange" style="padding: 8px 24px;">
-                            Make your first transfer
-                        </button>
-                    </div>
-                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="/transfers" class="btn btn-sm btn-outline-info" style="border-radius: 20px;">
+                        View All Transactions →
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -144,12 +152,13 @@
     private bool _isPremium = false;
     private string _userId = "";
     private List<RecentTransfer> _recentTransfers = new();
+
     
     protected override async Task OnInitializedAsync()
     {
         await LoadUserData();
         await LoadWalletData();
-        LoadSampleData();
+        await LoadRecentTransactions();
     }
     
     private async Task LoadUserData()
@@ -169,26 +178,39 @@
             _totalBalance = wallets.First().Balance;
         }
     }
-    
-    private void LoadSampleData()
+    private class RecentTransfer
     {
-        _recentTransfers = new List<RecentTransfer>
+        public string Date { get; set; } = "";
+        public string Type { get; set; } = "";
+        public string From { get; set; } = "";
+        public string To { get; set; } = "";
+        public string Amount { get; set; } = "";
+        public string Status { get; set; } = "";
+    }
+
+    private async Task LoadRecentTransactions()
+    {
+        var transfers = await DbContext.Transfers
+            .Where(t => t.UserId == _userId)
+            .OrderByDescending(t => t.CreatedAt)
+            .Take(5)
+            .ToListAsync();
+    
+        _recentTransfers = transfers.Select(t => new RecentTransfer
         {
-            new() { Date = DateTime.Now.AddDays(-2).ToString("MMM dd"), From = "USD", To = "EUR", Amount = "$1,000.00" },
-            new() { Date = DateTime.Now.AddDays(-5).ToString("MMM dd"), From = "EUR", To = "GBP", Amount = "€500.00" },
-            new() { Date = DateTime.Now.AddDays(-10).ToString("MMM dd"), From = "USD", To = "PKR", Amount = "$2,000.00" }
-        };
+            Date = t.CreatedAt.ToString("MMM dd, yyyy"),
+            Type = t.RecipientName == "Self Transfer" ? "Exchange" : "Transfer",
+            From = t.FromCurrency,
+            To = t.ToCurrency,
+            Amount = $"{t.Amount:F2} {t.FromCurrency}",
+            Status = t.Status
+        }).ToList();
+    
+        StateHasChanged();
     }
     
     private void GoToExchange() => Navigation.NavigateTo("/exchange");
     private void GoToLiveRates() => Navigation.NavigateTo("/liverates");
     private void GoToTransfers() => Navigation.NavigateTo("/transfers");
     
-    private class RecentTransfer
-    {
-        public string Date { get; set; } = "";
-        public string From { get; set; } = "";
-        public string To { get; set; } = "";
-        public string Amount { get; set; } = "";
-    }
 }

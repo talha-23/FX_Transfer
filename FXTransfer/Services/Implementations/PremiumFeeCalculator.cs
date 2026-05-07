@@ -4,14 +4,10 @@ using FXTransfer.Services.Interfaces;
 
 namespace FXTransfer.Services.Implementations;
 
-/// <summary>
-/// OCP: Extension of IFeeCalculator for premium users with 50% discount
-/// LSP: Can replace IFeeCalculator without breaking functionality
-/// </summary>
 public class PremiumFeeCalculator : IFeeCalculator
 {
     private readonly StandardFeeCalculator _standardCalculator;
-    private const decimal PREMIUM_DISCOUNT = 0.5m; // 50% off
+    private const decimal PREMIUM_DISCOUNT = 0.5m; // 50% discount
 
     public PremiumFeeCalculator()
     {
@@ -22,13 +18,12 @@ public class PremiumFeeCalculator : IFeeCalculator
     {
         var standardFee = await _standardCalculator.CalculateFeeAsync(amount, fromCurrency, toCurrency, user);
         var discountedFee = standardFee * (1 - PREMIUM_DISCOUNT);
-
         return discountedFee;
     }
 
     public async Task<decimal> GetFeePercentageAsync(ApplicationUser? user)
     {
         var standardPercentage = await _standardCalculator.GetFeePercentageAsync(user);
-        return standardPercentage * (1 - PREMIUM_DISCOUNT);
+        return standardPercentage * (1 - PREMIUM_DISCOUNT); // Returns 1% instead of 2%
     }
 }

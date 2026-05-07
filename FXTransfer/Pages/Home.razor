@@ -136,11 +136,32 @@
     
     protected override async Task OnInitializedAsync()
     {
-        _isLoggedIn = await AuthService.IsAuthenticatedAsync();
-        if (_isLoggedIn)
+        try
         {
-            _userName = await AuthService.GetCurrentUserFullNameAsync() ?? "User";
+            var isLoggedIn = await AuthService.IsAuthenticatedAsync();
+            if (isLoggedIn)
+            {
+                var roles = await AuthService.GetCurrentUserRolesAsync();
+                if (roles.Contains("Admin"))
+                {
+                    Navigation.NavigateTo("/admin/dashboard", true);
+                    return;
+                }
+                else
+                {
+                    Navigation.NavigateTo("/dashboard", true);
+                    return;
+                }
+            }
+        
+            _isLoggedIn = false;
+            StateHasChanged();
         }
-        StateHasChanged();
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Home page error: {ex.Message}");
+            _isLoggedIn = false;
+            StateHasChanged();
+        }
     }
 }

@@ -35,7 +35,7 @@
         <!-- ======================================== -->
         <!-- USER SECTION - Only for Logged In Users -->
         <!-- ======================================== -->
-        @if (_isLoggedIn && !_isSuspended)
+        @if (_isLoggedIn && !_isSuspended && !_isAdmin)
         {
             <div class="nav-divider px-3 mt-3">
                 <div class="text-white-50 small px-3 mb-2" style="letter-spacing: 1px; font-size: 0.75rem;">
@@ -201,7 +201,7 @@
         <!-- ======================================== -->
         <!-- ADMIN PORTAL - Only for Admin Users -->
         <!-- ======================================== -->
-        @if (_isAdmin)
+        @if (_isAdmin && _isLoggedIn)
         {
             <div class="nav-divider px-3 mt-4">
                 <div class="text-white-50 small px-3 mb-2" style="letter-spacing: 1px; border-top: 1px solid rgba(0,210,255,0.2); padding-top: 15px; font-size: 0.75rem;">
@@ -391,25 +391,37 @@
     
     private async Task LoadUserInfo()
     {
-        _isLoggedIn = await AuthService.IsAuthenticatedAsync();
-        if (_isLoggedIn)
+        try
         {
-            _userEmail = await AuthService.GetCurrentUserEmailAsync() ?? "";
-            _userId = await AuthService.GetCurrentUserIdAsync() ?? "";
-            var roles = await AuthService.GetCurrentUserRolesAsync();
-            _isAdmin = roles.Contains("Admin");
-            _isSuspended = roles.Contains("Suspended");
-            
-            // Get premium status using UserManager
-            if (!string.IsNullOrEmpty(_userId))
+            _isLoggedIn = await AuthService.IsAuthenticatedAsync();
+            if (_isLoggedIn)
             {
-                var user = await UserManager.FindByIdAsync(_userId);
-                if (user != null)
+                _userEmail = await AuthService.GetCurrentUserEmailAsync() ?? "";
+                _userId = await AuthService.GetCurrentUserIdAsync() ?? "";
+            
+                // DIRECT EMAIL CHECK - NO ROLE DETECTION NEEDED
+                _isAdmin = _userEmail == "admin@fxtransfer.com";
+            
+                if (!string.IsNullOrEmpty(_userId))
                 {
-                    _isPremium = user.IsPremium;
+                    var user = await UserManager.FindByIdAsync(_userId);
+                    if (user != null)
+                    {
+                        _isPremium = user.IsPremium;
+                    }
                 }
             }
+            else
+            {
+                _isAdmin = false;
+                _isPremium = false;
+                _isSuspended = false;
+            }
+            StateHasChanged();
         }
-        StateHasChanged();
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading user info: {ex.Message}");
+        }
     }
 }

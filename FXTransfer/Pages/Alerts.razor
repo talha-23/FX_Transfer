@@ -23,7 +23,15 @@
             </div>
         </div>
     </div>
-
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="gradient-text mb-0">
+            <i class="bi bi-bell-fill me-2"></i>Your Active Alerts
+            <span class="badge ms-2" style="background: rgba(0,210,255,0.2); color: #00d2ff;">@_alerts.Count</span>
+        </h5>
+        <button class="btn btn-sm btn-outline-info" @onclick="CheckAlertsNow">
+            <i class="bi bi-bell me-1"></i> Check Alerts Now
+        </button>
+    </div>
     <!-- Create Alert Form -->
     <div class="row mb-4" data-aos="fade-up" data-aos-delay="100">
         <div class="col-12">
@@ -226,6 +234,13 @@
         _timer.Start();
     }
     
+    private async Task CheckAlertsNow()
+    {
+        await AlertService.CheckAndTriggerAlertsAsync();
+        await LoadAlerts();
+        ToastService.ShowSuccess("Alerts checked!");
+    }
+
     private async Task OnTimerElapsed()
     {
         await InvokeAsync(async () =>

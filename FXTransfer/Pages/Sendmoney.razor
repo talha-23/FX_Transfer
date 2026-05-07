@@ -12,6 +12,28 @@
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
 @inject ApplicationDbContext DbContext
+@inject IJSRuntime JS
+@inject INotificationService NotificationService
+@inject IFeeCalculator FeeCalculator
+
+<style>
+    .fade-in {
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
 
 <div class="container page-transition">
     <div class="row justify-content-center">
@@ -26,6 +48,16 @@
                     <h1 class="gradient-text">Send Money</h1>
                     <p class="text-white-50">Transfer funds internationally</p>
                 </div>
+                
+                @if (_showMessage)
+                {
+                    <div class="alert @(_messageType == "success" ? "alert-success" : "alert-danger") mb-3 fade-in" style="background: @(_messageType == "success" ? "rgba(40,167,69,0.2)" : "rgba(220,53,69,0.2)"); border: 1px solid @(_messageType == "success" ? "#28a745" : "#dc3545"); border-radius: 12px;">
+                        <div class="d-flex align-items-center">
+                            <i class="bi @(_messageType == "success" ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill") me-2" style="color: @(_messageType == "success" ? "#28a745" : "#dc3545");"></i>
+                            <span class="@(_messageType == "success" ? "text-success" : "text-danger")">@_transactionMessage</span>
+                        </div>
+                    </div>
+                }
 
                 @if (!string.IsNullOrEmpty(_successMessage))
                 {
@@ -47,15 +79,15 @@
                         <label class="form-label text-white">
                             <i class="bi bi-wallet2 me-1"></i> From Currency
                         </label>
-                        <select class="form-control input-futuristic" @bind="_fromCurrency" @bind:event="onchange">
+                        <select class="form-control input-futuristic" @onchange="OnFromCurrencyChanged" style="color:deepskyblue">
                             @foreach (var wallet in _wallets)
                             {
-                                <option value="@wallet.CurrencyCode">
+                                <option value="@wallet.CurrencyCode" selected="@(wallet.CurrencyCode == _fromCurrency)">
                                     @GetCurrencyIcon(wallet.CurrencyCode) @wallet.CurrencyCode - Balance: @wallet.Balance.ToString("N2")
                                 </option>
                             }
                         </select>
-                        <small class="text-white-50">Available balance: @_selectedWalletBalance.ToString("N2") @_fromCurrency</small>
+                        <small class="text-white-50">Available balance: <span class="text-info fw-bold">@_selectedWalletBalance.ToString("N2") @_fromCurrency</span></small>
                     </div>
 
                     <!-- To Currency -->
@@ -63,15 +95,15 @@
                         <label class="form-label text-white">
                             <i class="bi bi-currency-exchange me-1"></i> To Currency
                         </label>
-                        <select class="form-control input-futuristic" @bind="_toCurrency" @bind:event="onchange">
-                            <option value="EUR">🇪🇺 EUR - Euro</option>
-                            <option value="USD">🇺🇸 USD - US Dollar</option>
-                            <option value="GBP">🇬🇧 GBP - British Pound</option>
-                            <option value="PKR">🇵🇰 PKR - Pakistani Rupee</option>
-                            <option value="AED">🇦🇪 AED - Dirham</option>
-                            <option value="SAR">🇸🇦 SAR - Riyal</option>
-                            <option value="CAD">🇨🇦 CAD - Canadian Dollar</option>
-                            <option value="AUD">🇦🇺 AUD - Australian Dollar</option>
+                        <select class="form-control input-futuristic" @onchange="OnToCurrencyChanged" style="color:deepskyblue">
+                            <option value="EUR" selected="@(_toCurrency == "EUR")">🇪🇺 EUR - Euro</option>
+                            <option value="USD" selected="@(_toCurrency == "USD")">🇺🇸 USD - US Dollar</option>
+                            <option value="GBP" selected="@(_toCurrency == "GBP")">🇬🇧 GBP - British Pound</option>
+                            <option value="PKR" selected="@(_toCurrency == "PKR")">🇵🇰 PKR - Pakistani Rupee</option>
+                            <option value="AED" selected="@(_toCurrency == "AED")">🇦🇪 AED - Dirham</option>
+                            <option value="SAR" selected="@(_toCurrency == "SAR")">🇸🇦 SAR - Riyal</option>
+                            <option value="CAD" selected="@(_toCurrency == "CAD")">🇨🇦 CAD - Canadian Dollar</option>
+                            <option value="AUD" selected="@(_toCurrency == "AUD")">🇦🇺 AUD - Australian Dollar</option>
                         </select>
                     </div>
 
@@ -80,7 +112,16 @@
                         <label class="form-label text-white">
                             <i class="bi bi-calculator me-1"></i> Amount
                         </label>
-                        <input type="number" class="form-control input-futuristic" @bind="_amount" @bind:event="oninput" placeholder="Enter amount" />
+                        <input type="number" class="form-control input-futuristic @(_amount > 100000 ? "input-error" : "")"
+                               value="@_amount" @oninput="OnAmountChanged" placeholder="Enter amount" style="color:deepskyblue" />
+                        @if (_amount > 100000)
+                        {
+                            <div class="error-message mt-1">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                Maximum single transfer is $100,000
+                            </div>
+                        }
+                        <small class="text-white-50">Min: $10, Max: $100,000 per transaction</small>
                     </div>
 
                     <!-- Converted Amount -->
@@ -107,21 +148,21 @@
                         <label class="form-label text-white">
                             <i class="bi bi-person me-1"></i> Recipient Name
                         </label>
-                        <input type="text" class="form-control input-futuristic" @bind="_recipientName" placeholder="Full name of recipient" />
+                        <input type="text" class="form-control input-futuristic" @bind="_recipientName" placeholder="Full name of recipient" style="color:deepskyblue" />
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label text-white">
                             <i class="bi bi-envelope me-1"></i> Recipient Email
                         </label>
-                        <input type="email" class="form-control input-futuristic" @bind="_recipientEmail" placeholder="recipient@example.com" />
+                        <input type="email" class="form-control input-futuristic" @bind="_recipientEmail" placeholder="recipient@example.com" style="color:deepskyblue" />
                     </div>
 
                     <div class="col-12">
                         <label class="form-label text-white">
                             <i class="bi bi-chat-text me-1"></i> Reference / Note (Optional)
                         </label>
-                        <input type="text" class="form-control input-futuristic" @bind="_reference" placeholder="Add a note for this transfer" />
+                        <input type="text" class="form-control input-futuristic" @bind="_reference" placeholder="Add a note for this transfer" style="color:deepskyblue" />
                     </div>
 
                     <!-- Fee Summary -->
@@ -130,6 +171,7 @@
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-white-50">Transfer Fee</span>
                                 <span class="text-warning fw-bold">@_feeAmount.ToString("N2") @_fromCurrency</span>
+                                <span class="text-info">@(_isPremium ? "Premium (1%)" : "Standard (2%)")</span>
                             </div>
                             <div class="d-flex justify-content-between">
                                 <span class="text-white-50">Total to Deduct</span>
@@ -169,6 +211,36 @@
         box-shadow: 0 0 20px rgba(0,210,255,0.2);
         outline: none;
     }
+    
+    .input-error {
+        border-color: #dc3545 !important;
+        background: rgba(220, 53, 69, 0.1) !important;
+    }
+    
+    .error-message {
+        color: #ff6b6b;
+        font-size: 0.75rem;
+        background: rgba(220, 53, 69, 0.15);
+        padding: 6px 10px;
+        border-radius: 8px;
+        display: inline-block;
+    }
+    
+    .spinner-css {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        display: inline-block;
+        animation: spin 0.6s linear infinite;
+    }
+    
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
 </style>
 
 @code {
@@ -188,6 +260,9 @@
     private bool _isLoading = false;
     private bool _isPremium = false;
     private decimal _selectedWalletBalance = 0;
+    private string _transactionMessage = "";
+    private string _messageType = "";
+    private bool _showMessage = false;
     
     private List<WalletInfo> _wallets = new();
     
@@ -198,6 +273,10 @@
         _isPremium = roles.Contains("Premium");
         await LoadWallets();
         await CalculateRate();
+    }
+    private async Task ShowAlert(string message, string type)
+    {
+        await JS.InvokeVoidAsync("alert", message);
     }
     
     private async Task LoadWallets()
@@ -223,10 +302,50 @@
         StateHasChanged();
     }
     
+    private async Task OnAmountChanged(ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), out decimal value))
+        {
+            _amount = value;
+        }
+        await CalculateRate();
+    }
+
+    private async Task OnFromCurrencyChanged(ChangeEventArgs e)
+    {
+        _fromCurrency = e.Value?.ToString() ?? "USD";
+        await UpdateWalletBalance();
+        await CalculateRate();
+    }
+
+    private async Task OnToCurrencyChanged(ChangeEventArgs e)
+    {
+        _toCurrency = e.Value?.ToString() ?? "EUR";
+        await CalculateRate();
+    }
+
+    private async Task ShowTempMessage(string message, string type)
+    {
+        _transactionMessage = message;
+        _messageType = type;
+        _showMessage = true;
+        StateHasChanged();
+    
+        await Task.Delay(3000);
+    
+        _showMessage = false;
+        StateHasChanged();
+    }
+
     private async Task CalculateRate()
     {
         try
         {
+            if (_amount <= 0)
+            {
+                _amount = 0.01m;
+            }
+            
             _currentRate = await RateService.GetExchangeRateAsync(_fromCurrency, _toCurrency);
             _convertedAmount = _amount * _currentRate;
             
@@ -251,25 +370,37 @@
         // Validation
         if (_amount <= 0)
         {
-            _errorMessage = "Please enter a valid amount";
+            await ShowTempMessage("Please enter a valid amount", "error");
+            return;
+        }
+        
+        if (_amount < 10)
+        {
+            await ShowTempMessage("Minimum transfer amount is $10", "error");
+            return;
+        }
+        
+        if (_amount > 100000)
+        {
+            await ShowTempMessage("Amount exceeds $100,000 limit", "error");
             return;
         }
         
         if (_totalAmount > _selectedWalletBalance)
         {
-            _errorMessage = $"Insufficient balance. Required: {_totalAmount} {_fromCurrency}, Available: {_selectedWalletBalance} {_fromCurrency}";
+            await ShowTempMessage($"Insufficient balance. Required: {_totalAmount} {_fromCurrency}, Available: {_selectedWalletBalance} {_fromCurrency}", "error");
             return;
         }
         
         if (string.IsNullOrWhiteSpace(_recipientName))
         {
-            _errorMessage = "Please enter recipient name";
+            await ShowTempMessage("Please enter recipient name", "error");
             return;
         }
         
         if (string.IsNullOrWhiteSpace(_recipientEmail))
         {
-            _errorMessage = "Please enter recipient email";
+            await ShowTempMessage("Please enter recipient email", "error");
             return;
         }
         
@@ -303,7 +434,11 @@
             DbContext.Transfers.Add(transfer);
             await DbContext.SaveChangesAsync();
             
+            await ShowTempMessage($"✅ Successfully sent {_amount:F2} {_fromCurrency} to {_recipientName}!", "success");
+
+            await CreateNotification(_userId, "💰 Money Sent", $"Successfully sent {_amount:F2} {_fromCurrency} to {_recipientName}", "success");
             _successMessage = $"Successfully sent {_amount} {_fromCurrency} to {_recipientName}!";
+            await JS.InvokeVoidAsync("alert", $"✅ SUCCESS!\n\nAmount: {_amount:F2} {_fromCurrency}\nRecipient: {_recipientName}");
             
             // Reset form after 2 seconds
             await Task.Delay(2000);
@@ -313,12 +448,29 @@
         }
         catch (Exception ex)
         {
-            _errorMessage = $"Transfer failed: {ex.Message}";
+            await ShowTempMessage($"Transfer failed: {ex.Message}", "error");
+            await JS.InvokeVoidAsync("alert", $"❌ FAILED!\n\n{ex.Message}");
         }
         finally
         {
             _isLoading = false;
         }
+    }
+
+    private async Task CreateNotification(string userId, string title, string message, string type)
+    {
+        var notification = new Notification
+        {
+            UserId = userId,
+            Title = title,
+            Message = message,
+            Type = type,
+            CreatedAt = DateTime.UtcNow,
+            IsRead = false
+        };
+    
+        DbContext.Notifications.Add(notification);
+        await DbContext.SaveChangesAsync();
     }
     
     private async Task ResetForm()

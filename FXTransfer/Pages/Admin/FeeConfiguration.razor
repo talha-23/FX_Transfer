@@ -1,8 +1,242 @@
 ﻿@page "/admin/fees"
 @attribute [Authorize(Roles = "Admin")]
 @layout AdminLayout
+@using Microsoft.EntityFrameworkCore
+@using FXTransfer.Data
+@using FXTransfer.Services
+@inject ApplicationDbContext DbContext
+@inject IToastService ToastService
+@inject IFeeService FeeService
+@using FeeConfigEntity = FXTransfer.Models.Entities.FeeConfiguration
 
-<div class="glass-card p-4">
-    <h2 class="gradient-text">Fee Configuration</h2>
-    <p class="text-white-50">Coming soon - Fee settings</p>
+<div class="page-transition">
+    <div class="glass-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h1 class="gradient-text mb-2">
+                    <i class="bi bi-percent me-2"></i>Fee Configuration
+                </h1>
+                <p class="text-white-50 mb-0">Manage transfer fees for different user types</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="glass-card p-4">
+                <h5 class="gradient-text mb-3">
+                    <i class="bi bi-person me-2"></i>Standard Users
+                </h5>
+                <div class="mb-3">
+                    <label class="form-label text-white">Fee Percentage</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control input-futuristic" @bind="_standardFee" step="0.1" style="color:white" />
+                        <span class="input-group-text" style="background: rgba(0,210,255,0.1); color: #00d2ff;">%</span>
+                    </div>
+                    <small class="text-white-50">Current fee: @_standardFee% per transaction</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-white">Minimum Fee</label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background: rgba(0,210,255,0.1); color: #00d2ff;">$</span>
+                        <input type="number" class="form-control input-futuristic" @bind="_minimumFee" step="0.5" style="color:white" />
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-white">Maximum Fee</label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background: rgba(0,210,255,0.1); color: #00d2ff;">$</span>
+                        <input type="number" class="form-control input-futuristic" @bind="_maximumFee" step="5" style="color:white" />
+                    </div>
+                </div>
+                <button class="btn-neon w-100" @onclick="SaveStandardFee" disabled="@_isSaving">
+                    @if (_isSaving)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    <i class="bi bi-save me-2"></i>Save Standard Fee Settings
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="glass-card p-4">
+                <h5 class="gradient-text mb-3">
+                    <i class="bi bi-gem me-2"></i>Premium Users
+                </h5>
+                <div class="mb-3">
+                    <label class="form-label text-white">Discount Percentage</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control input-futuristic" @bind="_premiumDiscount" step="5" min="0" max="100" style="color:white" />
+                        <span class="input-group-text" style="background: rgba(0,210,255,0.1); color: #00d2ff;">%</span>
+                    </div>
+                    <small class="text-white-50">Premium users pay @(_standardFee * (1 - _premiumDiscount / 100))% fee</small>
+                </div>
+                <div class="alert alert-info mt-3" style="background: rgba(0,210,255,0.1); color:white">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Premium users get a @_premiumDiscount% discount on all transfer fees
+                </div>
+                <button class="btn-neon w-100" @onclick="SavePremiumDiscount" disabled="@_isSaving">
+                    @if (_isSaving)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    <i class="bi bi-save me-2"></i>Save Premium Settings
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h5 class="gradient-text mb-3">
+                    <i class="bi bi-info-circle me-2"></i>Fee Information
+                </h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="p-3" style="background: rgba(255,255,255,0.05); border-radius: 12px;">
+                            <small class="text-white-50">Example Calculation ($100 transfer)</small>
+                            <div class="mt-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-white">Standard User Fee:</span>
+                                    <span class="text-warning">$@CalculateExampleFee(100, false)</span>
+                                </div>
+                                <div class="d-flex justify-content-between mt-1">
+                                    <span class="text-white">Premium User Fee:</span>
+                                    <span class="text-success">$@CalculateExampleFee(100, true)</span>
+                                </div>
+                                <div class="d-flex justify-content-between mt-1">
+                                    <span class="text-white">Premium Savings:</span>
+                                    <span class="text-info">$@((100 * _standardFee / 100) - CalculateExampleFee(100, true))</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3" style="background: rgba(255,255,255,0.05); border-radius: 12px;">
+                            <small class="text-white-50">Fee Limits</small>
+                            <div class="mt-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-white">Minimum Fee:</span>
+                                    <span class="text-info">$@_minimumFee</span>
+                                </div>
+                                <div class="d-flex justify-content-between mt-1">
+                                    <span class="text-white">Maximum Fee:</span>
+                                    <span class="text-info">$@_maximumFee</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+@code {
+    private decimal _standardFee = 2.0m;
+    private decimal _minimumFee = 1.0m;
+    private decimal _maximumFee = 50.0m;
+    private int _premiumDiscount = 50;
+    private bool _isSaving = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFeeSettings();
+    }
+
+    private async Task LoadFeeSettings()
+    {
+        var config = await DbContext.FeeConfigurations.FirstOrDefaultAsync();
+        if (config != null)
+        {
+            _standardFee = config.FeePercentage;
+            _minimumFee = config.MinimumFee;
+            _maximumFee = config.MaximumFee;
+            _premiumDiscount = config.PremiumDiscount;
+        }
+    }
+
+    private async Task SaveStandardFee()
+    {
+        _isSaving = true;
+        try
+        {
+            var feeConfig = await DbContext.FeeConfigurations.FirstOrDefaultAsync();
+            if (feeConfig == null)
+            {
+                feeConfig = new FeeConfigEntity();
+                DbContext.FeeConfigurations.Add(feeConfig);
+            }
+
+            feeConfig.FeePercentage = _standardFee;
+            feeConfig.MinimumFee = _minimumFee;
+            feeConfig.MaximumFee = _maximumFee;
+            feeConfig.PremiumDiscount = _premiumDiscount; // Preserve premium discount
+            feeConfig.LastUpdated = DateTime.UtcNow;
+
+            await DbContext.SaveChangesAsync();
+            
+            // Refresh the fee service cache
+            await FeeService.RefreshFeeSettingsAsync();
+            
+            ToastService.ShowSuccess("Standard fee settings saved successfully!");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error saving fees: {ex.Message}");
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private async Task SavePremiumDiscount()
+    {
+        _isSaving = true;
+        try
+        {
+            var feeConfig = await DbContext.FeeConfigurations.FirstOrDefaultAsync();
+            if (feeConfig == null)
+            {
+                feeConfig = new FeeConfigEntity();
+                DbContext.FeeConfigurations.Add(feeConfig);
+                feeConfig.FeePercentage = _standardFee;
+                feeConfig.MinimumFee = _minimumFee;
+                feeConfig.MaximumFee = _maximumFee;
+            }
+
+            feeConfig.PremiumDiscount = _premiumDiscount;
+            feeConfig.LastUpdated = DateTime.UtcNow;
+
+            await DbContext.SaveChangesAsync();
+            
+            // Refresh the fee service cache
+            await FeeService.RefreshFeeSettingsAsync();
+            
+            ToastService.ShowSuccess($"Premium discount set to {_premiumDiscount}% successfully!");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error saving premium discount: {ex.Message}");
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private decimal CalculateExampleFee(decimal amount, bool isPremium)
+    {
+        decimal feePercentage = isPremium
+            ? _standardFee * (100 - _premiumDiscount) / 100
+            : _standardFee;
+        
+        decimal fee = amount * feePercentage / 100;
+        fee = Math.Max(fee, _minimumFee);
+        fee = Math.Min(fee, _maximumFee);
+        return Math.Round(fee, 2);
+    }
+}

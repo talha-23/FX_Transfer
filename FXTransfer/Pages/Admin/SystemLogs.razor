@@ -1,8 +1,233 @@
 ﻿@page "/admin/logs"
 @attribute [Authorize(Roles = "Admin")]
 @layout AdminLayout
+@inject IToastService ToastService
+@inject IWebHostEnvironment Environment
 
-<div class="glass-card p-4">
-    <h2 class="gradient-text">System Logs</h2>
-    <p class="text-white-50">Coming soon - System logs viewer</p>
+<div class="page-transition">
+    <div class="glass-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h1 class="gradient-text mb-2">
+                    <i class="bi bi-file-text me-2"></i>System Logs
+                </h1>
+                <p class="text-white-50 mb-0">View application error logs and system events</p>
+            </div>
+            <button class="btn btn-outline-info" @onclick="RefreshLogs">
+                <i class="bi bi-arrow-repeat me-1"></i>Refresh
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="gradient-text mb-0">
+                        <i class="bi bi-exclamation-triangle me-2"></i>Error Logs
+                    </h5>
+                    <span class="badge" style="background: rgba(0,210,255,0.2); color: #00d2ff;">
+                        Last 100 entries
+                    </span>
+                </div>
+                
+                @if (!_logEntries.Any())
+                {
+                    <div class="text-center py-5">
+                        <i class="bi bi-check-circle" style="font-size: 48px; color: #28a745;"></i>
+                        <p class="text-white-50 mt-2">No error logs found. System is running smoothly!</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="log-container">
+                        @foreach (var log in _logEntries)
+                        {
+                            <div class="log-entry mb-2">
+                                <div class="d-flex">
+                                    <div class="log-level @GetLogLevelClass(log.Level)">
+                                        @log.Level
+                                    </div>
+                                    <div class="log-content flex-grow-1">
+                                        <div class="log-time">@log.Timestamp</div>
+                                        <div class="log-message">@log.Message</div>
+                                        @if (!string.IsNullOrEmpty(log.StackTrace))
+                                        {
+                                            <details class="mt-1">
+                                                <summary class="text-info small" style="cursor: pointer;">View Stack Trace</summary>
+                                                <pre class="log-stacktrace mt-1">@log.StackTrace</pre>
+                                            </details>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    .log-container {
+        max-height: 500px;
+        overflow-y: auto;
+        font-family: monospace;
+    }
+    
+    .log-entry {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
+        padding: 10px;
+        border-left: 3px solid;
+    }
+    
+    .log-level {
+        min-width: 80px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+        margin-right: 10px;
+        text-align: center;
+    }
+    
+        .log-level.Error {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border-left-color: #dc3545;
+        }
+    
+        .log-level.Warning {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border-left-color: #ffc107;
+        }
+    
+        .log-level.Info {
+            background: rgba(0, 210, 255, 0.2);
+            color: #00d2ff;
+            border-left-color: #00d2ff;
+        }
+    
+    .log-time {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .log-message {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 13px;
+        word-break: break-all;
+    }
+    
+    .log-stacktrace {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.7);
+        overflow-x: auto;
+    }
+    
+    .log-container::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .log-container::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .log-container::-webkit-scrollbar-thumb {
+        background: #00d2ff;
+        border-radius: 10px;
+    }
+</style>
+
+@code {
+    private List<LogEntry> _logEntries = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLogs();
+    }
+
+    private async Task LoadLogs()
+    {
+        _logEntries = new List<LogEntry>();
+        
+        var logPath = Path.Combine(Environment.WebRootPath, "logs", "error.log");
+        
+        if (File.Exists(logPath))
+        {
+            var lines = await File.ReadAllLinesAsync(logPath);
+            
+            // Parse last 100 lines
+            foreach (var line in lines.Reverse().Take(100).Reverse())
+            {
+                var logEntry = ParseLogLine(line);
+                if (logEntry != null)
+                {
+                    _logEntries.Add(logEntry);
+                }
+            }
+        }
+        
+        StateHasChanged();
+    }
+
+    private LogEntry? ParseLogLine(string line)
+    {
+        try
+        {
+            // Format: 2024-04-30 14:32:15 [Level] Message
+            var parts = line.Split(new[] { '[', ']' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length >= 2)
+            {
+                var timestampPart = parts[0].Trim();
+                var level = parts[1].Trim();
+                var message = parts.Length > 2 ? parts[2].Trim() : "";
+                
+                return new LogEntry
+                {
+                    Timestamp = timestampPart,
+                    Level = level,
+                    Message = message,
+                    StackTrace = ""
+                };
+            }
+        }
+        catch
+        {
+            // Skip malformed lines
+        }
+        
+        return null;
+    }
+
+    private async Task RefreshLogs()
+    {
+        await LoadLogs();
+        ToastService.ShowSuccess("Logs refreshed");
+    }
+
+    private string GetLogLevelClass(string level)
+    {
+        return level switch
+        {
+            "ERROR" => "Error",
+            "WARN" => "Warning",
+            "INFO" => "Info",
+            _ => "Info"
+        };
+    }
+
+    private class LogEntry
+    {
+        public string Timestamp { get; set; } = "";
+        public string Level { get; set; } = "";
+        public string Message { get; set; } = "";
+        public string StackTrace { get; set; } = "";
+    }
+}

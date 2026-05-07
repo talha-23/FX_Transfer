@@ -1,8 +1,506 @@
 ﻿@page "/admin/analytics"
 @attribute [Authorize(Roles = "Admin")]
 @layout AdminLayout
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Identity
+@using FXTransfer.Data
+@inject ApplicationDbContext DbContext
+@inject IJSRuntime JS
+@inject IToastService ToastService
+@inject UserManager<ApplicationUser> UserManager
 
-<div class="glass-card p-4">
-    <h2 class="gradient-text">Analytics Dashboard</h2>
-    <p class="text-white-50">Coming soon - Analytics and charts</p>
+<div class="page-transition">
+    <div class="glass-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h1 class="gradient-text mb-2">
+                    <i class="bi bi-graph-up me-2"></i>Analytics Dashboard
+                </h1>
+                <p class="text-white-50 mb-0">Platform statistics and visualizations with real-time calculations</p>
+            </div>
+            <button class="btn btn-outline-info" @onclick="RefreshData">
+                <i class="bi bi-arrow-repeat me-1"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center">
+                <i class="bi bi-people" style="font-size: 35px; color: #00d2ff;"></i>
+                <h2 class="text-white mt-2">@_totalUsers</h2>
+                <p class="text-white-50 small">Total Users</p>
+                <small class="text-info">+@_newUsersThisMonth this month</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center">
+                <i class="bi bi-arrow-left-right" style="font-size: 35px; color: #f093fb;"></i>
+                <h2 class="text-white mt-2">@_totalTransfers</h2>
+                <p class="text-white-50 small">Total Transfers</p>
+                <small class="text-info">@_avgDailyTransfers avg/day</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center">
+                <i class="bi bi-currency-dollar" style="font-size: 35px; color: #28a745;"></i>
+                <h2 class="text-white mt-2">$@_totalVolume.ToString("N0")</h2>
+                <p class="text-white-50 small">Total Volume</p>
+                <small class="text-info">$@_avgTransferAmount.ToString("N0") avg/transfer</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center">
+                <i class="bi bi-percent" style="font-size: 35px; color: #ffc107;"></i>
+                <h2 class="text-white mt-2">@_successRate%</h2>
+                <p class="text-white-50 small">Success Rate</p>
+                <small class="text-info">@_failedTransfers failed transfers</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4">
+        <!-- User Growth Chart -->
+        <div class="col-md-6">
+            <div class="glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="gradient-text mb-0">
+                        <i class="bi bi-person-plus me-2"></i>User Growth
+                    </h5>
+                    <div class="text-end">
+                        <small class="text-info d-block">Total: @_userGrowthData.Sum() new users</small>
+                        <small class="text-white-50">Avg: @(_userGrowthData.Average().ToString("F0"))/month</small>
+                    </div>
+                </div>
+                <canvas id="userGrowthChart" height="200"></canvas>
+                <div class="mt-2 text-center">
+                    <small class="text-white-50">Last 6 months growth trend</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transfer Volume Chart -->
+        <div class="col-md-6">
+            <div class="glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="gradient-text mb-0">
+                        <i class="bi bi-cash-stack me-2"></i>Transfer Volume
+                    </h5>
+                    <div class="text-end">
+                        <small class="text-info d-block">Total: $@_volumeData.Sum().ToString("N0")</small>
+                        <small class="text-white-50">Avg: $@(_volumeData.Average().ToString("N0"))/day</small>
+                    </div>
+                </div>
+                <canvas id="volumeChart" height="200"></canvas>
+                <div class="mt-2 text-center">
+                    <small class="text-white-50">Last 7 days volume ($)</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Currency Distribution -->
+        <div class="col-md-6">
+            <div class="glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="gradient-text mb-0">
+                        <i class="bi bi-currency-exchange me-2"></i>Currency Distribution
+                    </h5>
+                    <div class="text-end">
+                        <small class="text-info d-block">Most used: @GetMostUsedCurrency()</small>
+                        <small class="text-white-50">@_currencyData.Sum() total transactions</small>
+                    </div>
+                </div>
+                <canvas id="currencyChart" height="200"></canvas>
+                <div class="mt-2 text-center">
+                    <small class="text-white-50">Transaction distribution by currency</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Roles Distribution -->
+        <div class="col-md-6">
+            <div class="glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="gradient-text mb-0">
+                        <i class="bi bi-shield-lock me-2"></i>User Roles
+                    </h5>
+                    <div class="text-end">
+                        <small class="text-info d-block">Premium: @_rolesData[1] (@GetPremiumPercentage()%)</small>
+                        <small class="text-white-50">Regular: @_rolesData[2] users</small>
+                    </div>
+                </div>
+                <canvas id="rolesChart" height="200"></canvas>
+                <div class="mt-2 text-center">
+                    <small class="text-white-50">User distribution by role</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Transactions -->
+        <div class="col-md-12">
+            <div class="glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="gradient-text mb-0">
+                        <i class="bi bi-calendar-week me-2"></i>Daily Transactions
+                    </h5>
+                    <div class="text-end">
+                        <small class="text-info d-block">Total: @_dailyData.Sum() transactions</small>
+                        <small class="text-white-50">Peak day: @_dailyData.Max() transactions</small>
+                    </div>
+                </div>
+                <canvas id="dailyTransactionsChart" height="150"></canvas>
+                <div class="mt-2 text-center">
+                    <small class="text-white-50">Last 30 days transaction activity</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fee Revenue Chart -->
+        <div class="col-md-12">
+            <div class="glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="gradient-text mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Fee Revenue
+                    </h5>
+                    <div class="text-end">
+                        <small class="text-info d-block">Total: $@_feeData.Sum().ToString("N2")</small>
+                        <small class="text-white-50">Avg: $@(_feeData.Average().ToString("N2"))/day</small>
+                    </div>
+                </div>
+                <canvas id="feeRevenueChart" height="150"></canvas>
+                <div class="mt-2 text-center">
+                    <small class="text-white-50">Last 30 days fee collection ($)</small>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+    let charts = {};
+
+    window.initCharts = (userGrowthData, volumeLabels, volumeData, currencyLabels, currencyData, rolesLabels, rolesData, dailyLabels, dailyData, feeLabels, feeData) => {
+    // Destroy existing charts
+    Object.values(charts).forEach(chart => {
+    if (chart) chart.destroy();
+    });
+
+    // User Growth Chart (Line)
+    const userCtx = document.getElementById('userGrowthChart')?.getContext('2d');
+    if (userCtx) {
+    charts.userGrowth = new Chart(userCtx, {
+    type: 'line',
+    data: {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    datasets: [{
+    label: 'New Users',
+    data: userGrowthData,
+    borderColor: '#00d2ff',
+    backgroundColor: 'rgba(0, 210, 255, 0.1)',
+    fill: true,
+    tension: 0.4
+    }]
+    },
+    options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: { legend: { labels: { color: 'white' } } }
+    }
+    });
+    }
+
+    // Transfer Volume Chart (Bar)
+    const volumeCtx = document.getElementById('volumeChart')?.getContext('2d');
+    if (volumeCtx) {
+    charts.volume = new Chart(volumeCtx, {
+    type: 'bar',
+    data: {
+    labels: volumeLabels,
+    datasets: [{
+    label: 'Volume ($)',
+    data: volumeData,
+    backgroundColor: 'rgba(240, 147, 251, 0.6)',
+    borderColor: '#f093fb',
+    borderWidth: 1
+    }]
+    },
+    options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: { legend: { labels: { color: 'white' } } }
+    }
+    });
+    }
+
+    // Currency Distribution Chart (Pie)
+    const currencyCtx = document.getElementById('currencyChart')?.getContext('2d');
+    if (currencyCtx) {
+    charts.currency = new Chart(currencyCtx, {
+    type: 'pie',
+    data: {
+    labels: currencyLabels,
+    datasets: [{
+    data: currencyData,
+    backgroundColor: ['#00d2ff', '#f093fb', '#4facfe', '#28a745', '#ffc107', '#dc3545']
+    }]
+    },
+    options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: { legend: { labels: { color: 'white' } } }
+    }
+    });
+    }
+
+    // User Roles Chart (Doughnut)
+    const rolesCtx = document.getElementById('rolesChart')?.getContext('2d');
+    if (rolesCtx) {
+    charts.roles = new Chart(rolesCtx, {
+    type: 'doughnut',
+    data: {
+    labels: rolesLabels,
+    datasets: [{
+    data: rolesData,
+    backgroundColor: ['#dc3545', '#f093fb', '#00d2ff', '#6c757d']
+    }]
+    },
+    options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: { legend: { labels: { color: 'white' } } }
+    }
+    });
+    }
+
+    // Daily Transactions Chart (Line)
+    const dailyCtx = document.getElementById('dailyTransactionsChart')?.getContext('2d');
+    if (dailyCtx) {
+    charts.daily = new Chart(dailyCtx, {
+    type: 'line',
+    data: {
+    labels: dailyLabels,
+    datasets: [{
+    label: 'Transactions',
+    data: dailyData,
+    borderColor: '#4facfe',
+    backgroundColor: 'rgba(79, 172, 254, 0.1)',
+    fill: true,
+    tension: 0.4
+    }]
+    },
+    options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: { legend: { labels: { color: 'white' } } }
+    }
+    });
+    }
+
+    // Fee Revenue Chart (Bar)
+    const feeCtx = document.getElementById('feeRevenueChart')?.getContext('2d');
+    if (feeCtx) {
+    charts.fee = new Chart(feeCtx, {
+    type: 'bar',
+    data: {
+    labels: feeLabels,
+    datasets: [{
+    label: 'Fees ($)',
+    data: feeData,
+    backgroundColor: 'rgba(255, 193, 7, 0.6)',
+    borderColor: '#ffc107',
+    borderWidth: 1
+    }]
+    },
+    options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: { legend: { labels: { color: 'white' } } }
+    }
+    });
+    }
+    };
+</script>
+
+@code {
+    private int _totalUsers = 0;
+    private int _newUsersThisMonth = 0;
+    private int _totalTransfers = 0;
+    private int _avgDailyTransfers = 0;
+    private decimal _totalVolume = 0;
+    private decimal _avgTransferAmount = 0;
+    private int _successRate = 0;
+    private int _failedTransfers = 0;
+    
+    // Chart data
+    private int[] _userGrowthData = new int[6];
+    private string[] _volumeLabels = new string[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+    private decimal[] _volumeData = new decimal[7];
+    private string[] _currencyLabels = new string[] { "USD", "EUR", "GBP", "PKR", "AED", "Other" };
+    private int[] _currencyData = new int[6];
+    private string[] _rolesLabels = new string[] { "Admin", "Premium", "Regular", "Suspended" };
+    private int[] _rolesData = new int[4];
+    private string[] _dailyLabels = new string[30];
+    private int[] _dailyData = new int[30];
+    private string[] _feeLabels = new string[30];
+    private decimal[] _feeData = new decimal[30];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStatistics();
+        await LoadChartDataFromDatabase();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initCharts", _userGrowthData, _volumeLabels, _volumeData, _currencyLabels, _currencyData, _rolesLabels, _rolesData, _dailyLabels, _dailyData, _feeLabels, _feeData);
+        }
+    }
+
+    private async Task LoadStatistics()
+    {
+        _totalUsers = await DbContext.Users.CountAsync();
+    
+        var startOfMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+        _newUsersThisMonth = await DbContext.Users.CountAsync(u => u.RegisteredAt >= startOfMonth);
+    
+        _totalTransfers = await DbContext.Transfers.CountAsync();
+        _avgDailyTransfers = _totalTransfers / 30;
+    
+        var totalVolumeDouble = await DbContext.Transfers.SumAsync(t => (double)t.Amount);
+        _totalVolume = (decimal)totalVolumeDouble;
+    
+        _avgTransferAmount = _totalTransfers > 0 ? _totalVolume / _totalTransfers : 0;
+    
+        var completed = await DbContext.Transfers.CountAsync(t => t.Status == "Completed");
+        var failed = await DbContext.Transfers.CountAsync(t => t.Status == "Failed");
+        _failedTransfers = failed;
+        _successRate = _totalTransfers > 0 ? (int)((decimal)completed / _totalTransfers * 100) : 100;
+    
+        StateHasChanged();
+    }
+
+    private async Task LoadChartDataFromDatabase()
+    {
+        // Load daily transactions for last 30 days
+        var dailyTransactions = new List<(string Date, int Count)>();
+        var dailyFees = new List<(string Date, decimal Amount)>();
+    
+        for (int i = 29; i >= 0; i--)
+        {
+            var date = DateTime.UtcNow.AddDays(-i);
+            var nextDate = date.AddDays(1);
+        
+            var count = await DbContext.Transfers
+                .Where(t => t.CreatedAt >= date && t.CreatedAt < nextDate)
+                .CountAsync();
+        
+            // FIXED: Convert to double then back to decimal
+            var feesDouble = await DbContext.Transfers
+                .Where(t => t.CreatedAt >= date && t.CreatedAt < nextDate)
+                .SumAsync(t => (double)t.Fee);
+        
+            dailyTransactions.Add((date.ToString("MM/dd"), count));
+            dailyFees.Add((date.ToString("MM/dd"), (decimal)feesDouble));
+        }
+    
+        _dailyLabels = dailyTransactions.Select(d => d.Date).ToArray();
+        _dailyData = dailyTransactions.Select(d => d.Count).ToArray();
+        _feeLabels = dailyFees.Select(d => d.Date).ToArray();
+        _feeData = dailyFees.Select(d => d.Amount).ToArray();
+    
+        // Update volume data from real transfers last 7 days
+        var volumeByDay = new List<decimal>();
+        for (int i = 6; i >= 0; i--)
+        {
+            var date = DateTime.UtcNow.AddDays(-i);
+            var nextDate = date.AddDays(1);
+        
+            // FIXED: Convert to double then back to decimal
+            var volumeDouble = await DbContext.Transfers
+                .Where(t => t.CreatedAt >= date && t.CreatedAt < nextDate)
+                .SumAsync(t => (double)t.Amount);
+        
+            volumeByDay.Add((decimal)volumeDouble);
+        }
+        _volumeData = volumeByDay.ToArray();
+    
+        // Rest of the method remains the same...
+        // Update user growth (last 6 months)
+        var monthlyUsers = new List<int>();
+        for (int i = 5; i >= 0; i--)
+        {
+            var startDate = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1).AddMonths(-i);
+            var endDate = startDate.AddMonths(1);
+            var count = await DbContext.Users
+                .Where(u => u.RegisteredAt >= startDate && u.RegisteredAt < endDate)
+                .CountAsync();
+            monthlyUsers.Add(count);
+        }
+        _userGrowthData = monthlyUsers.ToArray();
+    
+        // Update currency distribution
+        var transfers = await DbContext.Transfers.ToListAsync();
+        _currencyData = new int[]
+        {
+        transfers.Count(t => t.FromCurrency == "USD"),
+        transfers.Count(t => t.FromCurrency == "EUR"),
+        transfers.Count(t => t.FromCurrency == "GBP"),
+        transfers.Count(t => t.FromCurrency == "PKR"),
+        transfers.Count(t => t.FromCurrency == "AED"),
+        transfers.Count(t => !new[] { "USD", "EUR", "GBP", "PKR", "AED" }.Contains(t.FromCurrency))
+        };
+    
+        // Update roles distribution
+        var users = await DbContext.Users.ToListAsync();
+        var roleCounts = new Dictionary<string, int>() { { "Admin", 0 }, { "Premium", 0 }, { "Regular", 0 }, { "Suspended", 0 } };
+    
+        foreach (var user in users)
+        {
+            var roles = await UserManager.GetRolesAsync(user);
+            var role = roles.FirstOrDefault() ?? "Regular";
+            if (roleCounts.ContainsKey(role)) roleCounts[role]++;
+            else roleCounts["Regular"]++;
+        }
+    
+        _rolesData = new int[] { roleCounts["Admin"], roleCounts["Premium"], roleCounts["Regular"], roleCounts["Suspended"] };
+    
+        StateHasChanged();
+    }
+
+    private string GetMostUsedCurrency()
+    {
+        if (_currencyData.All(c => c == 0)) return "No data";
+        var max = _currencyData.Max();
+        var index = Array.IndexOf(_currencyData, max);
+        return index switch
+        {
+            0 => "USD",
+            1 => "EUR",
+            2 => "GBP",
+            3 => "PKR",
+            4 => "AED",
+            _ => "Other"
+        };
+    }
+
+    private string GetPremiumPercentage()
+    {
+        var total = _rolesData.Sum();
+        if (total == 0) return "0";
+        return ((decimal)_rolesData[1] / total * 100).ToString("F1");
+    }
+
+    private async Task RefreshData()
+    {
+        await LoadStatistics();
+        await LoadChartDataFromDatabase();
+        await JS.InvokeVoidAsync("initCharts", _userGrowthData, _volumeLabels, _volumeData, _currencyLabels, _currencyData, _rolesLabels, _rolesData, _dailyLabels, _dailyData, _feeLabels, _feeData);
+        ToastService.ShowSuccess("Analytics data refreshed!");
+    }
+}

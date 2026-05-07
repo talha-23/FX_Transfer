@@ -41,4 +41,7 @@ public class FeeConfiguration
 
     [MaxLength(100)]
     public string? UpdatedBy { get; set; }
+
+    
+    public int PremiumDiscount { get; set; }  
 }

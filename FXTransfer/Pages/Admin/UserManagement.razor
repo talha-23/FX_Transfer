@@ -1,8 +1,415 @@
 ﻿@page "/admin/users"
 @attribute [Authorize(Roles = "Admin")]
 @layout AdminLayout
+@using FXTransfer.Data
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+@inject IToastService ToastService
+@inject NavigationManager Navigation
+@using Microsoft.EntityFrameworkCore
 
-<div class="glass-card p-4">
-    <h2 class="gradient-text">User Management</h2>
-    <p class="text-white-50">Coming soon - User management features</p>
+<div class="page-transition">
+    <!-- Header -->
+    <div class="glass-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h1 class="gradient-text mb-2">
+                    <i class="bi bi-people me-2"></i>User Management
+                </h1>
+                <p class="text-white-50 mb-0">Manage user accounts, roles, and permissions</p>
+            </div>
+            <div class="mt-2 mt-sm-0">
+                <span class="badge" style="background: rgba(0,210,255,0.2); color: #00d2ff;">
+                    <i class="bi bi-person-check me-1"></i> Total Users: @_totalUsers
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="glass-card p-3">
+                <div class="position-relative">
+                    <i class="bi bi-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #00d2ff;"></i>
+                    <input type="text" class="form-control input-futuristic" @bind="_searchTerm" @bind:event="oninput"
+                           placeholder="Search by name or email..." style="padding-left: 45px; color: white" />
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="glass-card p-3">
+                <select class="form-control input-futuristic" @bind="_roleFilter">
+                    <option value="">All Roles</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Premium">Premium</option>
+                    <option value="Regular">Regular</option>
+                    <option value="Suspended">Suspended</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-12 col-lg-5">
+            <div class="glass-card p-3">
+                <button class="btn-neon w-100" @onclick="RefreshUsers">
+                    <i class="bi bi-arrow-repeat me-2"></i>Refresh Users
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="glass-card p-4">
+        <div class="table-responsive">
+            <table class="table table-borderless">
+                <thead>
+                    <tr style="border-bottom: 2px solid rgba(0,210,255,0.2);">
+                        <th class="text-info">User</th>
+                        <th class="text-info">Email</th>
+                        <th class="text-info">Role</th>
+                        <th class="text-info">Status</th>
+                        <th class="text-info">Member Since</th>
+                        <th class="text-info">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!_filteredUsers.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <i class="bi bi-people" style="font-size: 48px; color: rgba(255,255,255,0.2);"></i>
+                                <p class="text-white-50 mt-2">No users found</p>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var user in _filteredUsers)
+                        {
+                            <tr style="border-bottom: 1px solid rgba(0,210,255,0.1);" class="user-row">
+                                <td class="text-dark py-3 fw-semibold">
+                                    <div class="d-flex align-items-center">
+                                        <div style="width: 35px; height: 35px; background: linear-gradient(135deg, #00d2ff, #f093fb); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+                                            <i class="bi bi-person-fill" style="color: white; font-size: 16px;"></i>
+                                        </div>
+                                        <span class="text-black">@user.FullName</span>
+                                    </div>
+                                </td>
+                                <td class="text-dark-80 py-3">@user.Email</td>
+                                <td class="py-3">
+                                    <span class="badge" style="background: @GetRoleColor(user.Role); color: white;">
+                                        @user.Role
+                                    </span>
+                                </td>
+                                <td class="text-dark-80 py-3">
+                                    @if (user.IsSuspended)
+                                    {
+                                        <span class="badge bg-danger">⛔ Suspended</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">✅ Active</span>
+                                    }
+                                </td>
+                                <td class="text-dark-80 py-3">@user.RegisteredAt.ToString("MMM dd, yyyy")</td>
+                                <td class="py-3">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-info" @onclick="() => EditUser(user)" title="Edit Role">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        @if (!user.IsSuspended)
+                                        {
+                                            <button class="btn btn-outline-warning" @onclick="() => ToggleSuspend(user)" title="Suspend">
+                                                <i class="bi bi-slash-circle"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-outline-success" @onclick="() => ToggleSuspend(user)" title="Activate">
+                                                <i class="bi bi-check-circle"></i>
+                                            </button>
+                                        }
+                                        @if (user.Email != "admin@fxtransfer.com")
+                                        {
+                                            <button class="btn btn-outline-danger" @onclick="() => DeleteUser(user)" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (_totalPages > 1)
+        {
+            <div class="d-flex justify-content-center mt-4">
+                <ul class="pagination">
+                    <li class="page-item @(_currentPage == 1 ? "disabled" : "")">
+                        <button class="page-link" @onclick="() => GoToPage(_currentPage - 1)">Previous</button>
+                    </li>
+                    @for (int i = 1; i <= _totalPages; i++)
+                    {
+                        <li class="page-item @(_currentPage == i ? "active" : "")">
+                            <button class="page-link" @onclick="() => GoToPage(i)">@i</button>
+                        </li>
+                    }
+                    <li class="page-item @(_currentPage == _totalPages ? "disabled" : "")">
+                        <button class="page-link" @onclick="() => GoToPage(_currentPage + 1)">Next</button>
+                    </li>
+                </ul>
+            </div>
+        }
+    </div>
 </div>
+
+<!-- Edit User Modal -->
+<!-- Edit User Modal -->
+@if (_showEditModal)
+{
+    <div class="modal-overlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+        <div class="modal-content" style="background: rgba(15,25,35,0.98); backdrop-filter: blur(15px); border: 1px solid rgba(0,210,255,0.3); border-radius: 16px; width: 90%; max-width: 500px;">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(0,210,255,0.2); padding: 15px 20px;">
+                <h5 class="modal-title gradient-text" style="margin: 0;">
+                    <i class="bi bi-pencil me-2"></i>Edit User Role
+                </h5>
+                <button type="button" class="btn-close btn-close-white" @onclick="CloseModal" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <div class="mb-3">
+                    <label class="form-label text-white">User</label>
+                    <input type="text" class="form-control input-futuristic" value="@_editingUser?.FullName" disabled style="background: rgba(255,255,255,0.1);" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-white">Email</label>
+                    <input type="text" class="form-control input-futuristic" value="@_editingUser?.Email" disabled style="background: rgba(255,255,255,0.1);" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-white">Role</label>
+                    <select class="form-control input-futuristic" @bind="_selectedRole">
+                        <option value="Regular">Regular User</option>
+                        <option value="Premium">Premium User</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Suspended">Suspended</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid rgba(0,210,255,0.2); padding: 15px 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="btn btn-secondary" @onclick="CloseModal" style="border-radius: 10px; padding: 8px 20px;">Cancel</button>
+                <button class="btn-neon" @onclick="SaveUserRole" style="border-radius: 10px; padding: 8px 20px;">Save Changes</button>
+            </div>
+        </div>
+    </div>
+}
+<style>
+    .user-row {
+        transition: all 0.2s ease;
+    }
+    
+    .user-row:hover {
+        background: rgba(0, 210, 255, 0.05);
+        transform: translateX(5px);
+    }
+    
+    .page-link {
+        background: rgba(255,255,255,0.1);
+        border: none;
+        color: white;
+        margin: 0 3px;
+        border-radius: 8px;
+    }
+    
+    .page-link:hover {
+        background: #00d2ff;
+        color: white;
+    }
+    
+    .page-item.active .page-link {
+        background: #00d2ff;
+    }
+</style>
+
+@code {
+    private List<UserDto> _allUsers = new();
+    private List<UserDto> _filteredUsers = new();
+    private string _searchTerm = "";
+    private string _roleFilter = "";
+    private int _currentPage = 1;
+    private int _pageSize = 10;
+    private int _totalPages = 1;
+    private int _totalUsers = 0;
+    private bool _showEditModal = false;
+    private UserDto? _editingUser;
+    private string _selectedRole = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        var users = await UserManager.Users.ToListAsync();
+        _allUsers = new List<UserDto>();
+        
+        foreach (var user in users)
+        {
+            var roles = await UserManager.GetRolesAsync(user);
+            _allUsers.Add(new UserDto
+            {
+                Id = user.Id,
+                FullName = user.FullName,
+                Email = user.Email ?? "",
+                Role = roles.FirstOrDefault() ?? "Regular",
+                IsSuspended = user.IsSuspended,
+                RegisteredAt = user.RegisteredAt
+            });
+        }
+        
+        _totalUsers = _allUsers.Count;
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        var query = _allUsers.AsQueryable();
+        
+        if (!string.IsNullOrEmpty(_searchTerm))
+        {
+            query = query.Where(u => u.FullName.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                                      u.Email.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase));
+        }
+        
+        if (!string.IsNullOrEmpty(_roleFilter))
+        {
+            query = query.Where(u => u.Role == _roleFilter);
+        }
+        
+        var filtered = query.ToList();
+        _totalPages = (int)Math.Ceiling((double)filtered.Count / _pageSize);
+        _filteredUsers = filtered.Skip((_currentPage - 1) * _pageSize).Take(_pageSize).ToList();
+        StateHasChanged();
+    }
+
+    private void RefreshUsers()
+    {
+        _currentPage = 1;
+        ApplyFilters();
+    }
+
+    private void GoToPage(int page)
+    {
+        if (page < 1 || page > _totalPages) return;
+        _currentPage = page;
+        ApplyFilters();
+    }
+
+    private void EditUser(UserDto user)
+    {
+        _editingUser = user;
+        _selectedRole = user.Role;
+        _showEditModal = true;
+        StateHasChanged();
+    }
+
+    private async Task SaveUserRole()
+    {
+        if (_editingUser == null) return;
+    
+        try
+        {
+            var user = await UserManager.FindByIdAsync(_editingUser.Id);
+            if (user != null)
+            {
+                var currentRoles = await UserManager.GetRolesAsync(user);
+                await UserManager.RemoveFromRolesAsync(user, currentRoles);
+                await UserManager.AddToRoleAsync(user, _selectedRole);
+            
+                // Update IsSuspended based on role
+                user.IsSuspended = (_selectedRole == "Suspended");
+                await UserManager.UpdateAsync(user);
+            
+                ToastService.ShowSuccess($"User role updated to {_selectedRole}");
+                CloseModal();
+                await LoadUsers();
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error: {ex.Message}");
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
+
+    private async Task ToggleSuspend(UserDto user)
+    {
+        var appUser = await UserManager.FindByIdAsync(user.Id);
+        if (appUser != null)
+        {
+            appUser.IsSuspended = !appUser.IsSuspended;
+            await UserManager.UpdateAsync(appUser);
+            ToastService.ShowSuccess(appUser.IsSuspended ? "User suspended" : "User activated");
+            await LoadUsers();
+        }
+    }
+
+    private async Task DeleteUser(UserDto user)
+    {
+        if (user.Email == "admin@fxtransfer.com")
+        {
+            ToastService.ShowError("Cannot delete the main admin user");
+            return;
+        }
+        
+        var appUser = await UserManager.FindByIdAsync(user.Id);
+        if (appUser != null)
+        {
+            var result = await UserManager.DeleteAsync(appUser);
+            if (result.Succeeded)
+            {
+                ToastService.ShowSuccess("User deleted successfully");
+                await LoadUsers();
+            }
+            else
+            {
+                ToastService.ShowError("Failed to delete user");
+            }
+        }
+    }
+
+    private void CloseModal()
+    {
+        _showEditModal = false;
+        _editingUser = null;
+        StateHasChanged();
+    }
+
+    private string GetRoleColor(string role)
+    {
+        return role switch
+        {
+            "Admin" => "#dc3545",
+            "Premium" => "#f093fb",
+            "Regular" => "#00d2ff",
+            "Suspended" => "#6c757d",
+            _ => "#6c757d"
+        };
+    }
+
+    private class UserDto
+    {
+        public string Id { get; set; } = "";
+        public string FullName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Role { get; set; } = "";
+        public bool IsSuspended { get; set; }
+        public DateTime RegisteredAt { get; set; }
+    }
+}

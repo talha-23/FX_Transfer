@@ -35,7 +35,7 @@
                     <!-- From Currency -->
                     <div class="col-md-6">
                         <label class="form-label text-white">From Currency</label>
-                        <select class="form-control input-futuristic" @bind="_fromCurrency">
+                        <select class="form-control input-futuristic" @bind="_fromCurrency" >
                             @foreach (var wallet in _userWallets)
                             {
                                 <option value="@wallet.CurrencyCode">
@@ -49,7 +49,7 @@
                     <!-- To Currency -->
                     <div class="col-md-6">
                         <label class="form-label text-white">To Currency</label>
-                        <select class="form-control input-futuristic" @bind="_toCurrency">
+                        <select class="form-control input-futuristic" @bind="_toCurrency" style="color:deepskyblue">
                             @foreach (var wallet in _userWallets.Where(w => w.CurrencyCode != _fromCurrency))
                             {
                                 <option value="@wallet.CurrencyCode">
@@ -62,7 +62,7 @@
                     <!-- Amount -->
                     <div class="col-md-6">
                         <label class="form-label text-white">Amount</label>
-                        <input type="number" class="form-control input-futuristic @(_amount > _selectedWalletBalance ? "input-error" : "")" @bind="_amount" />
+                        <input type="number" class="form-control input-futuristic @(_amount > _selectedWalletBalance ? "input-error" : "")" @bind="_amount" style="color:deepskyblue" />
                         @if (_amount > _selectedWalletBalance)
                         {
                             <div class="error-message mt-1">
@@ -98,9 +98,10 @@
                     <!-- Fee and Total -->
                     <div class="col-12">
                         <div class="d-flex justify-content-between p-3" style="background: rgba(255,255,255,0.05); border-radius: 16px;">
-                            <span class="text-white-50"><i class="bi bi-percent me-2"></i>Transfer Fee</span>
-                            <span class="text-warning fw-bold">@_feeAmount.ToString("N2") @_fromCurrency</span>
-                        </div>
+    <span class="text-white-50"><i class="bi bi-percent me-2"></i>Transfer Fee</span>
+    <span class="text-warning fw-bold fs-5">@_feeAmount.ToString("N2") @_fromCurrency</span>
+    <span class="text-info">@(_isPremium ? "Premium (1%)" : "Standard (2%)")</span>
+</div>
                         <div class="d-flex justify-content-between p-3 mt-2" style="background: rgba(255,255,255,0.05); border-radius: 16px;">
                             <span class="text-white-50"><i class="bi bi-calculator me-2"></i>Total Amount</span>
                             <span class="text-white fw-bold fs-3">@_totalAmount.ToString("N2") @_fromCurrency</span>
@@ -143,7 +144,7 @@
                         <i class="bi bi-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #00d2ff;"></i>
                         <input type="text" class="form-control input-futuristic" 
                                placeholder="Search currency (e.g., EUR, PKR)..." 
-                               style="padding-left: 45px;"
+                               style="padding-left: 45px;color:deepskyblue"
                                @bind="_searchTerm" 
                                @bind:event="oninput" />
                     </div>
@@ -257,6 +258,9 @@
     private string _userId = "";
     private string _searchTerm = "";
     private decimal _selectedWalletBalance = 0;
+    private string _transactionMessage = "";
+private string _messageType = "";
+private bool _showMessage = false;
     
     private List<UserWallet> _userWallets = new();
     private List<CurrencyRate> _popularRates = new();
@@ -352,29 +356,27 @@
 {
     try
     {
-        Console.WriteLine("Transfer started");
-        
         if (_amount <= 0)
         {
-            await JS.InvokeVoidAsync("alert", "Please enter a valid amount");
+            await ShowTempMessage("Please enter a valid amount", "error");
             return;
         }
         
         if (_amount < 10)
         {
-            await JS.InvokeVoidAsync("alert", "Minimum transfer amount is $10");
+            await ShowTempMessage("Minimum transfer amount is $10", "error");
             return;
         }
         
         if (_amount > 50000)
         {
-            await JS.InvokeVoidAsync("alert", "Maximum transfer amount is $50,000");
+            await ShowTempMessage("Maximum transfer amount is $50,000", "error");
             return;
         }
         
         if (_fromCurrency == _toCurrency)
         {
-            await JS.InvokeVoidAsync("alert", "Cannot transfer to the same currency");
+            await ShowTempMessage("Cannot transfer to the same currency", "error");
             return;
         }
         
@@ -382,7 +384,7 @@
         
         if (_totalAmount > _selectedWalletBalance)
         {
-            await JS.InvokeVoidAsync("alert", $"Insufficient balance!\nRequired: {_totalAmount:F2} {_fromCurrency}\nAvailable: {_selectedWalletBalance:F2} {_fromCurrency}");
+            await ShowTempMessage($"Insufficient balance! Required: {_totalAmount:F2} {_fromCurrency}, Available: {_selectedWalletBalance:F2} {_fromCurrency}", "error");
             return;
         }
         
@@ -412,9 +414,19 @@
         DbContext.Transfers.Add(transfer);
         await DbContext.SaveChangesAsync();
         
+        // ADD THIS NOTIFICATION
+        await NotificationService.CreateNotificationAsync(
+            _userId,
+            "🔄 Currency Exchanged",
+            $"Converted {_amount:F2} {_fromCurrency} to {_convertedAmount:F2} {_toCurrency}",
+            "success"
+        );
+
+        
         await LoadUserWallets();
         await CalculateConversion();
         
+        await ShowTempMessage($"✅ SUCCESS! Converted {_amount:F2} {_fromCurrency} to {_convertedAmount:F2} {_toCurrency}", "success");
         await JS.InvokeVoidAsync("alert", $"✅ SUCCESS!\n\nConverted: {_amount:F2} {_fromCurrency}\nReceived: {_convertedAmount:F2} {_toCurrency}\nFee: {_feeAmount:F2} {_fromCurrency}");
         
         _isLoading = false;
@@ -422,11 +434,23 @@
     }
     catch (Exception ex)
     {
-        await JS.InvokeVoidAsync("alert", $"❌ Transfer failed!\n\n{ex.Message}");
-        Console.WriteLine($"Error: {ex.Message}");
+        await ShowTempMessage($"❌ Transfer failed! {ex.Message}", "error");
+        await JS.InvokeVoidAsync("alert", $"❌ TRANSFER FAILED!\n\n{ex.Message}");
         _isLoading = false;
         StateHasChanged();
     }
+}
+private async Task ShowTempMessage(string message, string type)
+{
+    _transactionMessage = message;
+    _messageType = type;
+    _showMessage = true;
+    StateHasChanged();
+    
+    await Task.Delay(3000);
+    
+    _showMessage = false;
+    StateHasChanged();
 }
     
     private void ClearSearch()

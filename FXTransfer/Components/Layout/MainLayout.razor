@@ -161,6 +161,7 @@
 @code {
     private bool _isLoggedIn;
     private bool _isSuspended;
+    private bool _isAdmin;  // ADD THIS
     private string _userFullName = "";
     private bool _sidebarOpen = false;
     
@@ -191,6 +192,8 @@
         if (_isLoggedIn)
         {
             _userFullName = await AuthService.GetCurrentUserFullNameAsync() ?? "User";
+            var email = await AuthService.GetCurrentUserEmailAsync() ?? "";
+            // DIRECT EMAIL CHECK
             var roles = await AuthService.GetCurrentUserRolesAsync();
             _isSuspended = roles.Contains("Suspended");
         }

@@ -1,0 +1,128 @@
+﻿@page "/addfunds"
+@attribute [Authorize]
+@inject IWalletService WalletService
+@inject IAuthService AuthService
+@inject IToastService ToastService
+@inject NavigationManager Navigation
+
+<div class="container page-transition">
+    <div class="row justify-content-center">
+        <div class="col-md-6" data-aos="fade-up">
+            <div class="glass-card p-4">
+                <div class="text-center mb-4">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #00d2ff, #f093fb); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+                        <i class="bi bi-plus-circle" style="font-size: 28px; color: white;"></i>
+                    </div>
+                    <h2 class="gradient-text">Add Funds</h2>
+                    <p class="text-white-50">Add money to your @_currencyCode wallet</p>
+                </div>
+
+                @if (!string.IsNullOrEmpty(_errorMessage))
+                {
+                    <div class="alert alert-danger mb-3" style="background: rgba(220,53,69,0.2); border: 1px solid #dc3545;">
+                        <i class="bi bi-exclamation-triangle me-2"></i> @_errorMessage
+                    </div>
+                }
+
+                <div class="mb-4">
+                    <label class="form-label text-white">Amount (@_currencyCode)</label>
+                    <input type="number" class="form-control input-futuristic" @bind="_amount" placeholder="Enter amount" />
+                </div>
+
+                <div class="d-flex gap-3">
+                    <button class="btn-neon flex-grow-1" @onclick="AddingFund" disabled="@_isLoading">
+                        @if (_isLoading)
+                        {
+                            <span class="spinner-css me-2"></span>
+                            <span>Processing...</span>
+                        }
+                        else
+                        {
+                            <span><i class="bi bi-plus-circle me-2"></i>Add Funds</span>
+                        }
+                    </button>
+                    <button class="btn btn-outline-secondary" @onclick="GoBack" style="border-radius: 50px;">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .input-futuristic:focus {
+        border-color: #00d2ff;
+        box-shadow: 0 0 20px rgba(0,210,255,0.2);
+        outline: none;
+    }
+    
+    .spinner-css {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        display: inline-block;
+        animation: spin 0.6s linear infinite;
+    }
+    
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+@code {
+    private string _userId = "";
+    private string _currencyCode = "USD";
+    private decimal _amount = 0;
+    private string _errorMessage = "";
+    private bool _isLoading = false;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _userId = await AuthService.GetCurrentUserIdAsync() ?? "";
+        
+        var uri = Navigation.Uri;
+        if (uri.Contains("?currency="))
+        {
+            var currency = uri.Split("?currency=")[1];
+            _currencyCode = currency;
+        }
+    }
+    
+    private async Task AddingFund()
+    {
+        if (_amount <= 0)
+        {
+            _errorMessage = "Please enter a valid amount";
+            return;
+        }
+        
+        _isLoading = true;
+        _errorMessage = "";
+        StateHasChanged();
+        
+        try
+        {
+            await WalletService.AddFundsAsync(_userId, _currencyCode, _amount);
+            ToastService.ShowSuccess($"Added {_amount} {_currencyCode} to your wallet!");
+            Navigation.NavigateTo("/wallet");
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Failed: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+    
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/wallet");
+    }
+}

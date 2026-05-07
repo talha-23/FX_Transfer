@@ -17,7 +17,9 @@ builder.Services.AddServerSideBlazor();
 
 // Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
+
 
 // Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -49,6 +51,12 @@ builder.Services.AddScoped<IAlertService, AlertService>();
 builder.Services.AddScoped<IReferralService, ReferralService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
+builder.Services.AddHostedService<AlertBackgroundService>();
+builder.Services.AddScoped<IFeeCalculator, StandardFeeCalculator>();
+builder.Services.AddScoped<PremiumFeeCalculator>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddMemoryCache(); // Add memory cache
+builder.Services.AddScoped<IFeeService, FeeService>();
 
 
 // Authorization
@@ -62,6 +70,8 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/unauthorized";
     options.ExpireTimeSpan = TimeSpan.FromDays(7);
     options.SlidingExpiration = true;
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
 var app = builder.Build();

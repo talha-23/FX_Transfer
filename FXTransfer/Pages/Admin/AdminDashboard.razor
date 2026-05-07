@@ -1,138 +1,135 @@
 ﻿@page "/admin/dashboard"
 @attribute [Authorize(Roles = "Admin")]
+@layout AdminLayout
+@using Microsoft.EntityFrameworkCore
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
-@layout AdminLayout
+@using FXTransfer.Data
+@inject ApplicationDbContext DbContext
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
 
-
-<div class="container page-transition">
+<div class="page-transition">
     <!-- Admin Header -->
-    <div class="row mb-4" data-aos="fade-up">
-        <div class="col-12">
-            <div class="glass-card p-4">
-                <div class="d-flex justify-content-between align-items-center flex-wrap">
-                    <div>
-                        <div class="d-flex align-items-center gap-2 mb-2">
-                            <i class="bi bi-shield-lock" style="font-size: 32px; color: #00d2ff;"></i>
-                            <h1 class="gradient-text mb-0">Admin Dashboard</h1>
-                        </div>
-                        <p class="text-white-50 mb-0">Welcome back, @_adminName! You have full system control.</p>
-                    </div>
-                    <div class="mt-2 mt-sm-0">
-                        <span class="badge" style="background: rgba(0,210,255,0.2); color: #00d2ff; padding: 8px 16px;">
-                            <i class="bi bi-shield-check me-1"></i> Administrator Access
-                        </span>
-                    </div>
-                </div>
+    <div class="glass-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h1 class="gradient-text mb-2">Admin Dashboard</h1>
+                <p class="text-white-50 mb-0">Welcome back, @_adminName! Here's your platform overview.</p>
+            </div>
+            <div class="mt-2 mt-sm-0">
+                <span class="badge" style="background: rgba(0,210,255,0.2); color: #00d2ff; padding: 8px 16px;">
+                    <i class="bi bi-shield-check me-1"></i> Administrator
+                </span>
             </div>
         </div>
     </div>
 
-    <!-- Stats Cards -->
+    <!-- Real-time Stats Cards -->
     <div class="row g-4 mb-4">
-        <div class="col-md-3" data-aos="fade-up" data-aos-delay="100">
-            <div class="glass-card stat-card p-3 text-center">
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center" data-aos="fade-up" data-aos-delay="100">
                 <i class="bi bi-people" style="font-size: 35px; color: #00d2ff;"></i>
                 <h2 class="text-white mb-0 mt-2">@_totalUsers</h2>
                 <p class="text-white-50 small mb-0">Total Users</p>
-                <small class="text-success">↑ +12 this week</small>
+                <small class="text-success">+@_newUsersThisMonth this month</small>
             </div>
         </div>
         
-        <div class="col-md-3" data-aos="fade-up" data-aos-delay="200">
-            <div class="glass-card stat-card p-3 text-center">
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center" data-aos="fade-up" data-aos-delay="200">
                 <i class="bi bi-arrow-left-right" style="font-size: 35px; color: #f093fb;"></i>
                 <h2 class="text-white mb-0 mt-2">@_totalTransfers</h2>
                 <p class="text-white-50 small mb-0">Total Transfers</p>
-                <small class="text-info">$@_totalVolume.ToString("N0") volume</small>
+                <small class="text-info">@_todayTransfers today</small>
             </div>
         </div>
         
-        <div class="col-md-3" data-aos="fade-up" data-aos-delay="300">
-            <div class="glass-card stat-card p-3 text-center">
-                <i class="bi bi-exclamation-triangle" style="font-size: 35px; color: #ffc107;"></i>
-                <h2 class="text-white mb-0 mt-2">@_flaggedTransfers</h2>
-                <p class="text-white-50 small mb-0">Flagged Transfers</p>
-                <small class="text-warning">Requires review</small>
-            </div>
-        </div>
-        
-        <div class="col-md-3" data-aos="fade-up" data-aos-delay="400">
-            <div class="glass-card stat-card p-3 text-center">
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center" data-aos="fade-up" data-aos-delay="300">
                 <i class="bi bi-currency-dollar" style="font-size: 35px; color: #28a745;"></i>
-                <h2 class="text-white mb-0 mt-2">@_totalFeeCollected.ToString("N0")</h2>
-                <p class="text-white-50 small mb-0">Fees Collected</p>
-                <small class="text-success">USD</small>
+                <h2 class="text-white mb-0 mt-2">$@_totalVolume.ToString("N0")</h2>
+                <p class="text-white-50 small mb-0">Total Volume</p>
+                <small class="text-info">$@_todayVolume.ToString("N0") today</small>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="glass-card p-3 text-center" data-aos="fade-up" data-aos-delay="400">
+                <i class="bi bi-percent" style="font-size: 35px; color: #ffc107;"></i>
+                <h2 class="text-white mb-0 mt-2">$@_totalFees.ToString("N0")</h2>
+                <p class="text-white-50 small mb-0">Total Fees</p>
+                <small class="text-warning">@(_successRate)% success rate</small>
             </div>
         </div>
     </div>
 
-    <!-- Admin Action Cards -->
+    <!-- Admin Management Cards -->
     <div class="row g-4 mb-4">
-        <div class="col-md-4" data-aos="fade-up" data-aos-delay="500">
-            <div class="glass-card p-4 text-center">
+        <div class="col-md-4">
+            <div class="glass-card p-4 text-center" data-aos="fade-up" data-aos-delay="500">
                 <div style="width: 60px; height: 60px; background: rgba(0,210,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
                     <i class="bi bi-people" style="font-size: 28px; color: #00d2ff;"></i>
                 </div>
                 <h5 class="text-white">User Management</h5>
                 <p class="text-white-50 small">View, edit, suspend, or delete user accounts</p>
                 <button class="btn btn-outline-info btn-sm" @onclick="GoToUserManagement" style="border-radius: 20px;">
-                    Manage Users →
+                    Manage Users (@_totalUsers) →
                 </button>
             </div>
         </div>
         
-        <div class="col-md-4" data-aos="fade-up" data-aos-delay="600">
-            <div class="glass-card p-4 text-center">
+        <div class="col-md-4">
+            <div class="glass-card p-4 text-center" data-aos="fade-up" data-aos-delay="600">
                 <div style="width: 60px; height: 60px; background: rgba(240,147,251,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
                     <i class="bi bi-arrow-left-right" style="font-size: 28px; color: #f093fb;"></i>
                 </div>
                 <h5 class="text-white">Transaction Monitor</h5>
-                <p class="text-white-50 small">View and review all user transactions</p>
-                <button class="btn btn-outline-info btn-sm" @onclick="GoToTransactionMonitor" style="border-radius: 20px;">
-                    Monitor Transactions →
+                <p class="text-white-50 small">Monitor all user transactions in real-time</p>
+                <button class="btn btn-outline-info btn-sm" @onclick="GoToTransactions" style="border-radius: 20px;">
+                    Monitor (@_totalTransfers) →
                 </button>
             </div>
         </div>
         
-        <div class="col-md-4" data-aos="fade-up" data-aos-delay="700">
-            <div class="glass-card p-4 text-center">
+        <div class="col-md-4">
+            <div class="glass-card p-4 text-center" data-aos="fade-up" data-aos-delay="700">
                 <div style="width: 60px; height: 60px; background: rgba(79,172,254,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
-                    <i class="bi bi-gear" style="font-size: 28px; color: #4facfe;"></i>
+                    <i class="bi bi-percent" style="font-size: 28px; color: #4facfe;"></i>
                 </div>
                 <h5 class="text-white">Fee Configuration</h5>
-                <p class="text-white-50 small">Adjust global and premium fee rates</p>
-                <button class="btn btn-outline-info btn-sm" @onclick="GoToFeeConfig" style="border-radius: 20px;">
-                    Configure Fees →
+                <p class="text-white-50 small">Adjust global fee rates and premium discounts</p>
+                <button class="btn btn-outline-info btn-sm" @onclick="GoToFees" style="border-radius: 20px;">
+                    Configure →
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Second Row of Admin Actions -->
+    <!-- Second Row - System Management -->
     <div class="row g-4">
-        <div class="col-md-6" data-aos="fade-up" data-aos-delay="800">
-            <div class="glass-card p-4">
+        <div class="col-md-6">
+            <div class="glass-card p-4" data-aos="fade-up" data-aos-delay="800">
                 <div class="d-flex align-items-center mb-3">
                     <i class="bi bi-file-text" style="font-size: 28px; color: #00d2ff; margin-right: 10px;"></i>
                     <h5 class="text-white mb-0">System Logs</h5>
                 </div>
-                <p class="text-white-50 small">View application logs and error history</p>
-                <button class="btn btn-sm btn-outline-info" @onclick="GoToSystemLogs" style="border-radius: 20px;">
-                    <i class="bi bi-eye me-1"></i> View Logs
+                <p class="text-white-50 small">View application error logs and system events</p>
+                <button class="btn btn-outline-info btn-sm" @onclick="GoToLogs" style="border-radius: 20px;">
+                    View Logs →
                 </button>
             </div>
         </div>
         
-        <div class="col-md-6" data-aos="fade-up" data-aos-delay="900">
-            <div class="glass-card p-4">
+        <div class="col-md-6">
+            <div class="glass-card p-4" data-aos="fade-up" data-aos-delay="900">
                 <div class="d-flex align-items-center mb-3">
-                    <i class="bi bi-graph-up" style="font-size: 28px; color: #f093fb; margin-right: 10px;"></i>
-                    <h5 class="text-white mb-0">Analytics</h5>
+                    <i class="bi bi-database" style="font-size: 28px; color: #f093fb; margin-right: 10px;"></i>
+                    <h5 class="text-white mb-0">Database Tables</h5>
                 </div>
-                <p class="text-white-50 small">View platform statistics and charts</p>
-                <button class="btn btn-sm btn-outline-info" @onclick="GoToAnalytics" style="border-radius: 20px;">
-                    <i class="bi bi-bar-chart me-1"></i> View Analytics
+                <p class="text-white-50 small">View all database tables and their data</p>
+                <button class="btn btn-outline-info btn-sm" @onclick="GoToDatabase" style="border-radius: 20px;">
+                    View Tables →
                 </button>
             </div>
         </div>
@@ -148,71 +145,182 @@
                 <div class="table-responsive">
                     <table class="table table-borderless">
                         <thead>
-                            <tr>
-                                <th class="text-white-50">Email</th>
-                                <th class="text-white-50">Full Name</th>
-                                <th class="text-white-50">Role</th>
-                                <th class="text-white-50">Registered</th>
-                                <th class="text-white-50">Status</th>
+                            <tr style="border-bottom: 2px solid rgba(0,210,255,0.2);">
+                                <th class="text-info">User</th>
+                                <th class="text-info">Email</th>
+                                <th class="text-info">Role</th>
+                                <th class="text-info">Registered</th>
+                                <th class="text-info">Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var user in _recentUsers)
                             {
-                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                    <td class="text-white">@user.Email</td>
-                                    <td class="text-white">@user.FullName</td>
-                                    <td><span class="badge" style="background: rgba(0,210,255,0.2); color: #00d2ff;">@user.Role</span></td>
-                                    <td class="text-white-50">@user.RegisteredDate</td>
-                                    <td><span class="badge bg-success">Active</span></td>
+                                <tr style="border-bottom: 1px solid rgba(0,210,255,0.1);" class="user-row">
+                                    <td class="text-black py-2"">
+                                        <div class="d-flex align-items-center">
+                                            <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #00d2ff, #f093fb); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 8px;">
+                                                <i class="bi bi-person-fill" style="color: white; font-size: 14px;"></i>
+                                            </div >
+                                            @user.FullName
+                                        </div>
+                                    </td>
+                                    <td class="text-black-50 py-2">@user.Email</td>
+                                    <td class="py-2" >
+                                        <span class="badge" style="background: @GetRoleColor(user.Role); color: white;">
+                                            @user.Role
+                                        </span>
+                                    </td>
+                                    <td class="text-black-50 py-2">@user.RegisteredAt</td>
+                                    <td class="py-2">
+                                        @if (user.IsSuspended)
+                                        {
+                                            <span class="badge bg-danger">Suspended</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                    </td>
                                 </tr>
                             }
                         </tbody>
                     </table>
                 </div>
+                @if (_totalUsers > 5)
+                {
+                    <div class="text-center mt-3">
+                        <button class="btn btn-sm btn-outline-info" @onclick="GoToUserManagement" style="border-radius: 20px;">
+                            View All @_totalUsers Users →
+                        </button>
+                    </div>
+                }
             </div>
         </div>
     </div>
 </div>
 
+<style>
+    .user-row {
+        transition: all 0.2s ease;
+    }
+    
+        .user-row:hover {
+            background: rgba(0, 210, 255, 0.05);
+            transform: translateX(5px);
+        }
+</style>
+
 @code {
     private string _adminName = "";
-    private int _totalUsers = 24;
-    private int _totalTransfers = 156;
-    private decimal _totalVolume = 125000;
-    private int _flaggedTransfers = 3;
-    private decimal _totalFeeCollected = 1250;
+    
+    // Real-time stats
+    private int _totalUsers = 0;
+    private int _newUsersThisMonth = 0;
+    private int _totalTransfers = 0;
+    private int _todayTransfers = 0;
+    private decimal _totalVolume = 0;
+    private decimal _todayVolume = 0;
+    private decimal _totalFees = 0;
+    private int _successRate = 100;
     
     private List<RecentUser> _recentUsers = new();
     
     protected override async Task OnInitializedAsync()
     {
         _adminName = await AuthService.GetCurrentUserFullNameAsync() ?? "Admin";
-        LoadRecentUsers();
+        await LoadStatistics();
+        await LoadRecentUsers();
     }
     
-    private void LoadRecentUsers()
+    private async Task LoadStatistics()
     {
-        _recentUsers = new List<RecentUser>
+        // Total Users
+        _totalUsers = await DbContext.Users.CountAsync();
+        
+        // New users this month
+        var startOfMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+        _newUsersThisMonth = await DbContext.Users.CountAsync(u => u.RegisteredAt >= startOfMonth);
+        
+        // Total Transfers
+        _totalTransfers = await DbContext.Transfers.CountAsync();
+        
+        // Today's transfers
+        var today = DateTime.UtcNow.Date;
+        var tomorrow = today.AddDays(1);
+        _todayTransfers = await DbContext.Transfers.CountAsync(t => t.CreatedAt >= today && t.CreatedAt < tomorrow);
+        
+        // Total Volume
+        var volumeList = await DbContext.Transfers.Select(t => t.Amount).ToListAsync();
+        _totalVolume = volumeList.Sum();
+        
+        // Today's Volume
+        var todayVolumeList = await DbContext.Transfers
+            .Where(t => t.CreatedAt >= today && t.CreatedAt < tomorrow)
+            .Select(t => t.Amount)
+            .ToListAsync();
+        _todayVolume = todayVolumeList.Sum();
+        
+        // Total Fees
+        var feesList = await DbContext.Transfers.Select(t => t.Fee).ToListAsync();
+        _totalFees = feesList.Sum();
+        
+        // Success Rate
+        var completed = await DbContext.Transfers.CountAsync(t => t.Status == "Completed");
+        _successRate = _totalTransfers > 0 ? (int)((decimal)completed / _totalTransfers * 100) : 100;
+        
+        StateHasChanged();
+    }
+    
+    private async Task LoadRecentUsers()
+    {
+        var users = await DbContext.Users
+            .OrderByDescending(u => u.RegisteredAt)
+            .Take(5)
+            .ToListAsync();
+        
+        _recentUsers = new List<RecentUser>();
+        
+        foreach (var user in users)
         {
-            new() { Email = "john.doe@example.com", FullName = "John Doe", Role = "Regular", RegisteredDate = "2024-04-28" },
-            new() { Email = "jane.smith@example.com", FullName = "Jane Smith", Role = "Premium", RegisteredDate = "2024-04-27" },
-            new() { Email = "mike.wilson@example.com", FullName = "Mike Wilson", Role = "Regular", RegisteredDate = "2024-04-26" },
-            new() { Email = "sarah.johnson@example.com", FullName = "Sarah Johnson", Role = "Regular", RegisteredDate = "2024-04-25" }
+            var roles = await UserManager.GetRolesAsync(user);
+            _recentUsers.Add(new RecentUser
+            {
+                FullName = user.FullName,
+                Email = user.Email ?? "",
+                Role = roles.FirstOrDefault() ?? "Regular",
+                RegisteredAt = user.RegisteredAt.ToString("MMM dd, yyyy"),
+                IsSuspended = user.IsSuspended
+            });
+        }
+        
+        StateHasChanged();
+    }
+    
+    private string GetRoleColor(string role)
+    {
+        return role switch
+        {
+            "Admin" => "#dc3545",
+            "Premium" => "#f093fb",
+            "Regular" => "#00d2ff",
+            "Suspended" => "#6c757d",
+            _ => "#6c757d"
         };
     }
     
     private void GoToUserManagement() => Navigation.NavigateTo("/admin/users");
-    private void GoToTransactionMonitor() => Navigation.NavigateTo("/admin/transactions");
-    private void GoToFeeConfig() => Navigation.NavigateTo("/admin/fees");
-    private void GoToSystemLogs() => Navigation.NavigateTo("/admin/logs");
-    private void GoToAnalytics() => Navigation.NavigateTo("/admin/analytics");
+    private void GoToTransactions() => Navigation.NavigateTo("/admin/transactions");
+    private void GoToFees() => Navigation.NavigateTo("/admin/fees");
+    private void GoToLogs() => Navigation.NavigateTo("/admin/logs");
+    private void GoToDatabase() => Navigation.NavigateTo("/admin/database-tables");
     
     private class RecentUser
     {
-        public string Email { get; set; } = "";
         public string FullName { get; set; } = "";
+        public string Email { get; set; } = "";
         public string Role { get; set; } = "";
-        public string RegisteredDate { get; set; } = "";
+        public string RegisteredAt { get; set; } = "";
+        public bool IsSuspended { get; set; }
     }
 }
