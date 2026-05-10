@@ -201,7 +201,7 @@ MIT License - feel free to use for learning!
 
 ## 👨‍💻 Author
 
-**Talha Ahmed**
+**Muhammad Talha**
 - GitHub: [@talha-23](https://github.com/talha-23)
 - Project: Semester Project for Visual Programming Course
 
