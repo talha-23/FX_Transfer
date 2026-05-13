@@ -363,10 +363,18 @@
 
     private async Task CalculateRate()
     {
-        Console.WriteLine($"UserId: {_userId}");
-        Console.WriteLine($"IsPremium from role check: {_isPremium}");
         try
         {
+            // DEBUG - Check what's happening
+            Console.WriteLine($"=== DEBUG INFO ===");
+            Console.WriteLine($"IsPremium from role: {_isPremium}");
+            Console.WriteLine($"User ID: {_userId}");
+        
+            // Get user directly from database to confirm
+            var dbUser = await DbContext.Users.FirstOrDefaultAsync(u => u.Id == _userId);
+            bool isActualPremium = dbUser?.IsPremium ?? false;
+            Console.WriteLine($"IsPremium from database: {isActualPremium}");
+        
             if (_amount <= 0)
             {
                 _amount = 0.01m;
@@ -375,25 +383,31 @@
             _currentRate = await RateService.GetExchangeRateAsync(_fromCurrency, _toCurrency);
             _convertedAmount = _amount * _currentRate;
         
-            // DIRECT DATABASE CHECK FOR PREMIUM STATUS
-            var userFromDb = await DbContext.Users.FirstOrDefaultAsync(u => u.Id == _userId);
-            bool isUserPremium = userFromDb?.IsPremium ?? false;
-        
-            // Get base fee from database
+            // Get fee from database
             var config = await DbContext.FeeConfigurations.FirstOrDefaultAsync();
             var baseRate = config?.FeePercentage ?? 2.0m;
+            Console.WriteLine($"Base fee from DB: {baseRate}%");
         
-            // Apply premium discount (50% off)
-            var effectiveRate = isUserPremium ? baseRate * 0.5m : baseRate;
+            // Apply premium discount
+            decimal effectiveRate;
+            if (isActualPremium)
+            {
+                effectiveRate = baseRate * 0.5m;
+                Console.WriteLine($"Premium user - Fee: {effectiveRate}% (50% off)");
+            }
+            else
+            {
+                effectiveRate = baseRate;
+                Console.WriteLine($"Regular user - Fee: {effectiveRate}%");
+            }
         
             _feeAmount = _amount * (effectiveRate / 100);
             _totalAmount = _amount + _feeAmount;
         
-            // Update display
-            _feePercentageDisplay = isUserPremium ? $"Premium ({baseRate / 2:F1}%)" : $"Standard ({baseRate:F1}%)";
+            _feePercentageDisplay = isActualPremium ? $"Premium ({baseRate / 2:F1}%)" : $"Standard ({baseRate:F1}%)";
         
-            // Also update the _isPremium flag for UI display
-            _isPremium = isUserPremium;
+            // Update the _isPremium flag
+            _isPremium = isActualPremium;
         
             await UpdateWalletBalance();
             StateHasChanged();
@@ -401,6 +415,7 @@
         catch (Exception ex)
         {
             _errorMessage = $"Error loading rates: {ex.Message}";
+            Console.WriteLine($"Error: {ex.Message}");
         }
     }
 

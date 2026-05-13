@@ -61,7 +61,8 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddHostedService<AlertBackgroundService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddMemoryCache(); // Add memory cache
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<IFeeService, FeeService>();
 
 
 
