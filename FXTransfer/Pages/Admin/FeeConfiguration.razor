@@ -10,6 +10,7 @@
 @using FeeConfigEntity = FXTransfer.Models.Entities.FeeConfiguration
 @using FXTransfer.Services.Implementations
 @using Microsoft.EntityFrameworkCore;  
+@inject IToastService ToastService
 
 <div class="page-transition">
     <div class="glass-card p-4 mb-4">
@@ -162,21 +163,30 @@
 
     private async Task SaveStandardFee()
     {
-        var feeConfig = await DbContext.FeeConfigurations.FirstOrDefaultAsync();
-        if (feeConfig == null)
+        try
         {
-            feeConfig = new Models.Entities.FeeConfiguration();
-            DbContext.FeeConfigurations.Add(feeConfig);
+            var feeConfig = await DbContext.FeeConfigurations.FirstOrDefaultAsync();
+            if (feeConfig == null)
+            {
+                feeConfig = new Models.Entities.FeeConfiguration();
+                DbContext.FeeConfigurations.Add(feeConfig);
+            }
+        
+            feeConfig.FeePercentage = _standardFee;
+            feeConfig.MinimumFee = _minimumFee;
+            feeConfig.MaximumFee = _maximumFee;
+            feeConfig.LastUpdated = DateTime.UtcNow;
+        
+            await DbContext.SaveChangesAsync();
+        
+            // SHOW SUCCESS MESSAGE
+            ToastService.ShowSuccess($"✅ Fee updated successfully to {_standardFee}%!");
         }
-    
-        feeConfig.FeePercentage = _standardFee;
-        feeConfig.MinimumFee = _minimumFee;
-        feeConfig.MaximumFee = _maximumFee;
-        feeConfig.LastUpdated = DateTime.UtcNow;
-    
-        await DbContext.SaveChangesAsync();
-    
-        ToastService.ShowSuccess($"Standard fee updated to {_standardFee}%");
+        catch (Exception ex)
+        {
+            // SHOW ERROR MESSAGE
+            ToastService.ShowError($"❌ Failed to update fee: {ex.Message}");
+        }
     }
 
     private async Task SavePremiumDiscount()
